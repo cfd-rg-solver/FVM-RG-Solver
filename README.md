@@ -1,2 +1,3 @@
 # FVM-RG-Solver
-Development of an open-source object-oriented CFD-FVM-solver for non-equlibrium reacting gas flows
+
+Here we develop an open-source object-oriented CFD-solver to simulate non-equilibrium reacting gas  flows. This solver takes into account various aspects of such flows, including thermodynamic properties, transport properties, chemical reactions, and energy transfer. The solver is designed to handle both one-temperature and multi-temperature approximations for flow description and can potentially be extended to accommodate the STS approach. We are adopting the classical finite volume method and implementing a numerical scheme based on Godunov's scheme, which involves the use of approximate Riemann solvers like HLL, HLLE, and HLLC.
