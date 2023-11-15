@@ -9,6 +9,8 @@
 namespace fs = std::filesystem;
 int main()
 {
+
+    // Ar
     MixtureComponent argon;
     argon.name = "Ar";
     argon.density = 1.7839e-3; // case 1
@@ -17,15 +19,49 @@ int main()
     argon.mass = 6.633521356992E-26;
     argon.epsilonDevK = 1.8845852298E-21/kB; //! Mistake
     argon.sigma = 3.33E-10;
-    Mixture mixture({argon});
+    Mixture Ar({argon});
+
+    // O2/O
+
+    MixtureComponent Oxygen2;
+    Oxygen2.name = "O2";
+    Oxygen2.density = 1.42897e-3;
+    Oxygen2.molarMass = 0.032;
+    Oxygen2.mass = 5.313725014956E-26;
+    Oxygen2.epsilonDevK = 107.4;
+    Oxygen2.sigma = 3.458E-10;
+
+    MixtureComponent Oxygen;
+    Oxygen.name = "O";
+    Oxygen.density = 1.42897e-3;
+    Oxygen.molarMass = 0.015999;
+    Oxygen.mass = 5.313725014956E-26 / 2.;
+    Oxygen.epsilonDevK = 80;
+    Oxygen.sigma = 2.75E-10;
+
+    std::vector<MixtureComponent> tmp = {Oxygen2,Oxygen};
+    Mixture O2_O(tmp);
+
+    /////Выбор смеси/////
+
+    Mixture mixture = O2_O;
+
+    /////////////////////
 
     macroParam startParam(mixture);
-    startParam.fractionArray[0] = 1;
-    //startParam.pressure = 218563.81; //218563.81
-    startParam.densityArray[0] = argon.density;
-    startParam.density = argon.density;
+    startParam.fractionArray[0] = 0.5;
+    startParam.densityArray[0] =  startParam.fractionArray[0] * mixture.components[0].density;
+    if(mixture.NumberOfComponents == 2)
+    {
+        startParam.fractionArray[1] = 0.5;
+        startParam.densityArray[1] =  startParam.fractionArray[1] * mixture.components[1].density;
+    }
+    startParam.density = 0;
+    for(int i = 0; i < mixture.NumberOfComponents; i++)
+        startParam.density += startParam.densityArray[i];
     startParam.temp = 1000; //140
     startParam.velocity_tau = 0.00001;
+
 
     solverParams solParam;
     solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
@@ -45,8 +81,8 @@ int main()
     DataWriter writer("D:/main/work_materials/CdExamples/couette-mark/couette-solver-lib");
     DataReader reader("D:/main/work_materials/CdExamples/couette-mark/couette-solver-lib/prev_data");
 #else
-    DataWriter writer("D:/couette/couette");
-    DataReader reader("D:/couette/couette/prev_data");
+    DataWriter writer("D:/study/course_work");
+    DataReader reader("D:/study/course_work/prev_data");
 #endif
     reader.read();
     vector<macroParam> startParameters;

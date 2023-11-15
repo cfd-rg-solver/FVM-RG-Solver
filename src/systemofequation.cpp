@@ -706,7 +706,7 @@ void Couette2Alt::computeF(vector<macroParam> &points, double dh)
 void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -771,7 +771,8 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         Fv[energy][i] = 0;
         for(size_t j = 0 ; j <numberOfComponents; j++)
         {
-            Fv[energy][i]+= -p1.density * mixture.getEffDiff(j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
+            double effDiffCoeff = coeffSolver->effDiffusion(p1,j);
+            Fv[energy][i]+= -p1.density * effDiffCoeff *dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
         }
         Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal - p1.density * getEnergy(i);
     }
