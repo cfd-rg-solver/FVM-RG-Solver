@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(couette-solver-lib LANGUAGES CXX)
+project(FVM-RG-Solver LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -40,7 +40,7 @@ set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
                          ${HDR_FOLDER}/riemannsolver.h
 )
 
-add_subdirectory(example)
+add_subdirectory(example-couette)
 
 find_package(OpenMP)
 IF(OPENMP_FOUND)

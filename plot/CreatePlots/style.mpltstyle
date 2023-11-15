@@ -1,0 +1,161 @@
+# Personal style for matplotlib.pyplot
+
+# GENERAL
+
+font.family:  serif
+font.style:   normal
+font.variant: normal
+font.weight:  normal
+font.stretch: normal
+# font.size:    12.0
+# text.color : (0.2,0.2,0.2)
+
+# LINES
+
+lines.linewidth: 1.6               # line width in points
+#lines.linestyle: -                 # solid line
+#lines.marker:          None        # the default marker
+#lines.markerfacecolor: auto        # the default marker face color
+#lines.markeredgecolor: auto        # the default marker edge color
+lines.markeredgewidth: 0.4         # the line width around the marker symbol
+lines.markersize:      3           # marker size, in points
+
+# AXES
+
+# axes.fontfamily : sans-serif
+axes.xmargin:   .01
+axes.ymargin:   .01
+axes.prop_cycle : cycler('color', [ 'blue', 'crimson', 'fuchsia', 'forestgreen', 'purple', 'aqua']) + cycler('linestyle', ["--","-.",":","-","-.","--"])
+# axes.prop_cycle : cycler(linestyle=['solid', 'dotted', 'dashed', 'dashdot', 'densily dashdotted', 'densily dashdotdotted'])
+axes.linewidth:     0.7     # edge line width
+axes.grid : True
+
+axes.titlelocation: center   # alignment of the title: {left, right, center}
+
+axes.titlesize:     xx-large   # font size of the axes title
+axes.labelsize:     x-large  # font size of the x and y labels
+
+#axes.titleweight:   normal  # font weight of title
+#axes.titlecolor:    auto    # color of the axes title, auto falls back to
+                             # text.color as default value
+#axes.titley:        None    # position title (axes relative units).  None implies auto
+#axes.titlepad:      6.0     # pad between axes and title in points
+
+#xaxis.labellocation: center # alignment of the xaxis label: {left, right, center}
+#yaxis.labellocation: center # alignment of the yaxis label: {bottom, top, center}
+
+#axes.labelpad:      4.0     # space between label and axis
+#axes.labelweight:   normal  # weight of the x and y labels
+#axes.labelcolor:    black
+#axes.axisbelow:     line    # draw axis gridlines and ticks:
+                             #     - below patches (True)
+                             #     - above patches but below lines ('line')
+                             #     - above all (False)
+
+#axes.formatter.limits: -5, 6  # use scientific notation if log10
+                               # of the axis range is smaller than the
+                               # first or larger than the second
+#axes.formatter.use_locale: True   # When True, format tick labels
+                                   # according to the user's locale.
+                                   # For example, use ',' as a decimal
+                                   # separator in the fr_FR locale.
+#axes.formatter.use_mathtext: False  # When True, use mathtext for scientific
+                                     # notation.
+#axes.formatter.min_exponent: 0  # minimum exponent to format in scientific notation
+#axes.formatter.useoffset: True  # If True, the tick label formatter
+                                 # will default to labeling ticks relative
+                                 # to an offset when the data range is
+                                 # small compared to the minimum absolute
+                                 # value of the data.
+#axes.formatter.offset_threshold: 4  # When useoffset is True, the offset
+                                     # will be used when it can remove
+                                     # at least this number of significant
+                                     # digits from tick labels.
+
+#axes.autolimit_mode: data  # If "data", use axes.xmargin and axes.ymargin as is.
+                            # If "round_numbers", after application of margins, axis
+                            # limits are further expanded to the nearest "round" number.
+
+# GRID
+
+grid.alpha : 0.3      # transparency, between 0.0 and 1.0
+grid.linestyle : --
+grid.linewidth : 0.6
+
+# LEGEND
+
+legend.loc:  lower right
+#legend.frameon:       True     # if True, draw the legend on a background patch
+legend.framealpha:    0.8      # legend patch transparency
+#legend.facecolor:     inherit  # inherit from axes.facecolor; or color spec
+legend.edgecolor:     'black'      # background patch boundary color
+#legend.fancybox:      True     # if True, use a rounded box for the
+                                # legend background, else a rectangle
+#legend.shadow:        False    # if True, give background a shadow effect
+#legend.numpoints:     1        # the number of marker points in the legend line
+#legend.scatterpoints: 1        # number of scatter points
+legend.markerscale:   1.0      # the relative size of legend markers vs. original
+legend.fontsize:      large # medium
+#legend.labelcolor:    None
+#legend.title_fontsize: None    # None sets to the same as the default axes.
+
+## Dimensions as fraction of font size:
+legend.borderpad:     0.6  # border whitespace
+legend.labelspacing:  0.7  # the vertical space between the legend entries
+legend.handlelength:  1.4  # the length of the legend lines
+legend.handleheight:  1.0  # the height of the legend handle
+legend.handletextpad: 0.5  # the space between the legend line and legend text
+legend.borderaxespad: 0.5  # the border between the axes and legend edge
+legend.columnspacing: 2.2  # column separation
+
+# TICKS
+
+# tick_params.labelsize : 'medium'
+xtick.major.width : 2
+ytick.major.width : 2
+# xtick.labelsize : 13
+# xtick.color : (0.2,0.2,0.2)
+# xtick.direction : in
+# ytick.labelsize : 13
+# ytick.color : (0.2,0.2,0.2)
+# ytick.direction : in
+
+# FIGURE
+
+figure.dpi : 250
+savefig.dpi : 400
+
+#figure.titlesize:   large     # size of the figure title (``Figure.suptitle()``)
+#figure.titleweight: normal    # weight of the figure title
+#figure.labelsize:   large     # size of the figure label (``Figure.sup[x|y]label()``)
+#figure.labelweight: normal    # weight of the figure label
+figure.figsize:     5.4, 4.8  # figure size in inches
+#figure.facecolor:   white     # figure face color
+#figure.edgecolor:   white     # figure edge color
+#figure.frameon:     True      # enable figure frame
+#figure.max_open_warning: 40   # The maximum number of figures to open through
+                               # the pyplot interface before emitting a warning.
+                               # If less than one this feature is disabled.
+#figure.raise_window : True    # Raise the GUI window to front when show() is called.
+
+## The figure subplot parameters.  All dimensions are a fraction of the figure width and height.
+#figure.subplot.left:   0.125  # the left side of the subplots of the figure
+#figure.subplot.right:  0.9    # the right side of the subplots of the figure
+#figure.subplot.bottom: 0.11   # the bottom of the subplots of the figure
+#figure.subplot.top:    0.88   # the top of the subplots of the figure
+#figure.subplot.wspace: 0.2    # the amount of width reserved for space between subplots,
+                               # expressed as a fraction of the average axis width
+#figure.subplot.hspace: 0.2    # the amount of height reserved for space between subplots,
+                               # expressed as a fraction of the average axis height
+
+## Figure layout
+figure.autolayout: True  # When True, automatically adjust subplot
+                           # parameters to make the plot fit the figure
+                           # using `tight_layout`
+#figure.constrained_layout.use: False  # When True, automatically make plot
+                                       # elements fit on the figure. (Not
+                                       # compatible with `autolayout`, above).
+#figure.constrained_layout.h_pad:  0.04167  # Padding around axes objects. Float representing
+#figure.constrained_layout.w_pad:  0.04167  # inches. Default is 3/72 inches (3 points)
+#figure.constrained_layout.hspace: 0.02     # Space between subplot groups. Float representing
+#figure.constrained_layout.wspace: 0.02     # a fraction of the subplot widths being separated.
