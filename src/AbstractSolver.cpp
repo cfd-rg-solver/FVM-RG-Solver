@@ -9,62 +9,15 @@ AbstractSolver::AbstractSolver(Mixture mixture_, macroParam startParam_, solverP
     startParam=startParam_;
     solParam =solParam_;
     delta_h = 0;
-    if(type == SystemOfEquationType::couette1)
-    {
-        auto *tmp = new Couette1();
-        system = tmp;
-    }
-    if(type == SystemOfEquationType::couette2)
-    {
-        auto *tmp = new Couette2();
-        system = tmp;
-    }
-    if(type == SystemOfEquationType::couette2Alt)
-    {
-        auto *tmp = new Couette2Alt();
-        system = tmp;
-    }
-    if(type == SystemOfEquationType::soda)
-    {
-        auto *tmp = new Soda();
-        system = tmp;
-    }
 
-    switch(riemannType)
-    {
-    case RiemannSolverType::HLLCSolver:
-        {
-                riemannSolver = new struct HLLCSolver();
-                break;
-        }
-    case RiemannSolverType::HLLESolver:
-        {
-                riemannSolver = new struct HLLESolver();
-                break;
-        }
-    case RiemannSolverType::HLLIsentropic:
-        {
-                riemannSolver = new struct HLLIsentropic();
-                break;
-        }
-    case RiemannSolverType::HLLSimple:
-        {
-                riemannSolver = new struct HLLSimple();
-                break;
-        }
-    case RiemannSolverType::ExacRiemanSolver:
-        {
-                riemannSolver = new struct ExacRiemanSolver();
-                break;
-        }
-    case RiemannSolverType::HLLESolverSimen:
-        {
-                riemannSolver = new struct HLLESolverSimen();
-                break;
-        }
-    }
-    system->setBorderCondition(&border);
-    system->setCoeffSolver(&coeffSolver);
+    auto *tmp = new CoeffSolver1Comp1Temp();
+    coeffSolver = tmp;
+
+    system = getSystemOfEquation(type);
+    riemannSolver = getRiemannSolver(riemannType);
+
+    system->setBorderCondition(&border); 
+    system->setCoeffSolver(coeffSolver);
     system->setMixture(mixture);
     system->setNumberOfCells(solParam.NumCell);
     system->setSolverParams(solParam);
@@ -78,51 +31,15 @@ AbstractSolver::AbstractSolver(Mixture mixture_, vector<macroParam> startParam_,
     correctData();
     solParam = solParam_;
     delta_h = 0;
-    if(type == SystemOfEquationType::couette2)
-    {
-        auto *tmp = new Couette2();
-        system = tmp;
-    }
-    else if(type == SystemOfEquationType::soda)
-    {
-        auto *tmp = new Soda();
-        system = tmp;
-    }
-    switch(riemannType)
-    {
-    case RiemannSolverType::HLLCSolver:
-        {
-                riemannSolver = new struct HLLCSolver();
-                break;
-        }
-    case RiemannSolverType::HLLESolver:
-        {
-                riemannSolver = new struct HLLESolver();
-                break;
-        }
-    case RiemannSolverType::HLLIsentropic:
-        {
-                riemannSolver = new struct HLLIsentropic();
-                break;
-        }
-    case RiemannSolverType::HLLSimple:
-        {
-                riemannSolver = new struct HLLSimple();
-                break;
-        }
-    case RiemannSolverType::ExacRiemanSolver:
-        {
-                riemannSolver = new struct ExacRiemanSolver();
-                break;
-        }
-    case RiemannSolverType::HLLESolverSimen:
-        {
-                riemannSolver = new struct HLLESolverSimen();
-                break;
-        }
-    }
+
+    auto *tmp = new CoeffSolver1Comp1Temp();
+    coeffSolver = tmp;
+
+    system = getSystemOfEquation(type);
+    riemannSolver = getRiemannSolver(riemannType);
+
     system->setBorderCondition(&border);
-    system->setCoeffSolver(&coeffSolver);
+    system->setCoeffSolver(coeffSolver);
     system->setMixture(mixture);
     system->setNumberOfCells(solParam.NumCell);
     system->setSolverParams(solParam);
@@ -197,6 +114,66 @@ void AbstractSolver::correctData()
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
     }
     return;
+}
+
+SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
+{
+    switch(type)
+    {
+        case SystemOfEquationType::couette1:
+        {
+            auto *tmp = new Couette1();
+            return tmp;
+        }
+        case SystemOfEquationType::couette2:
+        {
+            auto *tmp = new Couette2();
+            return tmp;
+        }
+        case SystemOfEquationType::couette2Alt:
+        {
+            auto *tmp = new Couette2Alt();
+            return tmp;
+        }
+        case SystemOfEquationType::soda:
+        {
+            auto *tmp = new Soda();
+            return tmp;
+        }
+    }
+    return nullptr;
+}
+
+RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
+{
+    switch(type)
+    {
+    case RiemannSolverType::HLLCSolver:
+        {
+                return new struct HLLCSolver();
+        }
+    case RiemannSolverType::HLLESolver:
+        {
+                return new struct HLLESolver();
+        }
+    case RiemannSolverType::HLLIsentropic:
+        {
+                return new struct HLLIsentropic();
+        }
+    case RiemannSolverType::HLLSimple:
+        {
+                return new struct HLLSimple();
+        }
+    case RiemannSolverType::ExacRiemanSolver:
+        {
+                return new struct ExacRiemanSolver();
+        }
+    case RiemannSolverType::HLLESolverSimen:
+        {
+                return new struct HLLESolverSimen();
+        }
+    }
+    return nullptr;
 }
 
 void AbstractSolver::prepareVectorSizes()

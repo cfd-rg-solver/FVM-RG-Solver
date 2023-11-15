@@ -276,7 +276,7 @@ void Couette2::computeF(vector<macroParam> &points, double dh)
         // сейчас так:
         double etta = coeffSolver->shareViscositySimple(p1);
         double lambda = coeffSolver->lambda(p1);
-        double bulk = coeffSolver->bulcViscositySimple(mixture, p1.temp, p1.density, p1.pressure);
+        double bulk = coeffSolver->bulcViscositySimple(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
@@ -599,7 +599,7 @@ void Couette1::computeF(vector<macroParam> &points, double dh)
         // сейчас так:
         double etta = coeffSolver->shareViscositySimple(p1);
         double lambda = coeffSolver->lambda(p1);
-        double bulk = coeffSolver->bulcViscositySimple(mixture, p1.temp, p1.density, p1.pressure);
+        double bulk = coeffSolver->bulcViscositySimple(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
@@ -757,7 +757,7 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         // сейчас так:
         double lambda = coeffSolver->lambda(p1);
         double etta = coeffSolver->shareViscositySimple(p1);
-        double bulk = coeffSolver->bulcViscositySimple(mixture, p1.temp, p1.density, p1.pressure);
+        double bulk = coeffSolver->bulcViscositySimple(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
