@@ -22,13 +22,11 @@ namespace fs = std::filesystem;
 int main()
 {
 
-<<<<<<< HEAD:example/couette-solver-lib_main.cpp
-    // Ar
-=======
     std::string outputData = GetCurrentWorkingDir();
     std::cout << "Current directory is: " << outputData << std::endl;
 
->>>>>>> origin/main:example-couette/couette-solver-lib_main.cpp
+    // Ar
+
     MixtureComponent argon;
     argon.name = "Ar";
     argon.density = 1.7839e-3; // case 1
@@ -92,22 +90,10 @@ int main()
     Observer watcher(precision);
     watcher.setPeriodicity(10000);
 
-<<<<<<< HEAD:example/couette-solver-lib_main.cpp
-    // это меняешь под себя. Он так создаст папку data
-    // если не использовать setWriter, то записи не будет, но папка создастся, ибо она в конструкторе зашита
-    // он автоматически очищает папку перед новым рассчётом
-#ifdef Liia
-    DataWriter writer("D:/main/work_materials/CdExamples/couette-mark/couette-solver-lib");
-    DataReader reader("D:/main/work_materials/CdExamples/couette-mark/couette-solver-lib/prev_data");
-#else
-    DataWriter writer("D:/study/course_work");
-    DataReader reader("D:/study/course_work/prev_data");
-#endif
-=======
+
     DataWriter writer(outputData);
     DataReader reader(outputData + "\prev_data");
 
->>>>>>> origin/main:example-couette/couette-solver-lib_main.cpp
     reader.read();
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
