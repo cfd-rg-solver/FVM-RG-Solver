@@ -96,14 +96,55 @@ double CoeffSolver2Comp1Temp::bulcViscositySimple(macroParam currentPoint)
     return 0;
 }
 
-double CoeffSolver2Comp1Temp::binaryDiffusion(macroParam currentPoint)
+double CoeffSolver2Comp1Temp::effDiffusion(macroParam currentPoint, size_t component)
 {
-    double M = currentPoint.mixture.molarMass(0) + currentPoint.mixture.molarMass(1);
+    if(currentPoint.mixture.NumberOfComponents == 1)
+        return 0;
+
+
+    double xComp = Xc(currentPoint,component);
+    double denominator = 0;
+    for(int i = 0 ; i < currentPoint.mixture.NumberOfComponents; i++)
+    {
+        denominator += Xc(currentPoint,i)/binaryDiffusion(currentPoint,component,i);
+    }
+    double Dcomp = (1 - xComp) / denominator;
+    return Dcomp;
+}
+
+double CoeffSolver2Comp1Temp::binaryDiffusion(macroParam currentPoint, size_t comp1, size_t comp2)
+{
+    double M = 0;
+    if(comp1 != comp2)
+        M = currentPoint.mixture.molarMass(comp1) + currentPoint.mixture.molarMass(comp2);
+    else
+        M = currentPoint.mixture.molarMass(comp1);
     double R = UniversalGasConstant;
-    double m1 = currentPoint.mixture.mass(0);
-    double m2 = currentPoint.mixture.mass(1);
-    double D21 = (3 * pow(kB,2) * M * currentPoint.temp * (m1 + m2)) / (16 * currentPoint.density * R * m1 * m2 ) / omega11(currentPoint);
+    double m1 = currentPoint.mixture.mass(comp1);
+    double m2 = currentPoint.mixture.mass(comp2);
+    double D21 = (3 * pow(kB,2) * M * currentPoint.temp * (m1 + m2)) / (16 * currentPoint.density * R * m1 * m2 ) / omega11(currentPoint,comp1,comp2);
     return D21;
+}
+
+double CoeffSolver2Comp1Temp::Xc(macroParam currentPoint, size_t component)
+{
+    double rhoComp = currentPoint.densityArray[component];
+    double Mcomp = currentPoint.mixture.molarMass(component);
+
+    double n = 0;
+    for(int i = 0 ; i < currentPoint.mixture.NumberOfComponents; i++)
+    {
+        double tmp = currentPoint.densityArray[i];
+        for(int j = 0 ; j < currentPoint.mixture.NumberOfComponents; j++)
+        {
+            if(j == i)
+                continue;
+            tmp *=  currentPoint.mixture.molarMass(j);
+        }
+        n += tmp;
+    }
+    double xComp = (rhoComp * Mcomp) / n;
+    return xComp;
 }
 
 double CoeffSolver2Comp1Temp::shareViscosity(macroParam currentPoint, size_t component)
@@ -138,9 +179,10 @@ double CoeffSolver2Comp1Temp::phi(macroParam currentPoint, size_t component1, si
     double phi12 = (1 + sqrt(etta1/etta2)*pow(M2/M1,0.25)) / (2 * sqrt(2) * sqrt( 1 +  M1/M2 ));
     return phi12;
 }
-double CoeffSolver2Comp1Temp::omega11(macroParam currentPoint)
+double CoeffSolver2Comp1Temp::omega11(macroParam currentPoint, size_t comp1, size_t comp2)
 {
-    double tmp1 = sqrt(kB * currentPoint.temp / ( 2 * M_PI * (currentPoint.mixture.mass(0) + currentPoint.mixture.mass(1))));
-    double omega11 = tmp1 * M_PI * pow(currentPoint.mixture.sigma(0),2);
+    double tmp1 = sqrt(kB * currentPoint.temp / (M_PI * (currentPoint.mixture.mass(comp1) + currentPoint.mixture.mass(comp2))));
+    double sigma = ( currentPoint.mixture.sigma(comp1) + currentPoint.mixture.sigma(comp2)) / 2. ;
+    double omega11 = tmp1 * M_PI * pow(sigma,2);
     return omega11;
 }

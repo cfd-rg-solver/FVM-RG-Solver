@@ -25,6 +25,8 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     ofstream velocity_normal(localDir/"velocity_normal.txt",std::ios::out);
     ofstream temp(localDir/"temp.txt",std::ios::out);
     ofstream density(localDir/"density.txt",std::ios::out);
+    ofstream density1(localDir/"density1.txt",std::ios::out);
+    ofstream density2(localDir/"density2.txt",std::ios::out);
 
 //    ofstream e(localDir/"e.txt",std::ios::out);
 
@@ -36,6 +38,11 @@ void DataWriter::writeData(vector<macroParam> data, double time)
         velocity_normal<<dh*i<<" "<<data[i].velocity_normal<<endl;
         temp<<dh*i<<" "<<data[i].temp<<endl;
         density<<dh*i<<" "<<data[i].density<<endl;
+        if(data[i].mixture.NumberOfComponents == 2)
+        {
+            density1<<dh*i<<" "<<data[i].densityArray[0]<<endl;
+            density2<<dh*i<<" "<<data[i].densityArray[1]<<endl;
+        }
 //        double gamma = 1.4;
 //        double e_ = data[i].pressure/((gamma - 1) * data[i].density);
 //        e<<dh*i<<" "<<e_<<endl;

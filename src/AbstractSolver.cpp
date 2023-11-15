@@ -10,8 +10,16 @@ AbstractSolver::AbstractSolver(Mixture mixture_, macroParam startParam_, solverP
     solParam =solParam_;
     delta_h = 0;
 
-    auto *tmp = new CoeffSolver1Comp1Temp();
-    coeffSolver = tmp;
+    if(mixture.NumberOfComponents == 1)
+    {
+        auto *tmp = new CoeffSolver1Comp1Temp();
+        coeffSolver = tmp;
+    }
+    else
+    {
+        auto *tmp = new CoeffSolver2Comp1Temp();
+        coeffSolver = tmp;
+    }
 
     system = getSystemOfEquation(type);
     riemannSolver = getRiemannSolver(riemannType);
@@ -32,8 +40,16 @@ AbstractSolver::AbstractSolver(Mixture mixture_, vector<macroParam> startParam_,
     solParam = solParam_;
     delta_h = 0;
 
-    auto *tmp = new CoeffSolver1Comp1Temp();
-    coeffSolver = tmp;
+    if(mixture.NumberOfComponents == 1)
+    {
+        auto *tmp = new CoeffSolver1Comp1Temp();
+        coeffSolver = tmp;
+    }
+    else
+    {
+        auto *tmp = new CoeffSolver2Comp1Temp();
+        coeffSolver = tmp;
+    }
 
     system = getSystemOfEquation(type);
     riemannSolver = getRiemannSolver(riemannType);
@@ -95,7 +111,7 @@ void AbstractSolver::prepareSolving()
         points[i].density = startParam.density;
         points[i].pressure = points[i].density*UniversalGasConstant * startParam.temp/mixture.molarMass();
         //points[i].density = startParam.pressure * mixture.molarMass()/(UniversalGasConstant * startParam.temp);
-        points[i].densityArray[0] =  points[i].density;
+        points[i].densityArray =  startParam.densityArray;
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].velocity_tau = startParam.velocity_tau;
         points[i].velocity_normal = 0;
