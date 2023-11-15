@@ -17,7 +17,6 @@ std::string GetCurrentWorkingDir( void ) {
 //    return currentWorkingDir.string();
 }
 
-//#define Liia
 namespace fs = std::filesystem;
 int main()
 {
@@ -29,7 +28,7 @@ int main()
 
     MixtureComponent argon;
     argon.name = "Ar";
-    argon.density = 1.7839e-3; // case 1
+    argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
     //argon.density = 0.800773;
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992E-26;
@@ -42,17 +41,17 @@ int main()
     MixtureComponent Oxygen2;
     Oxygen2.name = "O2";
     Oxygen2.density = 1.42897e-3;
-    Oxygen2.molarMass = 0.032;
+    Oxygen2.molarMass = 0.0319988;
     Oxygen2.mass = 5.313725014956E-26;
-    Oxygen2.epsilonDevK = 107.4;
-    Oxygen2.sigma = 3.458E-10;
+    Oxygen2.epsilonDevK = 1.48281651048e-21/kB;
+    Oxygen2.sigma = 3.5155e-10;
 
     MixtureComponent Oxygen;
     Oxygen.name = "O";
-    Oxygen.density = 1.42897e-3;
+    Oxygen.density = 0.03168*0.01; // initial concentration - 0.01
     Oxygen.molarMass = 0.015999;
-    Oxygen.mass = 5.313725014956E-26 / 2.;
-    Oxygen.epsilonDevK = 80;
+    Oxygen.mass = 2.6567628316576e-26;
+    Oxygen.epsilonDevK = 1.1045188159999998e-21/kB;
     Oxygen.sigma = 2.75E-10;
 
     std::vector<MixtureComponent> tmp = {Oxygen2,Oxygen};
@@ -75,13 +74,14 @@ int main()
     startParam.density = 0;
     for(int i = 0; i < mixture.NumberOfComponents; i++)
         startParam.density += startParam.densityArray[i];
-    startParam.temp = 1000; //140
+    startParam.temp = 999; //140
     startParam.velocity_tau = 0.00001;
 
 
     solverParams solParam;
     solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.67;    // Показатель адиабаты
+    solParam.Gamma    = 1.32;
+//    solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
