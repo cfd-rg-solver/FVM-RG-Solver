@@ -47,7 +47,7 @@ public:
 
     solverParams solParam;
 
-    CoeffSolver coeffSolver;
+    CoeffSolver* coeffSolver;
 
     BorderCondition border;
 
@@ -64,6 +64,8 @@ protected:
     // функция для дозаполнения полей вектора points значениями скорости звука и параметрами смеси, которые не вытаскиваются из файлов расчёта
     virtual void correctData();
 
+    SystemOfEquation *getSystemOfEquation(SystemOfEquationType type);
+    RiemannSolver *getRiemannSolver(RiemannSolverType type);
 
     //подготавливает размеры всех векторов
     virtual void prepareVectorSizes();
@@ -77,9 +79,6 @@ protected:
 
     void useBorder();
     void UpdateBorderU();
-
-    //вычисляет температуру в i-ой ячейке
-    double computeT(macroParam p, size_t i);
 
     //функция для работы с наблюдателем, выдаёт true если нужно продолжать рассчёт
     bool observerCheck(size_t currentIteration);

@@ -533,8 +533,8 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         //указателя базового класса, чтобы можно было определять тип объекта по указателю
 
         double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
-        double etta = system->coeffSolver->shareViscositySimple(point,T);
-        double lambda = system->coeffSolver->lambda(point,T);
+        double etta = system->coeffSolver->shareViscositySimple(point);
+        double lambda = system->coeffSolver->lambda(point);
 
         // Рассчитываем производные в точке i
         double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
