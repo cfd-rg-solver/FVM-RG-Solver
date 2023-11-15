@@ -276,6 +276,7 @@ void AbstractSolver::updatePoints()
 void AbstractSolver::useBorder()
 {
     bool presEq = 1;
+    bool slipBC = 1; // TO DO
     //0
     points[0].mixture = mixture;
     if(presEq)

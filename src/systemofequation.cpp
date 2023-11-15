@@ -636,7 +636,7 @@ void Couette2Alt::updateU(double dh, double dt)
     {
         for (int j = 0; j < systemOrder; j++)
         {
-            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i+1] - Fv[j][i - 1])/(2.*dh)) * dt;
+            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1])/(/*2.**/dh)) * dt;
         }
     }
 }
@@ -688,7 +688,7 @@ void Couette2Alt::computeF(vector<macroParam> &points, double dh)
 
         double dT_dy;
         dT_dy = (p2.temp - p0.temp) / denominator;
-        double lambda = coeffSolver->lambda(p1);
+//        double lambda = coeffSolver->lambda(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
@@ -699,7 +699,7 @@ void Couette2Alt::computeF(vector<macroParam> &points, double dh)
         }
         F[v_tau][i] = p1.density * p1.velocity_tau * p1.velocity_normal;
         F[v_normal][i] = p1.density *pow(p1.velocity_normal,2) + p1.pressure;
-        F[energy][i] =  /*-lambda*dT_dy*/ + p1.pressure * p1.velocity_normal + p1.density * getEnergy(i);
+        F[energy][i] =  /*-lambda*dT_dy*/ + p1.pressure * p1.velocity_normal + p1.density * p1.velocity_normal * getEnergy(i);
     }
 }
 
@@ -773,6 +773,6 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         {
             Fv[energy][i]+= -p1.density * mixture.getEffDiff(j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
         }
-        Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal - p1.density * getEnergy(i);
+        Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
     }
 }
