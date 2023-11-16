@@ -15,7 +15,7 @@ void GodunovSolverSoda::solve()
 
         system->computeF(points, delta_h);
 
-        riemannSolver->computeFlux(system);
+        riemannSolver->computeFlux(system,delta_h);
         //riemannSolver->computeFlux(system,timeSolvind.last(), delta_h);
 
         // Вычисляем вектор релаксационных членов
@@ -29,7 +29,7 @@ void GodunovSolverSoda::solve()
 
         //записать данные, если это требуется
         //writePoints(T*1000000); // микросек
-        if(i%1 == 0)
+        if(i%10 == 0)
         {
             std::cout<<i<<" iteration"<<std::endl;
             writePoints(i); // микросек

@@ -1,7 +1,7 @@
 #include "riemannsolver.h"
 
 #include <algorithm>
-const double gamma = 1.67;
+const double gamma = 1.4;
 //void HLLCSolver::computeFlux(SystemOfEquation *system)
 //{
 //    for(size_t i = 0 ; i < system->numberOfCells-1; i++)
@@ -515,7 +515,7 @@ void HLLIsentropic::computeFlux(SystemOfEquation *system)
 
 void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
 {
-    #pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
         macroParam left,right,point;
@@ -532,41 +532,48 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         //надо видимо делать для точного метода какой-то особый случай, ну или здесь внутри прописывать if-ы и в системе ввести поле которое сможет сказать о типе
         //указателя базового класса, чтобы можно было определять тип объекта по указателю
 
-        double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
-        double etta = system->coeffSolver->shareViscositySimple(point);
-        double lambda = system->coeffSolver->lambda(point);
+        system->Flux[0][i] = point.density*point.velocity;
+        system->Flux[1][i] = point.density*pow(point.velocity,2) +  point.pressure;
+        double rho_e = point.pressure/(gamma - 1);
+        double kinetic = point.density * pow(point.velocity,2) / 2. ;
+        double E = kinetic + rho_e;
+        system->Flux[2][i] =  point.velocity*(E + point.pressure);
 
-        // Рассчитываем производные в точке i
-        double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
-        double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
-        vector<double> dy_dy(system->mixture.NumberOfComponents);
+//        double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
+//        double etta = system->coeffSolver->shareViscositySimple(point);
+//        double lambda = system->coeffSolver->lambda(point);
 
-        //учёт граничных условий
-        if(i == 0 || i == system->numberOfCells-1)
-            fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
-        else
-        {
-            for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-            {
-                dy_dy[j] = 0;
-            }
-        }
-        //заполнение вектора потоков
-        for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-        {
-            if(j!=0)
-                system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
-            else
-                system->Flux[j][i] = 0;
-        }
-        system->Flux[system->v_tau][i] = -etta * dv_dy;
-        system->Flux[system->v_normal][i] = 0;
-        system->Flux[system->energy][i] = 0;
-        for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
-        {
-            system->Flux[system->energy][i]+= - point.density * system->mixture.getEffDiff(j)*dy_dy[j] * system->mixture.getEntalp(i);
-        }
-        system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
+//        // Рассчитываем производные в точке i
+//        double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
+//        double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
+//        vector<double> dy_dy(system->mixture.NumberOfComponents);
+
+//        //учёт граничных условий
+//        if(i == 0 || i == system->numberOfCells-1)
+//            fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
+//        else
+//        {
+//            for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+//            {
+//                dy_dy[j] = 0;
+//            }
+//        }
+//        //заполнение вектора потоков
+//        for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+//        {
+//            if(j!=0)
+//                system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
+//            else
+//                system->Flux[j][i] = 0;
+//        }
+//        system->Flux[system->v_tau][i] = -etta * dv_dy;
+//        system->Flux[system->v_normal][i] = 0;
+//        system->Flux[system->energy][i] = 0;
+//        for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
+//        {
+//            system->Flux[system->energy][i]+= - point.density * system->mixture.getEffDiff(j)*dy_dy[j] * system->mixture.getEntalp(i);
+//        }
+//        system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
     }
 }
 
