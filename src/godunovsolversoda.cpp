@@ -15,7 +15,8 @@ void GodunovSolverSoda::solve()
 
         system->computeF(points, delta_h);
 
-        riemannSolver->computeFlux(system,delta_h);
+        riemannSolver->computeFlux(system);
+        //riemannSolver->computeFlux(system,delta_h);
         //riemannSolver->computeFlux(system,timeSolvind.last(), delta_h);
 
         // Вычисляем вектор релаксационных членов
