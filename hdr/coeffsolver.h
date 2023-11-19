@@ -1,6 +1,6 @@
 #pragma once
 #include "global.h"
-
+#include "macroparam.h"
 struct CoeffSolver
 {
 public:
