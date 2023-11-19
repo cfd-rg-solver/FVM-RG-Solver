@@ -1,5 +1,6 @@
 #include <iostream>
 #include <omp.h>
+#include <functional>
 #include "systemofequation.h"
 
 void SystemOfEquation::setNumberOfCells(size_t cells )
@@ -281,7 +282,7 @@ void Couette2::computeF(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                F[j][i] = -p1.density * mixture.getEffDiff(j) * dy_dy[j];
+                F[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
             else
                 F[j][i] = p1.density * p1.velocity_normal;
         }
@@ -290,7 +291,7 @@ void Couette2::computeF(vector<macroParam> &points, double dh)
         F[energy][i] = 0;
         for(size_t j = 0 ; j <numberOfComponents; j++)
         {
-            F[energy][i]+= -p1.density * mixture.getEffDiff(j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
+            F[energy][i]+= -p1.density * coeffSolver->effDiffusion(p1,j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
         }
         F[energy][i] += -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy + (p1.pressure - (bulk + 4./3.*etta)* dv_normal_dy) * p1.velocity_normal;
     }
@@ -604,7 +605,8 @@ void Couette1::computeF(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                F[j][i] = -p1.density * mixture.getEffDiff(j) * dy_dy[j];
+                //F[j][i] = -p1.density * mixture.getEffDiff(j) * dy_dy[j];
+                F[j][i] = -p1.density * 0 * dy_dy[j];
             else
                 F[j][i] = 0;
         }
@@ -613,7 +615,9 @@ void Couette1::computeF(vector<macroParam> &points, double dh)
         F[energy][i] = 0;
         for(size_t j = 0 ; j <numberOfComponents; j++)
         {
-            F[energy][i]+= -p1.density * mixture.getEffDiff(j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
+            //F[energy][i]+= -p1.density * mixture.getEffDiff(j)*dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
+            F[energy][i]+= -p1.density *  0 *dy_dy[j] * (solParam.Gamma * kB * p1.temp /p1.mixture.components[j].mass)/*mixture.getEntalp(i)*/;
+
         }
         F[energy][i] += /*-lambda*dT_dy*/ - etta* p1.velocity_tau*dv_tau_dy;
     }
@@ -762,7 +766,7 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                F[j][i] = -p1.density * mixture.getEffDiff(j) * dy_dy[j];
+                F[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
             else
                 F[j][i] = 0;
         }
@@ -776,4 +780,222 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         }
         Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
     }
+}
+
+void Couette2AltBinary::prepareSolving(vector<macroParam> &points)
+{
+    #pragma omp parallel for schedule(static)
+    for(auto i  = 0; i < numberOfCells; i++)
+    {
+        U[0][i] = points[i].density;
+        for(size_t j = 1; j < numberOfComponents; j++)
+            U[j][i] = points[i].densityArray[j] ;
+        U[v_tau][i] = points[i].density*points[i].velocity_tau;
+        U[v_normal][i] = points[i].density*points[i].velocity_normal;
+
+        double UTrRot = getTrRotEnegry(points[i], 0) + getTrRotEnegry(points[i], 1);
+        double UVibr =  getVibrEnergy(points[i], 0) + getTrRotEnegry(points[i], 1);
+        U[energy][i] = UTrRot + UVibr +0.5*pow(points[i].velocity,2)*points[i].density;
+    }
+}
+
+void Couette2AltBinary::updateBorderU(vector<macroParam> &points)
+{
+    for(int i : {0, (int)(numberOfCells-1)})
+    {
+        U[0][i] = points[i].density;
+        for(size_t j = 1; j < numberOfComponents; j++)
+            U[j][i] = points[i].densityArray[j];
+        U[v_tau][i] = points[i].density*points[i].velocity_tau;
+        U[v_normal][i] = points[i].density*points[i].velocity_normal;
+
+        double UTrRot = getTrRotEnegry(points[i], 0) + getTrRotEnegry(points[i], 1);
+        double UVibr =  getVibrEnergy(points[i], 0) + getTrRotEnegry(points[i], 1);
+        U[energy][i] = UTrRot + UVibr +0.5*pow(points[i].velocity,2)*points[i].density;
+    }
+    return;
+}
+
+void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
+{
+    Mixture mixture = points[0].mixture;
+    #pragma omp parallel for schedule(static)
+    for(int i = 0 ; i < numberOfCells; i++)
+    {
+        macroParam p0, p1, p2;
+        double denominator = 1.;
+        if(i!=0 && i != numberOfCells-1)
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = 2. * dh;
+        }
+        else if (i == 0)
+        {
+            p0 = points[i];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = dh;
+        }
+        else if (i == (numberOfCells - 1))
+        {
+            p0 = points[i-1];
+            p1 = points[i];
+            p2 = points[i];
+            denominator = dh;
+        }
+        // Рассчитываем производные в точке i
+
+
+        vector<double> dy_dy(numberOfComponents);
+
+        //учёт граничных условий
+        if(i == 0 || i == numberOfCells-1)
+            fill(dy_dy.begin(), dy_dy.end(),border->get_dyc_dy());
+        else
+        {
+            for(size_t j = 0 ; j <numberOfComponents; j++)
+            {
+                dy_dy[j] = (p2.fractionArray[j] - p0.fractionArray[j])/ denominator;
+            }
+        }
+
+        double dT_dy;
+        dT_dy = (p2.temp - p0.temp) / denominator;
+//        double lambda = coeffSolver->lambda(p1);
+
+        for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
+        {
+            if(j!=0)
+                F[j][i] = p1.density * p1.fractionArray[j] * p1.velocity_normal;
+            else
+                F[j][i] = p1.density * p1.velocity_normal;
+        }
+        F[v_tau][i] = p1.density * p1.velocity_tau * p1.velocity_normal;
+        F[v_normal][i] = p1.density *pow(p1.velocity_normal,2) + p1.pressure;
+        F[energy][i] =  p1.pressure * p1.velocity_normal + p1.density * p1.velocity_normal * getEnergy(i);
+    }
+}
+
+void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
+{
+    Mixture mixture = points[0].mixture;
+    //#pragma omp parallel for schedule(static)
+    for(int i = 0 ; i < numberOfCells; i++)
+    {
+        macroParam p0, p1, p2;
+        double denominator = 1.;
+        if(i!=0 && i != numberOfCells-1)
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = 2. * dh;
+        }
+        else if (i == 0)
+        {
+            p0 = points[i];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = dh;
+        }
+        else if (i == (numberOfCells - 1))
+        {
+            p0 = points[i-1];
+            p1 = points[i];
+            p2 = points[i];
+            denominator = dh;
+        }
+        // Рассчитываем производные в точке i
+        double dv_tau_dy;
+        double dv_normal_dy;
+        double dT_dy;
+        dT_dy = (p2.temp - p0.temp) / denominator;
+        dv_tau_dy = (p2.velocity_tau - p0.velocity_tau) / denominator;
+        dv_normal_dy = (p2.velocity_normal - p0.velocity_normal) / denominator;
+
+        vector<double> dy_dy(numberOfComponents);
+
+        //учёт граничных условий
+        if(i == 0 || i == numberOfCells-1)
+            fill(dy_dy.begin(), dy_dy.end(),border->get_dyc_dy());
+        else
+        {
+            for(size_t j = 0 ; j <numberOfComponents; j++)
+            {
+                dy_dy[j] = (p2.fractionArray[j] - p0.fractionArray[j])/ denominator;
+            }
+        }
+        // Расчет поточных членов
+        // .....
+        // сейчас так:
+        double lambda = coeffSolver->lambda(p1);
+        double etta = coeffSolver->shareViscositySimple(p1);
+        double bulk = coeffSolver->bulcViscositySimple(p1);
+
+        for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
+        {
+            if(j!=0)
+                F[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
+            else
+                F[j][i] = 0;
+        }
+        Fv[v_tau][i] = - etta * dv_tau_dy;
+        Fv[v_normal][i] = - (bulk + 4./3.*etta)* dv_normal_dy;
+        Fv[energy][i] = 0;
+        for(size_t j = 0 ; j <numberOfComponents; j++)
+        {
+            double effDiffCoeff = coeffSolver->effDiffusion(p1,j);
+            Fv[energy][i]+= -p1.density * effDiffCoeff * dy_dy[j] * getEntalp(points[i],j);
+        }
+        Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
+    }
+}
+
+void Couette2AltBinary::calcAndRemeberTemp(vector<macroParam> &points)
+{
+    for(size_t i = 0; i < numberOfCells; i++)
+    {
+        double (*func) (macroParam){getEntalp};
+        //newtonMethod(getEntalp,getEntalpDiff,temperature[i],U[energy])
+
+
+    }
+}
+
+double Couette2AltBinary::getEntalpDiff(macroParam &point)
+{
+    int i1 = point.mixture.components[0].numberAtoms;
+    double U1 = (i1 * 2 + 1)/2. * kB * point.fractionArray[0] / point.mixture.components[0].mass;
+
+    int i2 = point.mixture.components[1].numberAtoms;
+    double U2 = (i2 * 2 + 1)/2. * kB * point.fractionArray[1] / point.mixture.components[1].mass;
+
+    double diffVibr = point.fractionArray[0]/point.mixture.components[0].mass * point.mixture.components[0].avgVibrEnergyDiff(point.temp);
+
+    return U1 + U2 + diffVibr;
+}
+double Couette2AltBinary::getEntalp(macroParam &point, size_t component)
+{
+    if(point.mixture.components[component].numberAtoms == 1)
+        return 0;
+    double res = getTrRotEnegry(point, component) + getVibrEnergy(point, component);
+    return res;
+}
+
+double Couette2AltBinary::getTrRotEnegry(macroParam &point, size_t component)
+{
+    int i = point.mixture.components[component].numberAtoms;
+    double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
+    return U;
+}
+
+double Couette2AltBinary::getVibrEnergy(macroParam &point, size_t component)
+{
+    if(point.mixture.components[component].numberAtoms == 1)
+        return 0;
+    double avgVibrEnergy = point.mixture.components[component].avgVibrEnergy(point.temp);
+    double res = avgVibrEnergy * point.fractionArray[component] / point.mixture.mass(component);
+    return res;
 }

@@ -555,7 +555,8 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
+                //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
+                system->Flux[j][i] = -point.density * 0 * dy_dy[j];
             else
                 system->Flux[j][i] = 0;
         }
@@ -564,7 +565,7 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         system->Flux[system->energy][i] = 0;
         for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
         {
-            system->Flux[system->energy][i]+= - point.density * system->mixture.getEffDiff(j)*dy_dy[j] * system->mixture.getEntalp(i);
+            system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
         }
         system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
     }
