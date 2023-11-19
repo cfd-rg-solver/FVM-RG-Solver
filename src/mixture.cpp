@@ -1,4 +1,5 @@
 #include "mixture.h"
+#include "global.h"
 
 Mixture::Mixture(std::vector<MixtureComponent> components_)
 {
@@ -34,12 +35,72 @@ double Mixture::epsilonDevK(size_t i)
     return components[i].epsilonDevK;
 }
 
-double Mixture::getEffDiff(size_t j)
+
+double MixtureComponent::avgVibrEnergyDiff(double temp)
 {
-    return 0;
+    if(numberAtoms == 1)
+        return 0;
+
+    double Z = Zvibr(temp);
+    double Zdiff = ZvibrDiff(temp);
+
+    double tmp = 0;
+    double tmpDiff = 0;
+    for(size_t i = 0; i < numberVibrLvl; i++)
+    {
+        double eps_ic = vibrEnergyLvl(i);
+        tmp += eps_ic * exp (-eps_ic / ( kB * temp));
+        tmpDiff += pow(eps_ic,2) * exp (-eps_ic / ( kB * temp)) / ( kB * pow(temp,2));
+    }
+
+    double res = (tmpDiff * Z - tmp * Zdiff) / (pow( Z , 2));
+    return res;
 }
 
-double Mixture::getEntalp(size_t i)
+double MixtureComponent::avgVibrEnergy(double temp)
 {
-    return 0;
+    if(numberAtoms == 1)
+        return 0;
+
+    double sum = 0;
+    double Z = Zvibr(temp);
+    for(size_t i = 0; i < numberVibrLvl; i++)
+    {
+        sum += vibrEnergyLvl(i) / Z * exp (-vibrEnergyLvl(i) / ( kB * temp));
+    }
+    return sum;
+}
+
+double MixtureComponent::vibrEnergyLvl(int lvl)
+{
+    return hc * omega_e * (lvl + 1./2.);
+}
+
+double MixtureComponent::ZvibrDiff(double temp)
+{
+    if(numberAtoms == 1)
+        return 0;
+
+    double sum = 0;
+    double s_i = 1; // только для O2
+    for(size_t i = 0; i < numberVibrLvl; i++)
+    {
+        double eps_ic = vibrEnergyLvl(i);
+        sum += s_i * eps_ic * exp (-eps_ic / ( kB * temp)) / ( kB * pow(temp , 2.));
+    }
+    return sum;
+}
+
+double MixtureComponent::Zvibr(double temp)
+{
+    if(numberAtoms == 1)
+        return 0;
+
+    double sum = 0;
+    double s_i = 1; // только для O2
+    for(size_t i = 0; i < numberVibrLvl; i++)
+    {
+        sum += exp (-vibrEnergyLvl(i) / ( kB * temp));
+    }
+    return sum;
 }

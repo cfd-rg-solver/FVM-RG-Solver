@@ -11,7 +11,8 @@ set(HDR_FOLDER "${PROJECT_SOURCE_DIR}/hdr")
 
 set(${PROJECT_NAME}_SRC  ${SRC_FOLDER}/abstractsolver.cpp
                          #${SRC_FOLDER}/hllcsolver.cpp
-                         ${SRC_FOLDER}/grid.cpp
+                         ${SRC_FOLDER}/macroparam.cpp
+                         ${SRC_FOLDER}/newton.cpp
                          ${SRC_FOLDER}/godunovsolver.cpp
                          ${SRC_FOLDER}/godunovsolversoda.cpp
 			 ${SRC_FOLDER}/coeffsolver.cpp
@@ -26,7 +27,8 @@ set(${PROJECT_NAME}_SRC  ${SRC_FOLDER}/abstractsolver.cpp
 
 set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
                          #${HDR_FOLDER}/hllcsolver.h
-                         ${HDR_FOLDER}/grid.h
+                         ${HDR_FOLDER}/macroparam.h
+                         ${HDR_FOLDER}/newton.h
                          ${HDR_FOLDER}/godunovsolver.h
                          ${HDR_FOLDER}/godunovsolversoda.h
                          ${HDR_FOLDER}/coeffsolver.h

@@ -7,6 +7,7 @@ enum SystemOfEquationType
     couette1,
     couette2,
     couette2Alt,
+    couette2AltBinary,
     soda
 };
 struct SystemOfEquation
@@ -74,7 +75,6 @@ struct Couette2 : public SystemOfEquation
     double getEnergy(size_t i);
     double getTemp(size_t i);
 
-    double getMaxVelocity();
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
     void computeF(vector<macroParam> & points, double dh);
@@ -92,6 +92,31 @@ struct Couette2Alt : public Couette2
     void computeFv(vector<macroParam> & points, double dh);
 
     vector<Matrix> Fv;
+};
+
+struct Couette2AltBinary : public Couette2Alt
+{
+    Couette2AltBinary(){systemType = SystemOfEquationType::couette2AltBinary; temperature.resize(numberOfCells);};
+
+    void prepareSolving(vector<macroParam> & points);
+
+    double getPressure(size_t i);
+    double getDensity(size_t i);
+    double getTemp(size_t i);
+
+    void updateU(double dh, double dt);
+    void updateBorderU(vector<macroParam> & points);
+    void computeF(vector<macroParam> & points, double dh);
+    void computeFv(vector<macroParam> & points, double dh);
+private:
+    std::vector<double> temperature;
+    void calcAndRemeberTemp(vector<macroParam> &points);
+
+    double getEntalpDiff(macroParam & point); // производная
+    double getEntalp(macroParam & point){return getEntalp(point,0) + getEntalp(point,1);};
+    double getEntalp(macroParam & point, size_t component);
+    double getTrRotEnegry(macroParam & point, size_t component);
+    double getVibrEnergy(macroParam & point, size_t component);
 };
 
 struct Couette1 : public SystemOfEquation
