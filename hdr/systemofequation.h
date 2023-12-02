@@ -21,6 +21,7 @@ struct SystemOfEquation
 
     virtual double getPressure(size_t i) = 0;
     virtual double getDensity(size_t i) = 0;
+    virtual double getDensity(size_t i, size_t component){return 0;};
     virtual double getVelocity(size_t i) = 0;
     virtual double getVelocityTau(size_t i) = 0;
     virtual double getVelocityNormal(size_t i) = 0;
@@ -96,12 +97,13 @@ struct Couette2Alt : public Couette2
 
 struct Couette2AltBinary : public Couette2Alt
 {
-    Couette2AltBinary(){systemType = SystemOfEquationType::couette2AltBinary; temperature.resize(numberOfCells);};
+    Couette2AltBinary(){systemType = SystemOfEquationType::couette2AltBinary;};
 
     void prepareSolving(vector<macroParam> & points);
 
     double getPressure(size_t i);
     double getDensity(size_t i);
+    double getDensity(size_t i, size_t component);
     double getTemp(size_t i);
 
     void updateU(double dh, double dt);
@@ -110,10 +112,11 @@ struct Couette2AltBinary : public Couette2Alt
     void computeFv(vector<macroParam> & points, double dh);
 private:
     std::vector<double> temperature;
-    void calcAndRemeberTemp(vector<macroParam> &points);
+    void calcAndRemeberTemp();
 
+    double calcE(macroParam &point);
     double getEntalpDiff(macroParam & point); // производная
-    double getEntalp(macroParam & point){return getEntalp(point,0) + getEntalp(point,1);};
+    double getEntalpTotal(macroParam & point){return getEntalp(point,0) + getEntalp(point,1);};
     double getEntalp(macroParam & point, size_t component);
     double getTrRotEnegry(macroParam & point, size_t component);
     double getVibrEnergy(macroParam & point, size_t component);

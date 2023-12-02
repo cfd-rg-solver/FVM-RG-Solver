@@ -15,6 +15,19 @@ double Mixture::molarMass()
     return sum;
 }
 
+double Mixture::molarMass(std::vector<double> y_c)
+{
+    double sum = 0;
+    for(size_t j = 0; j < y_c.size(); j++)
+    {
+        double M_c = molarMass(j);
+        sum += y_c[j] / M_c;
+    }
+    double M = 1/sum;
+    return M;
+}
+
+
 double Mixture::molarMass(size_t i)
 {
     return components[i].molarMass;
@@ -46,14 +59,16 @@ double MixtureComponent::avgVibrEnergyDiff(double temp)
 
     double tmp = 0;
     double tmpDiff = 0;
+    double sum = 0;
     for(size_t i = 0; i < numberVibrLvl; i++)
     {
         double eps_ic = vibrEnergyLvl(i);
-        tmp += eps_ic * exp (-eps_ic / ( kB * temp));
-        tmpDiff += pow(eps_ic,2) * exp (-eps_ic / ( kB * temp)) / ( kB * pow(temp,2));
+        tmp = eps_ic * exp (-eps_ic / ( kB * temp));
+        tmpDiff = pow(eps_ic,2) * exp (-eps_ic / ( kB * temp)) / ( kB * pow(temp,2));
+        sum += tmpDiff * Z - tmp * Zdiff;
     }
 
-    double res = (tmpDiff * Z - tmp * Zdiff) / (pow( Z , 2));
+    double res = sum / (pow( Z , 2));
     return res;
 }
 
