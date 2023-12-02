@@ -7,7 +7,7 @@ struct MixtureComponent
 {
     double density;                 //плотность компоненты
     double molarMass; // молярная масса
-    double epsilonDevK; // параметр в потенциале (для рассчёта вязкости) (хз пока чё это такое)
+    double epsilonDevK; // параметр в потенциале (для рассчёта вязкости)
     double mass;
     double sigma; // диаметр в метрах
     double omega_e; // спектроскопическая постоянная
@@ -34,7 +34,8 @@ struct Mixture
     //... какие-то другие параметры смеси
     //пример
 
-    double molarMass();
+    double molarMass(); // неправильный рассчет в случае двух компонентного газа, использовать незя
+    double molarMass(std::vector<double> y_c);
     double molarMass(size_t i);
     double mass(size_t i);
     double sigma(size_t i);
