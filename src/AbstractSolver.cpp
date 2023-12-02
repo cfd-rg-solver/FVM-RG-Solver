@@ -109,7 +109,8 @@ void AbstractSolver::prepareSolving()
         points[i].temp = startParam.temp;
         points[i].fractionArray =  startParam.fractionArray;
         points[i].density = startParam.density;
-        points[i].pressure = points[i].density*UniversalGasConstant * startParam.temp/mixture.molarMass();
+
+        points[i].pressure = points[i].density * UniversalGasConstant * startParam.temp/mixture.molarMass(startParam.fractionArray);
         //points[i].density = startParam.pressure * mixture.molarMass()/(UniversalGasConstant * startParam.temp);
         points[i].densityArray =  startParam.densityArray;
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
@@ -149,6 +150,11 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
         case SystemOfEquationType::couette2Alt:
         {
             auto *tmp = new Couette2Alt();
+            return tmp;
+        }
+        case SystemOfEquationType::couette2AltBinary:
+        {
+            auto *tmp = new Couette2AltBinary();
             return tmp;
         }
         case SystemOfEquationType::soda:
@@ -227,7 +233,7 @@ void AbstractSolver::updatePoints()
 
         for(size_t j = 0; j < mixture.NumberOfComponents; j++)
         {
-            points[i].densityArray[j] =  system->U[j][i]; // тут косяк TODO
+            points[i].densityArray[j] =  system->getDensity(i,j); // тут косяк TODO
             points[i].fractionArray[j] = points[i].densityArray[j] / points[i].density;
         }
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
@@ -268,7 +274,7 @@ void AbstractSolver::updatePoints()
 
 void AbstractSolver::useBorder()
 {
-    bool presEq = 1;
+    bool presEq =1;
     bool slipBC = 1; // TO DO
     //0
     points[0].mixture = mixture;
@@ -285,9 +291,9 @@ void AbstractSolver::useBorder()
     // дополнительные рассчитываемые величины
 
     if(!presEq)
-        points[0].pressure = points[0].density / mixture.molarMass() * UniversalGasConstant * points[0].temp;
+        points[0].pressure = points[0].density / mixture.molarMass(points[0].fractionArray) * UniversalGasConstant * points[0].temp;
     else
-        points[0].density = points[0].pressure * mixture.molarMass() / (UniversalGasConstant * points[0].temp);
+        points[0].density = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (UniversalGasConstant * points[0].temp);
     points[0].soundSpeed = sqrt(solParam.Gamma*points[0].pressure/points[0].density);
 
 
@@ -304,10 +310,11 @@ void AbstractSolver::useBorder()
     points[solParam.NumCell-1].velocity = sqrt(pow(points[solParam.NumCell-1].velocity_tau,2) + pow(points[solParam.NumCell-1].velocity_normal,2));
     points[solParam.NumCell-1].temp = -points[solParam.NumCell-2].temp +  2.*border.up_temp;
     // дополнительные рассчитываемые величины
+    auto y_c = points[solParam.NumCell-1].fractionArray;
     if(!presEq)
-        points[solParam.NumCell-1].pressure = points[solParam.NumCell-1].density / mixture.molarMass() * UniversalGasConstant * points[solParam.NumCell-1].temp;
+        points[solParam.NumCell-1].pressure = points[solParam.NumCell-1].density / mixture.molarMass(y_c) * UniversalGasConstant * points[solParam.NumCell-1].temp;
     else
-        points[solParam.NumCell-1].density = points[solParam.NumCell-1].pressure * mixture.molarMass() / (UniversalGasConstant * points[solParam.NumCell-1].temp);
+        points[solParam.NumCell-1].density = points[solParam.NumCell-1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[solParam.NumCell-1].temp);
     points[solParam.NumCell-1].soundSpeed = sqrt(solParam.Gamma*points[solParam.NumCell-1].pressure/points[solParam.NumCell-1].density);
 }
 
