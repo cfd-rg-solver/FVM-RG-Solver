@@ -432,6 +432,7 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
 
 //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
 //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
+        double tmp1 = system->getEnergy(i);
         H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i); //! Mistake (the same for enthalpy)
         H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
 
@@ -479,36 +480,6 @@ void HLLSimple::computeFlux(SystemOfEquation *system, double dt, double dh)
             UR = system->U[j][i+1];
             UL = system->U[j][i];
             system->Flux[j][i] = (SR*FL - SL*FR + SL*SR * (UR - UL))/(SR - SL);
-        }
-    }
-}
-
-void HLLIsentropic::computeFlux(SystemOfEquation *system)
-{
-
-    for(size_t i = 0 ; i < system->numberOfCells - 1; i++)
-    {
-        double u_star, a_star,ul,ur,al,ar,SR, SL, FL, FR, UL, UR;
-        ul = system->getVelocity(i);
-        ur = system->getVelocity(i+1);
-        al = system->getSoundSpeed(i);
-        ar = system->getSoundSpeed(i+1);
-        u_star = 1/2*(ul-ur) + (al - ar)/(gamma - 1);
-        a_star = 1/2*(al + ar) + 1/4 *(gamma - 1)*(ul-ur);
-        SL = std::min({ul - al, u_star - a_star});
-        SR = std::max({ur + ar, u_star + a_star});
-        for(size_t j = 0; j < system->systemOrder; j++)
-        {
-            FR = system->F[j][i+1];
-            FL = system->F[j][i];
-            UR = system->U[j][i+1];
-            UL = system->U[j][i];
-            if(SL >= 0 )
-                system->Flux[j][i] = FL;
-            else if( SR <= 0)
-                system->Flux[j][i] = FR;
-            else
-                system->Flux[j][i] = (SR*FL - SL*FR + SL*SR * (UR - UL))/(SR - SL);
         }
     }
 }
@@ -768,49 +739,6 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
         }
     }
     return ret;
-}
-
-void HLLESolverSimen::computeFlux(SystemOfEquation *system)
-{
-    for(size_t i = 0; i < system->numberOfCells-1; i++)
-    {
-        // Временные переменные
-        double f_hlle, f0, f1, u0, u1, a0, a1, v0, v1, rho0, rho1, avg_k;
-        double b0, b1, eta, avg_a, avg_v;
-
-        // Забираем известные макропараметры в (.)-ах [i], [i+1]
-        a0 = pow(system->getSoundSpeed(i),2);
-        a1 = pow(system->getSoundSpeed(i+1),2);
-        v0 = system->getVelocity(i);
-        v1 = system->getVelocity(i+1);
-        rho0 = sqrt(system->getDensity(i));
-        rho1 = sqrt(system->getDensity(i+1));
-        avg_v = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
-        avg_k = gamma;  // у cИмена было так: 0.5 * (k[i] + k[i + 1]);
-
-        for (size_t j = 0; j < system->systemOrder; j++)
-        {
-            // Забираем известные макропараметры в (.)-ах [i], [i+1]
-            f0 = system->F[j][i];
-            f1 = system->F[j][i + 1];
-            u0 = system->U[j][i];
-            u1 = system->U[j][i + 1];
-
-            // Расчитываем сигнальные скорости
-            eta = (avg_k - 1.0) / 2.0 * rho0 * rho1 / pow(rho0 + rho1, 2.0);
-            avg_a = sqrt((rho0 * a0 + rho1 * a1) / (rho0 + rho1) +
-                          eta * pow(v1 - v0, 2.0));
-            avg_v = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
-
-            // Расчет потока на стыке ячеек
-            b0 = std::min(avg_v - avg_a, 0.0);
-            b1 = std::max(avg_v + avg_a, 0.0);
-            f_hlle = (b1 * f0 - b0 * f1 + b1 * b0 * (u1 - u0)) / (b1 - b0);
-
-            // Обновляем значение [j] вектора поточных членов в (.) [i-1]
-            system->Flux[j][i] = f_hlle;
-        }
-    }
 }
 
 void RiemannSolver::toMaxVelocity(double vel)

@@ -139,11 +139,6 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
 {
     switch(type)
     {
-        case SystemOfEquationType::couette1:
-        {
-            auto *tmp = new Couette1();
-            return tmp;
-        }
         case SystemOfEquationType::couette2:
         {
             auto *tmp = new Couette2();
@@ -157,11 +152,6 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
         case SystemOfEquationType::couette2AltBinary:
         {
             auto *tmp = new Couette2AltBinary();
-            return tmp;
-        }
-        case SystemOfEquationType::soda:
-        {
-            auto *tmp = new Soda();
             return tmp;
         }
     }
@@ -180,10 +170,6 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
         {
                 return new struct HLLESolver();
         }
-    case RiemannSolverType::HLLIsentropic:
-        {
-                return new struct HLLIsentropic();
-        }
     case RiemannSolverType::HLLSimple:
         {
                 return new struct HLLSimple();
@@ -191,10 +177,6 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
     case RiemannSolverType::ExacRiemanSolver:
         {
                 return new struct ExacRiemanSolver();
-        }
-    case RiemannSolverType::HLLESolverSimen:
-        {
-                return new struct HLLESolverSimen();
         }
     }
     return nullptr;
