@@ -3,7 +3,7 @@
 double OneTempApprox::calcEnergy(macroParam &point)
 {
     double UTrRot = getTrRotEnegry(point, 0) + getTrRotEnegry(point, 1);
-    double UVibr =  getVibrEnergy(point, 0) + getTrRotEnegry(point, 1);
+    double UVibr =  getVibrEnergy(point, 0) + getVibrEnergy(point, 1);
     double E = point.density * (UTrRot + UVibr) + 0.5*pow(point.velocity,2)*point.density;
     return E;
 }

@@ -7,9 +7,8 @@ enum RiemannSolverType
     HLLCSolver,         // not correct
     HLLESolver,         // correct
     HLLSimple,          // not correct
-    HLLIsentropic,      // correct
     ExacRiemanSolver,   // correct
-    HLLESolverSimen     // correct
+
 };
 struct RiemannSolver
 {
@@ -34,19 +33,9 @@ struct HLLESolver : public RiemannSolver
     void computeFlux(SystemOfEquation *system);
 };
 
-struct HLLESolverSimen : public RiemannSolver
-{
-    void computeFlux(SystemOfEquation *system);
-};
-
 struct HLLSimple : public RiemannSolver
 {
     void computeFlux(SystemOfEquation *system, double dt, double dh);
-};
-
-struct HLLIsentropic : public RiemannSolver
-{
-    void computeFlux(SystemOfEquation *system);
 };
 
 struct ExacRiemanSolver : public RiemannSolver
