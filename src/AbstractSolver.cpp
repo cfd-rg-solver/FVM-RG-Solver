@@ -29,6 +29,7 @@ AbstractSolver::AbstractSolver(Mixture mixture_, macroParam startParam_, solverP
     system->setMixture(mixture);
     system->setNumberOfCells(solParam.NumCell);
     system->setSolverParams(solParam);
+    system->setEqSolver(eqSolver);
 }
 
 AbstractSolver::AbstractSolver(Mixture mixture_, vector<macroParam> startParam_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType)
@@ -59,6 +60,7 @@ AbstractSolver::AbstractSolver(Mixture mixture_, vector<macroParam> startParam_,
     system->setMixture(mixture);
     system->setNumberOfCells(solParam.NumCell);
     system->setSolverParams(solParam);
+    system->setEqSolver(eqSolver);
 }
 
 void AbstractSolver::setStartCondition(macroParam start)

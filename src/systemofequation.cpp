@@ -2,7 +2,7 @@
 #include <omp.h>
 #include <functional>
 #include "systemofequation.h"
-
+#include "numeric.h"
 void SystemOfEquation::setNumberOfCells(size_t cells )
 {
     numberOfCells = cells;
@@ -29,6 +29,11 @@ void SystemOfEquation::setCoeffSolver(CoeffSolver *coeffSolver_)
 void SystemOfEquation::setSolverParams(solverParams solParam_)
 {
     solParam = solParam_;
+}
+
+void SystemOfEquation::setEqSolver(NonLinearEqSolver *eqSolver_)
+{
+    eqSolver = eqSolver_;
 }
 
 double SystemOfEquation::getMaxVelocity()
@@ -794,10 +799,7 @@ void Couette2AltBinary::prepareSolving(vector<macroParam> &points)
         U[v_tau][i] = points[i].density*points[i].velocity_tau;
         U[v_normal][i] = points[i].density*points[i].velocity_normal;
 
-        double UTrRot = getTrRotEnegry(points[i], 0) + getTrRotEnegry(points[i], 1);
-        double UVibr =  getVibrEnergy(points[i], 0) + getTrRotEnegry(points[i], 1);
-        U[energy][i] = points[i].density * (UTrRot + UVibr) + 0.5*pow(points[i].velocity,2)*points[i].density;
-
+        U[energy][i] = energyCalculator->calcEnergy(points[i]);
         temperature[i] = points[i].temp;
     }
 }
@@ -843,7 +845,7 @@ double Couette2AltBinary::getTemp(size_t i)
 
 void Couette2AltBinary::updateU(double dh, double dt)
 {
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for(auto i  = 1; i < numberOfCells-1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -864,9 +866,7 @@ void Couette2AltBinary::updateBorderU(vector<macroParam> &points)
         U[v_tau][i] = points[i].density*points[i].velocity_tau;
         U[v_normal][i] = points[i].density*points[i].velocity_normal;
 
-        double UTrRot = getTrRotEnegry(points[i], 0) + getTrRotEnegry(points[i], 1);
-        double UVibr =  getVibrEnergy(points[i], 0) + getTrRotEnegry(points[i], 1);
-        U[energy][i] = points[i].density * (UTrRot + UVibr +0.5*pow(points[i].velocity,2));
+        U[energy][i] = energyCalculator->calcEnergy(points[i]);
     }
     return;
 }
@@ -936,7 +936,7 @@ void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
 void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -1002,60 +1002,15 @@ void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <numberOfComponents; j++)
         {
             double effDiffCoeff = coeffSolver->effDiffusion(p1,j);
-            Fv[energy][i]+= -p1.density * effDiffCoeff * dy_dy[j] * getEntalp(points[i],j);
+            Fv[energy][i]+= -p1.density * effDiffCoeff * dy_dy[j] * energyCalculator->getEntalp(points[i],j);
         }
         Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
     }
 }
-
-//void Couette2AltBinary::calcAndRemeberTemp()
-//{
-//    for(size_t i = 0; i < numberOfCells; i++)
-//    {
-//        macroParam p0(mixture);
-//        p0.temp = temperature[i];
-//        p0.densityArray.resize(numberOfComponents);
-//        p0.fractionArray.resize(numberOfComponents);
-//        for(size_t j = 0 ; j <numberOfComponents; j++)
-//        {
-
-//            p0.densityArray[j] =  getDensity(i,j);
-//            p0.fractionArray[j] = p0.densityArray[j] / getDensity(i);
-//        }
-
-//        // тут можно пользоваться как производной которая написана аналитически, так и такой численной схемой,
-//        // результат насколько я могу судить одинаковый:
-//        macroParam p2 = p0;
-//        macroParam p3 = p0;
-//        p2.temp += 0.00001;
-//        p3.temp -= 0.00001;
-
-//        double f2 = getDensity(i)*getEntalpTotal(p2);
-//        double f3 = getDensity(i)*getEntalpTotal(p3);
-//        double df23 = (f2 - f3) / 0.00002;
-
-//        double t1  = p0.temp - (getDensity(i)*getEntalpTotal(p0) - U[energy][i]+ getDensity(i) * pow(getVelocity(i),2) / 2.) / df23 /*getEntalpDiff(p0)*/; // первое приближение
-//        double eps = 0.0001;
-//        while (fabs(t1 - p0.temp) > eps)
-//        {
-//            p0.temp = t1;
-//            p2.temp = t1 + 0.00001;
-//            p3.temp = t1 - 0.00001;
-//            f2 = getDensity(i) * getEntalpTotal(p2);
-//            f3 = getDensity(i) * getEntalpTotal(p3);
-//            df23 = (f2 - f3) / 0.00002;
-
-//            t1 = p0.temp - (getDensity(i)*getEntalpTotal(p0) - U[energy][i] + getDensity(i) * pow(getVelocity(i),2) / 2.) / df23 /*getEntalpDiff(p0)*/; // последующие приближения
-
-//        }
-//        temperature[i] = t1;
-//    }
-//    return;
-//}
-
 void Couette2AltBinary::calcAndRemeberTemp()
 {
-    for(size_t i = 0; i < numberOfCells; i++)
+    #pragma omp parallel for schedule(static)
+    for(int i = 0; i < numberOfCells; i++)
     {
         macroParam p0(mixture);
         p0.temp = temperature[i];
@@ -1069,77 +1024,9 @@ void Couette2AltBinary::calcAndRemeberTemp()
             p0.velocity = getVelocity(i);
         }
         p0.density = getDensity(i);
-        // тут можно пользоваться как производной которая написана аналитически, так и такой численной схемой,
-        // результат насколько я могу судить одинаковый:
-        macroParam p2 = p0;
-        macroParam p3 = p0;
-        p2.temp += 0.00001;
-        p3.temp -= 0.00001;
 
-
-        double f2 = calcE(p2);
-        double f3 = calcE(p3);
-        double df23 = (f2 - f3) / 0.00002;
-
-        double t1  = p0.temp - (calcE(p0) - U[energy][i]) / df23 /*getEntalpDiff(p0)*/; // первое приближение
-        double eps = 0.0001;
-        while (fabs(t1 - p0.temp) > eps)
-        {
-            p0.temp = t1;
-            p2.temp = t1 + 0.00001;
-            p3.temp = t1 - 0.00001;
-            f2 = calcE(p2);
-            f3 = calcE(p3);
-            df23 = (f2 - f3) / 0.00002;
-
-            t1 = p0.temp - (calcE(p0) - U[energy][i]) / df23 /*getEntalpDiff(p0)*/; // последующие приближения
-
-        }
-        temperature[i] = t1;
+        temperature[i] = eqSolver->solveEq(energyCalculator,p0,U[energy][i]);
     }
     return;
 }
-double Couette2AltBinary::calcE(macroParam &point)
-{
-    double UTrRot = getTrRotEnegry(point, 0) + getTrRotEnegry(point, 1);
-    double UVibr =  getVibrEnergy(point, 0) + getTrRotEnegry(point, 1);
-    double E = point.density * (UTrRot + UVibr + 0.5*pow(point.velocity,2));
-    return E;
-}
-double Couette2AltBinary::getEntalpDiff(macroParam &point)
-{
-    int i1 = point.mixture.components[0].numberAtoms;
-    double U1 = (i1 * 2 + 1)/2. * kB * point.fractionArray[0] / point.mixture.components[0].mass;
 
-    int i2 = point.mixture.components[1].numberAtoms;
-    double U2 = (i2 * 2 + 1)/2. * kB * point.fractionArray[1] / point.mixture.components[1].mass;
-
-    double diffVibr = point.fractionArray[0]/point.mixture.components[0].mass * point.mixture.components[0].avgVibrEnergyDiff(point.temp);
-
-    return U1 + U2 + diffVibr;
-}
-double Couette2AltBinary::getEntalp(macroParam &point, size_t component)
-{
-    double Tr = 5/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
-    double Rot = 0;
-    if(point.mixture.components[component].numberAtoms == 2)
-        Rot = kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
-    double res = Tr + Rot + getVibrEnergy(point, component);
-    return res;
-}
-
-double Couette2AltBinary::getTrRotEnegry(macroParam &point, size_t component)
-{
-    int i = point.mixture.components[component].numberAtoms;
-    double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
-    return U;
-}
-
-double Couette2AltBinary::getVibrEnergy(macroParam &point, size_t component)
-{
-    if(point.mixture.components[component].numberAtoms == 1)
-        return 0;
-    double avgVibrEnergy = point.mixture.components[component].avgVibrEnergy(point.temp);
-    double res = avgVibrEnergy * point.fractionArray[component] / point.mixture.mass(component);
-    return res;
-}
