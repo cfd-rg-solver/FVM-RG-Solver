@@ -13,3 +13,4 @@ _deps
 data/
 CMakeSettings.json
 out/
+/build*
