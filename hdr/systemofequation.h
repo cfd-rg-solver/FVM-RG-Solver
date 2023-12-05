@@ -6,11 +6,9 @@
 #include "numeric.h"
 enum SystemOfEquationType
 {
-    couette1,
     couette2,
     couette2Alt,
     couette2AltBinary,
-    soda
 };
 struct SystemOfEquation
 {
@@ -28,7 +26,6 @@ struct SystemOfEquation
     virtual double getVelocity(size_t i) = 0;
     virtual double getVelocityTau(size_t i) = 0;
     virtual double getVelocityNormal(size_t i) = 0;
-    virtual double getSoundSpeed(size_t i) = 0;
     virtual double getEnergy(size_t i) = 0;
     virtual double getTemp(size_t i) = 0;
 
@@ -77,7 +74,6 @@ struct Couette2 : public SystemOfEquation
     double getVelocity(size_t i);
     double getVelocityTau(size_t i);
     double getVelocityNormal(size_t i);
-    double getSoundSpeed(size_t i) { return 0; };
     double getEnergy(size_t i);
     double getTemp(size_t i);
 
@@ -118,51 +114,4 @@ struct Couette2AltBinary : public Couette2Alt
 private:
     std::vector<double> temperature;
     void calcAndRemeberTemp();
-};
-
-struct Couette1 : public SystemOfEquation
-{
-    Couette1(){systemType = SystemOfEquationType::couette1;};
-    void prepareSolving(vector<macroParam> & points);
-    void prepareIndex();
-
-    double getPressure(size_t i);
-    double getDensity(size_t i);
-    double getVelocity(size_t i);
-    double getVelocityTau(size_t i);
-    double getVelocityNormal(size_t i);
-    double getSoundSpeed(size_t i);
-    double getEnergy(size_t i);
-    double getTemp(size_t i);
-
-    double getMaxVelocity();
-    void updateU(double dh, double dt);
-    void updateBorderU(vector<macroParam> & points);
-    void computeF(vector<macroParam> & points, double dh);
-
-
-};
-
-struct Soda : public SystemOfEquation
-{
-    Soda(){systemType = SystemOfEquationType::soda;};
-    void prepareSolving(vector<macroParam> & points);
-    void prepareIndex();
-
-    double getPressure(size_t i);
-    double getDensity(size_t i);
-    double getVelocity(size_t i);
-    double getVelocityTau(size_t i);
-    double getVelocityNormal(size_t i);
-    double getSoundSpeed(size_t i);
-    double getEnergy(size_t i);
-    double getTemp(size_t i) { return 0; };
-
-    double getMaxVelocity();
-    void updateU(double dh, double dt);
-    void updateBorderU(vector<macroParam> & points){};
-    void computeF(vector<macroParam> & points, double dh);
-
-
-    double gamma = 1.4;
 };
