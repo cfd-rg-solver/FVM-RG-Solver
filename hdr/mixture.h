@@ -5,7 +5,6 @@
 #include "global.h"
 struct MixtureComponent
 {
-    double density;                 //плотность компоненты
     double molarMass; // молярная масса
     double epsilonDevK; // параметр в потенциале (для рассчёта вязкости)
     double mass;
@@ -15,14 +14,6 @@ struct MixtureComponent
     int numberAtoms;
     //... какие-то другие параметры компонент
     std::string name;                    //название компоненты
-
-    double avgVibrEnergyDiff(double temp);
-    double avgVibrEnergy(double temp);
-    double vibrEnergyLvl(int lvl);
-    double ZvibrDiff(double temp);
-    double Zvibr(double temp);
-
-
 };
 struct Mixture
 {

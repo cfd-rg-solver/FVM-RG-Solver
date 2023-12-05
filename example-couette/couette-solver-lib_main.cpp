@@ -28,7 +28,7 @@ int main()
 
     MixtureComponent argon;
     argon.name = "Ar";
-    argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
+    //argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
     //argon.density = 0.800773;
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992E-26;
@@ -41,7 +41,6 @@ int main()
     MixtureComponent Oxygen2;
     Oxygen2.name = "O2";
 //    Oxygen2.density = 1.42897e-3*0.99;
-    Oxygen2.density = 0.03168;
     Oxygen2.molarMass = 0.0319988;
     Oxygen2.mass = 5.313725014956E-26;
     Oxygen2.epsilonDevK = 1.48281651048e-21/kB;
@@ -52,7 +51,6 @@ int main()
 
     MixtureComponent Oxygen;
     Oxygen.name = "O";
-    Oxygen.density = 0.03168; // initial concentration - 0.01
     Oxygen.molarMass = 0.015999;
     Oxygen.mass = 2.6567628316576e-26;
     Oxygen.epsilonDevK = 1.1045188159999998e-21/kB;
@@ -69,21 +67,19 @@ int main()
     /////////////////////
 
     macroParam startParam(mixture);
+    startParam.density = 0.03168;
     startParam.fractionArray[0] = 0.99;
-    startParam.densityArray[0] =  startParam.fractionArray[0] * mixture.components[0].density;
+    startParam.densityArray[0] =  startParam.fractionArray[0] * startParam.density;
 
     startParam.fractionArray[1] = 0.01;
-    startParam.densityArray[1] =  startParam.fractionArray[1] * mixture.components[1].density;
+    startParam.densityArray[1] =  startParam.fractionArray[1] * startParam.density;
 
-    startParam.density = 0;
-    for(int i = 0; i < mixture.NumberOfComponents; i++)
-        startParam.density += startParam.densityArray[i];
     startParam.temp = 800; //140
     startParam.velocity_tau = 0.00001;
 
 
     solverParams solParam;
-    solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.32;
 //    solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
     solParam.CFL      = 0.9;    // Число Куранта

@@ -12,6 +12,7 @@
 #include "observer.h"
 #include "systemofequation.h"
 #include "riemannsolver.h"
+#include "numeric.h"
 struct AbstractSolver
 {
 public:
@@ -48,6 +49,8 @@ public:
     solverParams solParam;
 
     CoeffSolver* coeffSolver;
+
+    NonLinearEqSolver* eqSolver = new Newton();
 
     BorderCondition border;
 

@@ -2,6 +2,8 @@
 #include "global.h"
 #include "coeffsolver.h"
 #include "bordercondition.h"
+#include "energycalc.h"
+#include "numeric.h"
 enum SystemOfEquationType
 {
     couette1,
@@ -18,6 +20,7 @@ struct SystemOfEquation
     void setBorderCondition(BorderCondition* border_);
     void setCoeffSolver(CoeffSolver* coeffSolver_);
     void setSolverParams(solverParams solParam_);
+    void setEqSolver(NonLinearEqSolver* eqSolver_);
 
     virtual double getPressure(size_t i) = 0;
     virtual double getDensity(size_t i) = 0;
@@ -52,6 +55,8 @@ struct SystemOfEquation
     size_t systemOrder;
 
     Mixture mixture;
+    EnergyCalc* energyCalculator = new OneTempApprox();
+    NonLinearEqSolver*  eqSolver;
     CoeffSolver* coeffSolver;
     BorderCondition* border;
     solverParams solParam;
@@ -113,13 +118,6 @@ struct Couette2AltBinary : public Couette2Alt
 private:
     std::vector<double> temperature;
     void calcAndRemeberTemp();
-
-    double calcE(macroParam &point);
-    double getEntalpDiff(macroParam & point); // производная
-    double getEntalpTotal(macroParam & point){return getEntalp(point,0) + getEntalp(point,1);};
-    double getEntalp(macroParam & point, size_t component);
-    double getTrRotEnegry(macroParam & point, size_t component);
-    double getVibrEnergy(macroParam & point, size_t component);
 };
 
 struct Couette1 : public SystemOfEquation
