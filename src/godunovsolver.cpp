@@ -3,17 +3,7 @@
 #include <omp.h>
 void GodunovSolver::solve()
 {
-    if(!isContinue)
-    {
-        prepareSolving();
-        writePoints(-1);
-    }
-    else
-    {
-        prepareVectorSizes();
-        system->prepareSolving(points);
-        writePoints(-1);
-    }
+    writePoints(-1);
     double T = 0;
     for(size_t i  = 0; i < solParam.MaxIter; i++)
     {
@@ -43,7 +33,7 @@ void GodunovSolver::solve()
         //writePoints(T*1000000); // микросек
 
         double max;
-        if(i%10000 == 0)
+        if(i%10 == 0)
         {
             std::cout<<i<<" iteration"<<std::endl;
             writePoints(T*1000000); // микросек

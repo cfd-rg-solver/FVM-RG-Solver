@@ -6,6 +6,7 @@ enum RiemannSolverType
 {
     HLLCSolver,         // not correct
     HLLESolver,         // correct
+    HLLESolverSoda,         // correct
     HLLSimple,          // not correct
     ExacRiemanSolver,   // correct
 
@@ -29,6 +30,11 @@ struct HLLCSolver : public RiemannSolver
 
 
 struct HLLESolver : public RiemannSolver
+{
+    void computeFlux(SystemOfEquation *system);
+};
+
+struct HLLESolverSoda : public RiemannSolver
 {
     void computeFlux(SystemOfEquation *system);
 };

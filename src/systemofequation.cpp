@@ -36,6 +36,13 @@ void SystemOfEquation::setEqSolver(NonLinearEqSolver *eqSolver_)
     eqSolver = eqSolver_;
 }
 
+double SystemOfEquation::getDensity(size_t i, size_t component)
+{
+    if(mixture.NumberOfComponents == 1)
+        return getDensity(i);
+    else return 0;
+}
+
 double SystemOfEquation::getMaxVelocity()
 {
     double res = 0;
@@ -703,3 +710,87 @@ void Couette2AltBinary::calcAndRemeberTemp()
     return;
 }
 
+void Soda::prepareSolving(vector<macroParam> &points)
+{
+    for(auto i  = 0; i < numberOfCells; i++)
+    {
+        U[0][i] = points[i].density;
+        U[v_tau][i] = points[i].density*points[i].velocity;
+        double e = points[i].pressure/((gamma - 1) * points[i].density);
+        U[energy][i] = points[i].density*0.5*pow(points[i].velocity,2) + points[i].density*e;
+    }
+}
+
+void Soda::prepareIndex()
+{
+    systemOrder = numberOfComponents + 2;
+
+    v_tau = numberOfComponents;
+    v_normal = numberOfComponents;
+    energy = numberOfComponents + 1;
+}
+
+double Soda::getPressure(size_t i)
+{
+    double rho = getDensity(i);
+    return ((getEnergy(i) - 0.5 * rho* pow(getVelocity(i),2)) * (gamma - 1));
+
+}
+
+double Soda::getDensity(size_t i)
+{
+    return U[0][i];
+}
+
+double Soda::getVelocity(size_t i)
+{
+    return U[v_tau][i]/getDensity(i);
+}
+
+double Soda::getVelocityTau(size_t i)
+{
+    return U[v_tau][i]/getDensity(i);
+}
+
+double Soda::getVelocityNormal(size_t i)
+{
+    return 0;
+}
+
+double Soda::getSoundSpeed(size_t i)
+{
+    return sqrt(gamma * getPressure(i)/ getDensity(i));
+}
+
+double Soda::getEnergy(size_t i)
+{
+    return U[energy][i];
+}
+
+void Soda::updateU(double dh, double dt)
+{
+    int last = numberOfCells-1;
+    for (int j = 0; j < systemOrder; j++)
+    {
+        U[j][0] += 0;
+        U[j][last] += 0;
+    }
+    for(auto i  = 1; i < numberOfCells-1; i++)
+    {
+        for (int j = 0; j < systemOrder; j++)
+        {
+            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh) * dt;
+        }
+    }
+
+}
+
+void Soda::computeF(vector<macroParam> &points, double dh)
+{
+    for(size_t i = 0 ; i < numberOfCells; i++)
+    {
+        F[0][i] = points[i].density*points[i].velocity;
+        F[v_tau][i] = points[i].density*pow(points[i].velocity,2) +  points[i].pressure;
+        F[energy][i] =  points[i].velocity*(U[energy][i] + points[i].pressure);
+    }
+}
