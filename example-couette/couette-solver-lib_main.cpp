@@ -34,7 +34,6 @@ int main()
     argon.mass = 6.633521356992E-26;
     argon.epsilonDevK = 1.8845852298E-21/kB; //! Mistake
     argon.sigma = 3.33E-10;
-    Mixture Ar({argon});
 
     // O2/O
 
@@ -57,16 +56,16 @@ int main()
     Oxygen.sigma = 2.75E-10;
     Oxygen.numberAtoms = 1;
 
-    std::vector<MixtureComponent> tmp = {Oxygen2,Oxygen};
-    Mixture O2_O(tmp);
+    std::vector<MixtureComponent> tmp1 = {Oxygen2,Oxygen};
+    Mixture O2_O(tmp1);
 
-    /////Выбор смеси/////
+    std::vector<MixtureComponent> tmp2 = {argon};
+    Mixture Ar(tmp2);
+    //////////////////////////////////////////////////////////////
+    ///////////////////// Start param for Couette ////////////////
+    //////////////////////////////////////////////////////////////
 
-    Mixture mixture = O2_O;
-
-    /////////////////////
-
-    macroParam startParam(mixture);
+    macroParam startParam(O2_O);
     startParam.density = 0.03168;
     startParam.fractionArray[0] = 0.99;
     startParam.densityArray[0] =  startParam.fractionArray[0] * startParam.density;
@@ -77,10 +76,25 @@ int main()
     startParam.temp = 800; //140
     startParam.velocity_tau = 0.00001;
 
+    //////////////////////////////////////////////////////////////
+    ///////////////////// Start param for Soda ///////////////////
+    //////////////////////////////////////////////////////////////
+
+    macroParam leftStartParam(Ar);
+    macroParam rightStartParam(Ar);
+
+    leftStartParam.density = 1;
+    leftStartParam.pressure = 1;
+    leftStartParam.velocity = 0;
+    rightStartParam.density = 0.125;
+    rightStartParam.pressure = 0.1;
+    rightStartParam.velocity = 0;
+
+    //////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.32;
+    solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.Gamma    = 1.4;
 //    solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
@@ -101,11 +115,13 @@ int main()
     double T2wall = 1000;
     double velocity = 300;
     double h = 1;
-    GodunovSolver solver(mixture,startParam,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(Ar,solParam, SystemOfEquationType::soda, RiemannSolverType::HLLESolverSoda);
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
     solver.setDelta_h(h / (solParam.NumCell - 2));
     solver.setBorderConditions(velocity,T2wall,T1wall);
+    //solver.setStartDistribution(startParam);
+    solver.setStartDistribution(leftStartParam, rightStartParam);
     solver.solve();
 }

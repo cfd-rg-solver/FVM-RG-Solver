@@ -1,7 +1,7 @@
 #include "riemannsolver.h"
 
 #include <algorithm>
-const double gamma = 1.67;
+const double gamma = 1.4;
 //void HLLCSolver::computeFlux(SystemOfEquation *system)
 //{
 //    for(size_t i = 0 ; i < system->numberOfCells-1; i++)
@@ -432,7 +432,6 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
 
 //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
 //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
-        double tmp1 = system->getEnergy(i);
         H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i); //! Mistake (the same for enthalpy)
         H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
 
@@ -464,6 +463,54 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
     }
 }
 
+void HLLESolverSoda::computeFlux(SystemOfEquation *system)
+{
+    toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
+    #pragma omp parallel for schedule(static)
+    for(int i = 0 ; i < system->numberOfCells-1; i++)
+    {
+        double H0, H1, c0, c1, u0, u1, v0,v1,V0,V1, rho0, rho1, u_avg,v_avg, H_avg, c_avg, b0, b1, b_plus, b_minus;
+
+        u0 = system->getVelocityNormal(i);
+        u1 = system->getVelocityNormal(i+1);
+
+        v0 = system->getVelocityTau(i);
+        v1 = system->getVelocityTau(i+1);
+
+        V0 = sqrt(pow(u0,2) + pow(v0,2));
+        V1 = sqrt(pow(u1,2) + pow(v1,2));
+
+//        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
+//        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
+        H0 = system->getEnergy(i) + system->getPressure(i)/system->getDensity(i);
+        H1 = system->getEnergy(i+1) + system->getPressure(i+1)/system->getDensity(i+1);
+
+        c0 = sqrt((gamma - 1.)*(H0 - 0.5 * pow(V0,2)));
+        c1 = sqrt((gamma - 1.)*(H1 - 0.5 * pow(V1,2)));
+
+        rho0 = sqrt(system->getDensity(i));
+        rho1 = sqrt(system->getDensity(i+1));
+
+        u_avg = (rho0 * u0 + rho1 * u1) / (rho0 + rho1);
+        v_avg = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
+
+        H_avg = (rho0 * H0 + rho1 * H1) / (rho0 + rho1);
+        c_avg = sqrt((gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
+
+        b0 = (std::min)({u_avg - c_avg, u0 - c0});
+        b1 = (std::max)({u_avg + c_avg, u1 + c1});
+
+        toMaxVelocity(max(fabs(b0),fabs(b1)));
+
+        b_plus = (std::max)({0., b1});
+        b_minus = (std::min)({0., b0});
+
+        for(size_t j = 0; j < system->systemOrder; j++)
+        {
+            system->Flux[j][i] = (b_plus * system->F[j][i] - b_minus* system->F[j][i+1])/(b_plus  - b_minus) + (b_plus * b_minus)/(b_plus - b_minus) * (system->U[j][i+1] - system->U[j][i]);
+        }
+    }
+}
 
 void HLLSimple::computeFlux(SystemOfEquation *system, double dt, double dh)
 {
