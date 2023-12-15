@@ -4,7 +4,7 @@
 
 struct BorderCondition
 {
-    virtual void updatePoints(vector<macroParam> points) = 0;
+    virtual void updatePoints(vector<macroParam> &points) = 0;
 
     virtual double get_dyc_dy(){return 0;}; //затычка для более серьёзных условий
 
@@ -16,12 +16,12 @@ struct BorderCondition
 
 struct BorderConditionCouette : public BorderCondition
 {
-    void updatePoints(vector<macroParam> points);
-
-    double get_dyc_dy(); //затычка для более серьёзных условий
+    void updatePoints(vector<macroParam> &points);
+    double get_dyc_dy(){return 0;};
 };
 
 struct BorderConditionSoda : public BorderCondition
 {
-    void updatePoints(vector<macroParam> points){return;};
+    void updatePoints(vector<macroParam> &points){return;};
+    double get_dyc_dy(){return 0;};
 };
