@@ -1,9 +1,9 @@
 #include "bordercondition.h"
 
-void BorderConditionCouette::updatePoints(vector<macroParam> points)
+void BorderConditionCouette::updatePoints(vector<macroParam> &points)
 {
 
-    bool presEq =1;
+    bool presEq = 1;
     bool slipBC = 1; // TO DO
     Mixture mixture = points[0].mixture;
     int N = points.size();
@@ -19,7 +19,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> points)
     points[0].velocity = sqrt(pow(fabs(points[0].velocity_tau),2) + pow(fabs(points[0].velocity_normal),2));
     points[0].temp = -points[1].temp +  2.* down_temp;
     // дополнительные рассчитываемые величины
-
     if(!presEq)
         points[0].pressure = points[0].density / mixture.molarMass(points[0].fractionArray) * UniversalGasConstant * points[0].temp;
     else
@@ -46,10 +45,5 @@ void BorderConditionCouette::updatePoints(vector<macroParam> points)
         points[N - 1].density = points[N - 1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[N-1].temp);
     points[N - 1].soundSpeed = sqrt(gamma*points[N-1].pressure/points[N-1].density);
 
-}
-
-double BorderConditionCouette::get_dyc_dy()
-{
-    return 0;
 }
 
