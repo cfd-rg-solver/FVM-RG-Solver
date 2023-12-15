@@ -115,7 +115,7 @@ int main()
     double T2wall = 1000;
     double velocity = 300;
     double h = 1;
-    GodunovSolver solver(Ar,solParam, SystemOfEquationType::soda, RiemannSolverType::HLLESolverSoda);
+    GodunovSolver solver(Ar,solParam, SystemOfEquationType::soda, RiemannSolverType::HLLCSolver);
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);

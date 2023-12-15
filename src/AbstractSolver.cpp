@@ -22,6 +22,7 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
 
     system = getSystemOfEquation(type);
     riemannSolver = getRiemannSolver(riemannType);
+    riemannSolver->solParam = solParam_;
 
     system->setBorderCondition(border);
     system->setCoeffSolver(coeffSolver);
@@ -182,10 +183,6 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
     case RiemannSolverType::HLLESolver:
         {
                 return new struct HLLESolver();
-        }
-    case RiemannSolverType::HLLESolverSoda:
-        {
-                return new struct HLLESolverSoda();
         }
     case RiemannSolverType::HLLSimple:
         {
