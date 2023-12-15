@@ -1,8 +1,10 @@
 #include <iostream>
 #include <omp.h>
 #include <functional>
+
 #include "systemofequation.h"
 #include "numeric.h"
+
 void SystemOfEquation::setNumberOfCells(size_t cells )
 {
     numberOfCells = cells;
@@ -717,7 +719,7 @@ void Soda::prepareSolving(vector<macroParam> &points)
         U[0][i] = points[i].density;
         U[v_tau][i] = points[i].density*points[i].velocity;
         double e = points[i].pressure/((gamma - 1) * points[i].density);
-        U[energy][i] = points[i].density*0.5*pow(points[i].velocity,2) + points[i].density*e;
+        U[energy][i] = points[i].density*0.5*pow(points[i].velocity,2) + points[i].density * e;
     }
 }
 
@@ -733,7 +735,7 @@ void Soda::prepareIndex()
 double Soda::getPressure(size_t i)
 {
     double rho = getDensity(i);
-    return ((getEnergy(i) - 0.5 * rho* pow(getVelocity(i),2)) * (gamma - 1));
+    return ((getEnergy(i) * rho - 0.5 * rho * pow(getVelocity(i),2)) * (gamma - 1));
 
 }
 
@@ -764,7 +766,7 @@ double Soda::getSoundSpeed(size_t i)
 
 double Soda::getEnergy(size_t i)
 {
-    return U[energy][i];
+    return U[energy][i] / getDensity(i); // important
 }
 
 void Soda::updateU(double dh, double dt)
@@ -789,8 +791,8 @@ void Soda::computeF(vector<macroParam> &points, double dh)
 {
     for(size_t i = 0 ; i < numberOfCells; i++)
     {
-        F[0][i] = points[i].density*points[i].velocity;
-        F[v_tau][i] = points[i].density*pow(points[i].velocity,2) +  points[i].pressure;
-        F[energy][i] =  points[i].velocity*(U[energy][i] + points[i].pressure);
+        F[0][i] = points[i].density * points[i].velocity;
+        F[v_tau][i] = points[i].density * pow(points[i].velocity,2) +  points[i].pressure;
+        F[energy][i] =  points[i].velocity * (U[energy][i] + points[i].pressure);
     }
 }
