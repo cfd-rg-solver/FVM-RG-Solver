@@ -24,7 +24,6 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
     riemannSolver = getRiemannSolver(riemannType);
     riemannSolver->solParam = solParam_;
 
-    system->setBorderCondition(border);
     system->setCoeffSolver(coeffSolver);
     system->setMixture(mixture);
     system->setNumberOfCells(solParam.NumCell);
@@ -41,6 +40,7 @@ void AbstractSolver::setBorderConditions(double up_velocity_, double up_temp_, d
     border->down_velocity = 0.;
     border->up_temp =  up_temp_;
     border->down_temp = down_temp_;
+    system->setBorderCondition(border);
     return;
 }
 
@@ -76,6 +76,8 @@ void AbstractSolver::setStartDistribution(macroParam start)
 {
     prepareVectorSizes();
     mixture = start.mixture;
+    points[0].mixture = mixture;
+    points[points.size()-1].mixture = mixture;
     for(size_t i = 1; i < points.size()-1; i++)
     {
         points[i].mixture = mixture;

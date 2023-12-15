@@ -94,8 +94,8 @@ int main()
 
     solverParams solParam;
     solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.4;
-//    solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
+    solParam.Gamma    = 1.32; // Показатель адиабаты, O2/O
+    //solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
@@ -115,13 +115,20 @@ int main()
     double T2wall = 1000;
     double velocity = 300;
     double h = 1;
-    GodunovSolver solver(Ar,solParam, SystemOfEquationType::soda, RiemannSolverType::HLLCSolver);
+    GodunovSolver solver(O2_O,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
     solver.setDelta_h(h / (solParam.NumCell - 2));
+
+    // в следующих строчках супер сложные зависимости, скорее всего надо создавать какой-то отдельный класс для начальных и граничных уловий,
+    // ибо то, что есть сейчас супер завязано на определнной последовательности и выглядит не интуитивно
+    // т.е. что-то задается в конструкторе, что-то в вызыываемом методе, что-то не может быть вызвано без предварительного вызова другого и т.д, хотя логически
+    // оно немного и связано (типо начальное распределение, а точнее его значение в фиктивных ячейках, зависит от граничных условий),
     solver.setBorderConditions(velocity,T2wall,T1wall);
-    //solver.setStartDistribution(startParam);
-    solver.setStartDistribution(leftStartParam, rightStartParam);
+
+    solver.setStartDistribution(startParam); // for couette
+    //solver.setStartDistribution(leftStartParam, rightStartParam); // for soda
+
     solver.solve();
 }
