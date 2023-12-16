@@ -94,8 +94,7 @@ int main()
 
     solverParams solParam;
     solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.32; // Показатель адиабаты, O2/O
-    //solParam.Gamma    = 1.67;    // Показатель адиабаты, Ar
+    solParam.Gamma    = 1.67;
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
