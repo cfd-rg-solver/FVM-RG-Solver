@@ -3,17 +3,7 @@
 #include <omp.h>
 void GodunovSolver::solve()
 {
-    if(!isContinue)
-    {
-        prepareSolving();
-        writePoints(-1);
-    }
-    else
-    {
-        prepareVectorSizes();
-        system->prepareSolving(points);
-        writePoints(-1);
-    }
+    writePoints(-1);
     double T = 0;
     for(size_t i  = 0; i < solParam.MaxIter; i++)
     {
@@ -22,7 +12,7 @@ void GodunovSolver::solve()
         T += timeSolvind.last();
 
         system->computeF(points, delta_h);
-        if(system->systemType == SystemOfEquationType::couette2Alt)
+        if(system->systemType == SystemOfEquationType::couette2Alt || system->systemType == SystemOfEquationType::couette2AltBinary)
             system->computeFv(points, delta_h);
         riemannSolver->computeFlux(system);
         //riemannSolver->computeFlux(system, delta_h);
@@ -33,6 +23,7 @@ void GodunovSolver::solve()
 
         // Обновляем вектор U
         system->updateU(delta_h,timeSolvind.last());
+
         // Обновляем вектор макропараметров
         updatePoints();
         // обновляем вектор U с учётом граничных условий

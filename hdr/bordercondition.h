@@ -1,13 +1,27 @@
 #pragma once
 #include "global.h"
+#include "macroparam.h"
+
 struct BorderCondition
 {
-    double up_velocity , down_velocity = 0., up_temp , down_temp;
+    virtual void updatePoints(vector<macroParam> &points) = 0;
 
-    double get_dyc_dy(); //затычка для более серьёзных условий
+    virtual double get_dyc_dy(){return 0;}; //затычка для более серьёзных условий
+
+    void setGamma(double gamma_){gamma = gamma_;};
+
+    double up_velocity , down_velocity = 0., up_temp , down_temp;
+    double gamma;
 };
 
-struct BorderConditionSoda  // временное решение
+struct BorderConditionCouette : public BorderCondition
 {
-    double leftDensity, leftPressure, leftVelocity, rightDensity, rightPressure, rightVelocity;
+    void updatePoints(vector<macroParam> &points);
+    double get_dyc_dy(){return 0;};
+};
+
+struct BorderConditionSoda : public BorderCondition
+{
+    void updatePoints(vector<macroParam> &points){return;};
+    double get_dyc_dy(){return 0;};
 };
