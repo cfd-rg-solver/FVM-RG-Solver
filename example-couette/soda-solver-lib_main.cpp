@@ -1,5 +1,5 @@
 //#include "hllcsolver.h"
-#include "godunovsolver.h"
+#include "godunovsolversoda.h"
 #include "datawriter.h"
 #include "observer.h"
 #include <filesystem>
@@ -9,6 +9,7 @@ int main()
 {
     MixtureComponent argon;
     argon.name = "Ar";
+    argon.density = 1.7839;
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992E-26;
     argon.epsilonDevK = 1.8845852298E-21;
@@ -16,7 +17,6 @@ int main()
     Mixture mixture({argon});
 
     macroParam startParam(mixture);
-    startParam.density = 1.7839;
     startParam.fractionArray[0] = 1;
     startParam.pressure = 218563.81; //218563.81
     //startParam.densityArray[0] = argon.density;
@@ -48,7 +48,7 @@ int main()
 
     double h = 1;
 
-    GodunovSolver solver(mixture,startParam,solParam, SystemOfEquationType::soda,RiemannSolverType::ExacRiemanSolver);
+    GodunovSolverSoda solver(mixture,startParam,solParam, SystemOfEquationType::soda,RiemannSolverType::ExacRiemanSolver);
     solver.setDelta_h(h / solParam.NumCell);
     solver.setWriter(&writer);
     //solver.setObserver(&watcher);
