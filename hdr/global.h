@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <string>
+#include "mixture.h"
 
 using namespace std;
 
@@ -38,7 +39,28 @@ extern double sigma;
 extern double epsilonDevK;
 extern double molMass;
 extern double mass;
+struct macroParam
+{
+    macroParam(){mixture = Mixture();}
+    macroParam(Mixture mix):mixture(mix){fractionArray.resize(mix.NumberOfComponents); densityArray.resize(mix.NumberOfComponents);}
+    Mixture mixture;
+    vector<double> densityArray;
+    vector<double> fractionArray; // в сумме должны давать 1
+    double density      = 0;
+    double pressure     = 0;
+    double velocity_tau     = 0;
+    double velocity_normal  = 0;
+    double velocity = 0;
+    double temp         = 0;
+    double tempIntr     = 0;
+    double soundSpeed   = 0;
+    string gas         ="Ar";
+};
 
+struct Grid
+{
+    vector<macroParam> cell;
+};
 struct solverParams
 {
     int NumCell     = 0;    // Число расчтеных ячеек

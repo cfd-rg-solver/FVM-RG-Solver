@@ -1,7 +1,5 @@
 #pragma once
 #include "global.h"
-#include "macroparam.h"
-
 class Observer
 {
 public:

@@ -12,32 +12,28 @@
 #include "observer.h"
 #include "systemofequation.h"
 #include "riemannsolver.h"
-#include "numeric.h"
 struct AbstractSolver
 {
 public:
-    AbstractSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
+    AbstractSolver(Mixture mixture_, macroParam startParam_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
+    AbstractSolver(Mixture mixture_, vector<macroParam> startParam_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
     // запускает процесс решения задачи
     virtual void solve() = 0;
     virtual void solveContinue(){};
     //устанавливает размер ячейки
     void setDelta_h(double dh);
 
+    // устанавливает начальное распрделение температуры, плотности и скорости
+    void setStartCondition(macroParam start);
+
     // устанавливает некоторые граничные условия (TODO сделать более общую структуру)
     void setBorderConditions(double up_velocity_, double up_temp_, double down_temp_);
-    void setBorderConditions();
 
     // устанавливает записыватель и поднимает флаг записи
     void setWriter(DataWriter *writer_);
 
     // устанавливает наблюдателя, который будет следить за тем, чтобы рассчёт остановился, когда будет достигнута новая точность
     void setObserver(Observer* obs);
-
-    // устанавливает начальное распределение параметром, пока есть две перегрузки, но скорее всего для это действия лучше отдельный класс завести
-    void setStartDistribution(vector<macroParam> start);
-    void setStartDistribution(macroParam start);
-    void setStartDistribution(macroParam left, macroParam right);
-
 
     SystemOfEquation* system;
 
@@ -47,13 +43,13 @@ public:
 
     Mixture mixture;
 
+    macroParam startParam;
+
     solverParams solParam;
 
     CoeffSolver* coeffSolver;
 
-    NonLinearEqSolver* eqSolver = new Newton();
-
-    BorderCondition* border;
+    BorderCondition border;
 
     DataWriter* writer;
 
@@ -61,6 +57,9 @@ protected:
 
     //записывает текущие макропараметры points[] в папку с названием i
     void writePoints(double i);
+
+    //заполняет начальные ячеки
+    virtual void prepareSolving();
 
     // функция для дозаполнения полей вектора points значениями скорости звука и параметрами смеси, которые не вытаскиваются из файлов расчёта
     virtual void correctData();

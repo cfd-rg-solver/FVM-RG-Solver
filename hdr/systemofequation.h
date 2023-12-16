@@ -2,13 +2,11 @@
 #include "global.h"
 #include "coeffsolver.h"
 #include "bordercondition.h"
-#include "energycalc.h"
-#include "numeric.h"
 enum SystemOfEquationType
 {
+    couette1,
     couette2,
     couette2Alt,
-    couette2AltBinary,
     soda
 };
 struct SystemOfEquation
@@ -19,14 +17,13 @@ struct SystemOfEquation
     void setBorderCondition(BorderCondition* border_);
     void setCoeffSolver(CoeffSolver* coeffSolver_);
     void setSolverParams(solverParams solParam_);
-    void setEqSolver(NonLinearEqSolver* eqSolver_);
 
     virtual double getPressure(size_t i) = 0;
     virtual double getDensity(size_t i) = 0;
-    virtual double getDensity(size_t i, size_t component);
     virtual double getVelocity(size_t i) = 0;
     virtual double getVelocityTau(size_t i) = 0;
     virtual double getVelocityNormal(size_t i) = 0;
+    virtual double getSoundSpeed(size_t i) = 0;
     virtual double getEnergy(size_t i) = 0;
     virtual double getTemp(size_t i) = 0;
 
@@ -53,8 +50,6 @@ struct SystemOfEquation
     size_t systemOrder;
 
     Mixture mixture;
-    EnergyCalc* energyCalculator = new OneTempApprox();
-    NonLinearEqSolver*  eqSolver;
     CoeffSolver* coeffSolver;
     BorderCondition* border;
     solverParams solParam;
@@ -75,9 +70,11 @@ struct Couette2 : public SystemOfEquation
     double getVelocity(size_t i);
     double getVelocityTau(size_t i);
     double getVelocityNormal(size_t i);
+    double getSoundSpeed(size_t i) { return 0; };
     double getEnergy(size_t i);
     double getTemp(size_t i);
 
+    double getMaxVelocity();
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
     void computeF(vector<macroParam> & points, double dh);
@@ -97,24 +94,27 @@ struct Couette2Alt : public Couette2
     vector<Matrix> Fv;
 };
 
-struct Couette2AltBinary : public Couette2Alt
+struct Couette1 : public SystemOfEquation
 {
-    Couette2AltBinary(){systemType = SystemOfEquationType::couette2AltBinary;};
-
+    Couette1(){systemType = SystemOfEquationType::couette1;};
     void prepareSolving(vector<macroParam> & points);
+    void prepareIndex();
 
     double getPressure(size_t i);
     double getDensity(size_t i);
-    double getDensity(size_t i, size_t component);
+    double getVelocity(size_t i);
+    double getVelocityTau(size_t i);
+    double getVelocityNormal(size_t i);
+    double getSoundSpeed(size_t i);
+    double getEnergy(size_t i);
     double getTemp(size_t i);
 
+    double getMaxVelocity();
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
     void computeF(vector<macroParam> & points, double dh);
-    void computeFv(vector<macroParam> & points, double dh);
-private:
-    std::vector<double> temperature;
-    void calcAndRemeberTemp();
+
+
 };
 
 struct Soda : public SystemOfEquation

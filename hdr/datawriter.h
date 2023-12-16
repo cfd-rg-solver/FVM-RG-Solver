@@ -6,8 +6,6 @@
 #include <fstream>
 #include <filesystem>
 #include "global.h"
-#include "macroparam.h"
-
 
 namespace fs = std::filesystem;
 using std::ofstream;
