@@ -1,8 +1,11 @@
 #include "godunovsolver.h"
+#include "lawchecker.h"
+
 #include <iostream>
 #include <omp.h>
 void GodunovSolver::solve()
 {
+    LawChecker cheker(2,70,10,12,delta_h);
     writePoints(-1);
     double T = 0;
     for(size_t i  = 0; i < solParam.MaxIter; i++)
@@ -20,6 +23,7 @@ void GodunovSolver::solve()
 
         // Вычисляем вектор релаксационных членов
         //computeR();
+
 
         // Обновляем вектор U
         system->updateU(delta_h,timeSolvind.last());
@@ -49,6 +53,8 @@ void GodunovSolver::solve()
             if(!observerCheck(i))
                 break;
         }
+        cheker.rememberU(system->U[system->energy],i,timeSolvind.last());
+        cheker.rememberF(system->F[system->energy], system->Fv[system->energy],i,timeSolvind.last());
     }
     writePoints(T*1000000);
 }

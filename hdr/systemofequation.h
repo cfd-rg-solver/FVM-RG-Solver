@@ -60,7 +60,8 @@ struct SystemOfEquation
     solverParams solParam;
     SystemOfEquationType systemType;
 
-    vector<Matrix> U, R, F, Flux;
+    vector<vector<double>> U, R, F, Flux;
+    vector<vector<double>> Fv;
 };
 
 
@@ -94,7 +95,7 @@ struct Couette2Alt : public Couette2
     void computeF(vector<macroParam> & points, double dh);
     void computeFv(vector<macroParam> & points, double dh);
 
-    vector<Matrix> Fv;
+
 };
 
 struct Couette2AltBinary : public Couette2Alt

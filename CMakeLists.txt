@@ -21,6 +21,7 @@ set(${PROJECT_NAME}_SRC  ${SRC_FOLDER}/abstractsolver.cpp
                          ${SRC_FOLDER}/riemannsolver.cpp
                          ${SRC_FOLDER}/energycalc.cpp
                          ${SRC_FOLDER}/numeric.cpp
+                         ${SRC_FOLDER}/lawchecker.cpp
 )
 
 set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
@@ -36,6 +37,7 @@ set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
                          ${HDR_FOLDER}/riemannsolver.h
                          ${HDR_FOLDER}/energycalc.h
                          ${HDR_FOLDER}/numeric.h
+                         ${HDR_FOLDER}/lawchecker.h
 )
 
 add_subdirectory(example-couette)
