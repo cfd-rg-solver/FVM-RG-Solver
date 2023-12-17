@@ -9,9 +9,9 @@ std::string GetCurrentWorkingDir( void ) {
     std::filesystem::path currentWorkingDir = std::filesystem::current_path();
     std::filesystem::path parentDir = currentWorkingDir.parent_path().parent_path();
 
-    std::string res = parentDir.string() + "/FVM-RG-Solver/main/example-couette";
+//    std::string res = parentDir.string() + "/FVM-RG-Solver/main/example-couette"; ! win case
 
-//    std::string res = parentDir.string() + "/main/example-couette"; // !normal case using qt
+    std::string res = parentDir.string() + "/main/example-couette"; // !normal case using qt
     return res;
 //    return currentWorkingDir; // without qt
 //    return currentWorkingDir.string();

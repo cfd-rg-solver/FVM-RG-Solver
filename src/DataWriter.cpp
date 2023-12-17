@@ -25,10 +25,19 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     ofstream velocity_normal(localDir/"velocity_normal.txt",std::ios::out);
     ofstream temp(localDir/"temp.txt",std::ios::out);
     ofstream density(localDir/"density.txt",std::ios::out);
-    ofstream densityO2(localDir/"densityO2.txt",std::ios::out);
-    ofstream densityO(localDir/"densityO.txt",std::ios::out);
+//    ofstream densityO2(localDir/"densityO2.txt",std::ios::out);
+//    ofstream densityO(localDir/"densityO.txt",std::ios::out);
 
 //    ofstream e(localDir/"e.txt",std::ios::out);
+
+    pressure<<"y"<<" "<<"p"<<endl;
+    velocity<<"y"<<" "<<"v"<<endl;
+    velocity_tau<<"y"<<" "<<"v_t"<<endl;
+    velocity_normal<<"y"<<" "<<"v_n"<<endl;
+    temp<<"y"<<" "<<"T"<<endl;
+    density<<"y"<<" "<<"rho"<<endl;
+//    densityO2<<"y"<<" "<<"rho_O2"<<endl;
+//    densityO<<"y"<<" "<<"rho_O"<<endl;
 
     for(size_t i = 0; i < data.size(); i++)
     {
@@ -38,11 +47,11 @@ void DataWriter::writeData(vector<macroParam> data, double time)
         velocity_normal<<dh*i<<" "<<data[i].velocity_normal<<endl;
         temp<<dh*i<<" "<<data[i].temp<<endl;
         density<<dh*i<<" "<<data[i].density<<endl;
-        if(data[i].mixture.NumberOfComponents == 2)
-        {
-            densityO2<<dh*i<<" "<<data[i].densityArray[0]<<endl;
-            densityO<<dh*i<<" "<<data[i].densityArray[1]<<endl;
-        }
+//        if(data[i].mixture.NumberOfComponents == 2)
+//        {
+//            densityO2<<dh*i<<" "<<data[i].densityArray[0]<<endl;
+//            densityO<<dh*i<<" "<<data[i].densityArray[1]<<endl;
+//        }
 //        double gamma = 1.4;
 //        double e_ = data[i].pressure/((gamma - 1) * data[i].density);
 //        e<<dh*i<<" "<<e_<<endl;
@@ -50,6 +59,8 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     pressure.close();
     velocity.close();
     temp.close();
+    velocity_normal.close();
+    velocity_tau.close();
 }
 
 void DataWriter::setDelta_h(double dh_)
