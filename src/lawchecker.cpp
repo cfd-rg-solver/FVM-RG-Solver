@@ -42,7 +42,7 @@ bool LawChecker::checkLaw()
         S2 += U2[i];
     }
     double deltaT = time2 - time1;
-    double d = (S2 - S1) * dh + deltaT * (F[y2]+Fv[y2] - F[y1]*Fv[y1]);
+    double d = (S2 - S1) * dh + deltaT * (F[y2]+Fv[y2] - F[y1] - Fv[y1]);
     std::cout<<std::endl<< "DIFFERENCE "<< d << std::endl <<std::endl;
     return true;
 
