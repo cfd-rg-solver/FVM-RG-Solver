@@ -5,7 +5,7 @@
 #include <omp.h>
 void GodunovSolver::solve()
 {
-    LawChecker cheker(2,70,10,12,delta_h);
+    LawChecker cheker(0,201,100000,100001,delta_h);
     writePoints(-1);
     double T = 0;
     for(size_t i  = 0; i < solParam.MaxIter; i++)

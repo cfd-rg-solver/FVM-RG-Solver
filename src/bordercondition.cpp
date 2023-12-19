@@ -12,7 +12,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
         points[0].pressure = points[1].pressure;
     else
         points[0].density = points[1].density;
-    points[0].densityArray =points[1].densityArray;
     points[0].fractionArray =points[1].fractionArray;
     points[0].velocity_tau = -points[1].velocity_tau + 2.* down_velocity;
     points[0].velocity_normal = -points[1].velocity_normal;
@@ -25,7 +24,8 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
     else
         points[0].density = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (UniversalGasConstant * points[0].temp);
     points[0].soundSpeed = sqrt(gamma*points[0].pressure/points[0].density);
-
+    for(int i = 0; i < points[0].mixture.components.size(); i++)
+        points[0].densityArray[i] = points[0].density * points[0].fractionArray[i];
 
     //solParam.NumCell-1
     points[N-1].mixture = mixture;
@@ -33,7 +33,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
         points[N-1].pressure = points[N-2].pressure;
     else
         points[N-1].density = points[N-2].density;
-    points[N-1].densityArray = points[N-2].densityArray;
     points[N-1].fractionArray = points[N-2].fractionArray;
     points[N-1].velocity_tau = -points[N-2].velocity_tau + 2.* up_velocity;
     points[N-1].velocity_normal = -points[N-2].velocity_normal;
@@ -46,4 +45,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
     else
         points[N-1].density = points[N-1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[N-1].temp);
     points[N-1].soundSpeed = sqrt(gamma*points[N-1].pressure/points[N-1].density);
+    for(int i = 0; i < points[N-1].mixture.components.size(); i++)
+        points[N-1].densityArray[i] = points[N-1].density * points[N-1].fractionArray[i];
 }
