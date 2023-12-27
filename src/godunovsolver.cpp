@@ -17,9 +17,9 @@ void GodunovSolver::solve()
         system->computeF(points, delta_h);
         if(system->systemType == SystemOfEquationType::couette2Alt || system->systemType == SystemOfEquationType::couette2AltBinary)
             system->computeFv(points, delta_h);
-        riemannSolver->computeFlux(system);
+        //riemannSolver->computeFlux(system);
         //riemannSolver->computeFlux(system, delta_h);
-        //riemannSolver->computeFlux(system,timeSolvind.last(),delta_h);
+        riemannSolver->computeFlux(system,timeSolvind.last(),delta_h);
 
         // Вычисляем вектор релаксационных членов
         //computeR();
