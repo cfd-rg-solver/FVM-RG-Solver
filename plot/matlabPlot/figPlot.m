@@ -9,29 +9,29 @@ vel = readmatrix("toPlot/velocity.txt");
 
 FontSize = 20;
 %% velocity plotting
-figure ("Position", [0, 0, 2000, 700])
-t=tiledlayout(1, 3, "TileSpacing", "compact");
-nexttile
-hold on
-plot(vel_tau(:,1),vel_tau(:,2),'-r','LineWidth', 2.0);
-grid on
-title("tangent velocity",'FontSize',FontSize);
-xlabel('length, m','FontSize',FontSize)
-ylabel('velocity, m/s','FontSize',FontSize)
-xlim([min(vel_tau(:,1))  max(vel_tau(:,1))])
-ylim([min(vel_tau(:,2))  max(vel_tau(:,2))])
+figure ("Position", [0, 0, 1000, 1000])
+% t=tiledlayout(1, 3, "TileSpacing", "compact");
+% nexttile
+% hold on
+% plot(vel_tau(:,1),vel_tau(:,2),'-r','LineWidth', 2.0);
+% grid on
+% title("tangent velocity",'FontSize',FontSize);
+% xlabel('length, m','FontSize',FontSize)
+% ylabel('velocity, m/s','FontSize',FontSize)
+% xlim([min(vel_tau(:,1))  max(vel_tau(:,1))])
+% ylim([min(vel_tau(:,2))  max(vel_tau(:,2))])
+% 
+% nexttile
+% hold on
+% plot(vel_norm(:,1), vel_norm(:,2),'-r','LineWidth', 2.0);
+% grid on
+% title("normal velocity",'FontSize',FontSize);
+% xlabel('length, m','FontSize',FontSize)
+% ylabel('velocity, m/s','FontSize',FontSize)
+% xlim([min(vel_norm(:,1))  max(vel_norm(:,1))])
+% ylim([min(vel_norm(:,2))  max(vel_norm(:,2))])
 
-nexttile
-hold on
-plot(vel_norm(:,1), vel_norm(:,2),'-r','LineWidth', 2.0);
-grid on
-title("normal velocity",'FontSize',FontSize);
-xlabel('length, m','FontSize',FontSize)
-ylabel('velocity, m/s','FontSize',FontSize)
-xlim([min(vel_norm(:,1))  max(vel_norm(:,1))])
-ylim([min(vel_norm(:,2))  max(vel_norm(:,2))])
-
-nexttile
+% nexttile
 hold on
 plot(vel(:,1), vel(:,2),'-r','LineWidth', 2.0);
 grid on
@@ -41,8 +41,8 @@ ylabel('velocity, m/s','FontSize',FontSize)
 xlim([min(vel(:,1))  max(vel(:,1))])
 ylim([min(vel(:,2))  max(vel(:,2))])
 
-saveas(gcf,'fig/all_velocity.fig')
-saveas(gcf,'fig/all_velocity.png')
+saveas(gcf,'matlabPlot/fig/all_velocity.fig')
+saveas(gcf,'matlabPlot/fig/all_velocity.png')
 
 %% density plotting
 figure ("Position", [0, 0, 2000, 700])

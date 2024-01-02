@@ -53,8 +53,8 @@ void GodunovSolver::solve()
             if(!observerCheck(i))
                 break;
         }
-        cheker.rememberU(system->U[system->energy],i,timeSolvind.last());
-        cheker.rememberF(system->F[system->energy], system->Fv[system->energy],i,timeSolvind.last());
+        cheker.rememberU(system->U[system->energy],system->U[0],i,T);
+        cheker.rememberF(system->F[system->energy], system->Fv[system->energy],i,T);
     }
     writePoints(T*1000000);
 }

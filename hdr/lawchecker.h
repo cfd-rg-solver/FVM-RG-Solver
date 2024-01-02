@@ -13,10 +13,10 @@ struct LawChecker
 
     double time1,time2;
 
-    void rememberU(vector<double> &U, int t, double time);
+    void rememberU(vector<double> &U,vector<double> &rho, int t, double time);
     void rememberF(vector<double> &F_, vector<double> &Fv_, int t, double time);
     bool checkLaw();
 private:
-    vector<double> U1,U2,F,Fv;
+    vector<double> U1,U2,F,Fv, rho1, rho2;
 
 };
