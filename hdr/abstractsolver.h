@@ -24,7 +24,7 @@ public:
     void setDelta_h(double dh);
 
     // устанавливает некоторые граничные условия (TODO сделать более общую структуру)
-    void setBorderConditions(double up_velocity_, double up_temp_, double down_temp_);
+    void setBorderConditions(double up_velocity_, double down_velocity_, double up_temp_, double down_temp_);
     void setBorderConditions();
 
     // устанавливает записыватель и поднимает флаг записи

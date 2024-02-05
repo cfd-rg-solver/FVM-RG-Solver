@@ -32,12 +32,13 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
 }
 
 
-void AbstractSolver::setBorderConditions(double up_velocity_, double up_temp_, double down_temp_)
+void AbstractSolver::setBorderConditions(double up_velocity_, double down_velocity_, double up_temp_, double down_temp_)
 {
-    border = new BorderConditionCouette();
+//    border = new BorderConditionCouette();
+    border = new BorderConditionPersonal();
     border->setGamma(solParam.Gamma);
     border->up_velocity = up_velocity_;
-    border->down_velocity = 0.;
+    border->down_velocity = down_velocity_;
     border->up_temp =  up_temp_;
     border->down_temp = down_temp_;
     system->setBorderCondition(border);
@@ -90,11 +91,12 @@ void AbstractSolver::setStartDistribution(macroParam start)
         points[i].densityArray =  start.densityArray;
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].velocity_tau = start.velocity_tau;
-        points[i].velocity_normal = 0;
+        points[i].velocity_normal = start.velocity_normal;
         points[i].velocity = fabs(points[i].velocity_tau);
     }
     // для points[0] и points[solParam.NumCell-1] (!важно что идёт после цикла!)
     useBorder();
+    points[0].velocity_normal = 10; // TEMP
     system->prepareSolving(points);
 }
 
