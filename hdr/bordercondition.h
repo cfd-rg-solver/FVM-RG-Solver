@@ -20,6 +20,12 @@ struct BorderConditionCouette : public BorderCondition
     double get_dyc_dy(){return 0;};
 };
 
+struct BorderConditionPersonal : public BorderCondition
+{
+    void updatePoints(vector<macroParam> &points);
+    double get_dyc_dy(){return 0;};
+};
+
 struct BorderConditionSoda : public BorderCondition
 {
     void updatePoints(vector<macroParam> &points){return;};

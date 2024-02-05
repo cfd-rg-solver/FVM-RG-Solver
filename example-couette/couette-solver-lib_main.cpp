@@ -63,18 +63,33 @@ int main()
     Mixture Ar(tmp2);
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Couette ////////////////
+    ////////////////////////////  O2_O  /////////////////////////
+
+    macroParam startParamO2_O(O2_O);
+    startParamO2_O.density = 0.03168;
+    startParamO2_O.fractionArray[0] = 0.99;
+    startParamO2_O.densityArray[0] =  startParamO2_O.fractionArray[0] * startParamO2_O.density;
+
+    startParamO2_O.fractionArray[1] = 0.01;
+    startParamO2_O.densityArray[1] =  startParamO2_O.fractionArray[1] * startParamO2_O.density;
+
+    startParamO2_O.temp = 140; //140
+    startParamO2_O.velocity_tau = 0;
+    startParamO2_O.velocity_normal = 1;
+
     //////////////////////////////////////////////////////////////
+    ///////////////////// Start param for Couette ////////////////
+    ////////////////////////////  Ar  ///////////////////////////
 
-    macroParam startParam(O2_O);
-    startParam.density = 0.03168;
-    startParam.fractionArray[0] = 0.99;
-    startParam.densityArray[0] =  startParam.fractionArray[0] * startParam.density;
 
-    startParam.fractionArray[1] = 0.01;
-    startParam.densityArray[1] =  startParam.fractionArray[1] * startParam.density;
+    macroParam startParamAr(Ar);
+    startParamAr.density = 0.03168;
+    startParamAr.fractionArray[0] = 1;
+    startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
 
-    startParam.temp = 800; //140
-    startParam.velocity_tau = 0.00001;
+    startParamAr.temp = 140; //140
+    startParamAr.velocity_tau = 0;
+    startParamAr.velocity_normal = 0;
 
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Soda ///////////////////
@@ -94,7 +109,8 @@ int main()
 
     solverParams solParam;
     solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.67;
+    solParam.Gamma    = 1.67;   // Ar
+//    solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
@@ -112,9 +128,12 @@ int main()
     reader.getPoints(startParameters);
     double T1wall = 1000;
     double T2wall = 1000;
-    double velocity = 300;
+    double velocity1 = 0;
+    double velocity2 = 0;
     double h = 1;
-    GodunovSolver solver(O2_O,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
+//    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
@@ -124,9 +143,12 @@ int main()
     // ибо то, что есть сейчас супер завязано на определнной последовательности и выглядит не интуитивно
     // т.е. что-то задается в конструкторе, что-то в вызыываемом методе, что-то не может быть вызвано без предварительного вызова другого и т.д, хотя логически
     // оно немного и связано (типо начальное распределение, а точнее его значение в фиктивных ячейках, зависит от граничных условий),
-    solver.setBorderConditions(velocity,T2wall,T1wall);
 
-    solver.setStartDistribution(startParam); // for couette
+    //solver.setBorderConditions();  // for soda
+    solver.setBorderConditions(velocity1, velocity2, T2wall, T1wall);  // for couette
+
+    solver.setStartDistribution(startParamAr); // for couette Ar
+//    solver.setStartDistribution(startParamO2_O); // for couette O2_O
     //solver.setStartDistribution(leftStartParam, rightStartParam); // for soda
 
     solver.solve();
