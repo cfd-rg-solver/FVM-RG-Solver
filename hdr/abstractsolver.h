@@ -8,6 +8,7 @@
 #include "mixture.h"
 #include "coeffsolver.h"
 #include "bordercondition.h"
+#include "startcondition.h"
 #include "datawriter.h"
 #include "observer.h"
 #include "systemofequation.h"
@@ -19,13 +20,11 @@ public:
     AbstractSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
     // запускает процесс решения задачи
     virtual void solve() = 0;
-    virtual void solveContinue(){};
     //устанавливает размер ячейки
     void setDelta_h(double dh);
 
     // устанавливает некоторые граничные условия (TODO сделать более общую структуру)
-    void setBorderConditions(double up_velocity_, double down_velocity_, double up_temp_, double down_temp_);
-    void setBorderConditions();
+    void setBorderConditions(BorderCondition* border_);
 
     // устанавливает записыватель и поднимает флаг записи
     void setWriter(DataWriter *writer_);
@@ -33,11 +32,8 @@ public:
     // устанавливает наблюдателя, который будет следить за тем, чтобы рассчёт остановился, когда будет достигнута новая точность
     void setObserver(Observer* obs);
 
-    // устанавливает начальное распределение параметром, пока есть две перегрузки, но скорее всего для это действия лучше отдельный класс завести
-    void setStartDistribution(vector<macroParam> start);
-    void setStartDistribution(macroParam start);
-    void setStartDistribution(macroParam left, macroParam right);
-
+    // устанавливает начальное распределение
+    void setStartDistribution(StartCondition* startDist);
 
     SystemOfEquation* system;
 
@@ -78,12 +74,10 @@ protected:
 
     void updatePoints();
 
-    void useBorder();
     void UpdateBorderU();
 
     //функция для работы с наблюдателем, выдаёт true если нужно продолжать рассчёт
     bool observerCheck(size_t currentIteration);
-
 
     // хранит значение макропараметров в каждой ячейке
     vector<macroParam> points;
