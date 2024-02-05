@@ -31,27 +31,6 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
     system->setEqSolver(eqSolver);
 }
 
-
-void AbstractSolver::setBorderConditions(double up_velocity_, double down_velocity_, double up_temp_, double down_temp_)
-{
-//    border = new BorderConditionCouette();
-    border = new BorderConditionPersonal();
-    border->setGamma(solParam.Gamma);
-    border->up_velocity = up_velocity_;
-    border->down_velocity = down_velocity_;
-    border->up_temp =  up_temp_;
-    border->down_temp = down_temp_;
-    system->setBorderCondition(border);
-    return;
-}
-
-void AbstractSolver::setBorderConditions()
-{
-    border = new BorderConditionSoda();
-    border->setGamma(solParam.Gamma);
-    return;
-}
-
 void AbstractSolver::setWriter(DataWriter *writer_)
 {
     writer = writer_;
@@ -65,67 +44,14 @@ void AbstractSolver::setObserver(Observer* obs)
     isObserverWatching = true;
 }
 
-void AbstractSolver::setStartDistribution(vector<macroParam> start)
+void AbstractSolver::setStartDistribution(StartCondition *startDist)
 {
     prepareVectorSizes();
-    mixture = start[1].mixture;
-    points = start;
+    startDist->setStartDistribution(points);
+    mixture = points[0].mixture;
     system->prepareSolving(points);
 }
 
-void AbstractSolver::setStartDistribution(macroParam start)
-{
-    prepareVectorSizes();
-    mixture = start.mixture;
-    points[0].mixture = mixture;
-    points[points.size()-1].mixture = mixture;
-    for(size_t i = 1; i < points.size()-1; i++)
-    {
-        points[i].mixture = mixture;
-        points[i].temp = start.temp;
-        points[i].fractionArray =  start.fractionArray;
-        points[i].density = start.density;
-
-        points[i].pressure = points[i].density * UniversalGasConstant * start.temp/mixture.molarMass(start.fractionArray);
-        //points[i].density = startParam.pressure * mixture.molarMass()/(UniversalGasConstant * startParam.temp);
-        points[i].densityArray =  start.densityArray;
-        points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
-        points[i].velocity_tau = start.velocity_tau;
-        points[i].velocity_normal = start.velocity_normal;
-        points[i].velocity = fabs(points[i].velocity_tau);
-    }
-    // для points[0] и points[solParam.NumCell-1] (!важно что идёт после цикла!)
-    useBorder();
-    points[0].velocity_normal = 10; // TEMP
-    system->prepareSolving(points);
-}
-
-void AbstractSolver::setStartDistribution(macroParam left, macroParam right)
-{
-    mixture = left.mixture;
-    prepareVectorSizes();
-    for(size_t i = 0; i < points.size()/2; i++)
-    {
-        points[i].mixture = mixture;
-        points[i].pressure = left.pressure;
-        points[i].density  = left.density;
-        points[i].velocity_tau = left.velocity;
-        points[i].velocity_normal = 0;
-        points[i].velocity = left.velocity;
-        points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
-    }
-    for(size_t i = points.size()/2; i < points.size(); i++)
-    {
-        points[i].mixture = mixture;
-        points[i].pressure = right.pressure;
-        points[i].density  = right.density;
-        points[i].velocity_tau = right.velocity;
-        points[i].velocity_normal = 0;
-        points[i].velocity = right.velocity;
-        points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
-    }
-    system->prepareSolving(points);
-}
 
 void AbstractSolver::writePoints(double i)
 {
@@ -136,6 +62,12 @@ void AbstractSolver::writePoints(double i)
 void AbstractSolver::setDelta_h(double dh)
 {
     delta_h = dh;
+}
+
+void AbstractSolver::setBorderConditions(BorderCondition *border_)
+{
+    border = border_;
+    system->setBorderCondition(border);
 }
 
 void AbstractSolver::correctData()
@@ -246,42 +178,7 @@ void AbstractSolver::updatePoints()
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].temp = system->getTemp(i);
     }
-    useBorder();
-}
-
-//void AbstractSolver::useBorder()
-//{
-//    //0
-//    points[0].mixture = mixture;
-//    points[0].pressure = points[1].pressure;
-//    points[0].densityArray =points[1].densityArray;
-//    points[0].fractionArray =points[1].fractionArray;
-//    points[0].velocity_tau = -points[1].velocity_tau + 2.*border.down_velocity;
-//    points[0].velocity_normal = -points[1].velocity_normal;
-//    points[0].velocity = sqrt(pow(fabs(points[0].velocity_tau),2) + pow(fabs(points[0].velocity_normal),2));
-//    points[0].temp = -points[1].temp +  2.*border.down_temp;
-//    // дополнительные рассчитываемые величины
-//    points[0].density = points[0].pressure * mixture.molarMass() /UniversalGasConstant / points[0].temp;
-//    points[0].soundSpeed = sqrt(solParam.Gamma*points[0].pressure/points[0].density);
-
-
-//    //solParam.NumCell-1
-//    points[solParam.NumCell-1].mixture = mixture;
-//    points[solParam.NumCell-1].pressure = points[solParam.NumCell-2].pressure;
-//    points[solParam.NumCell-1].densityArray = points[solParam.NumCell-2].densityArray;
-//    points[solParam.NumCell-1].fractionArray = points[solParam.NumCell-2].fractionArray;
-//    points[solParam.NumCell-1].velocity_tau = -points[solParam.NumCell-2].velocity_tau + 2.*border.up_velocity;
-//    points[solParam.NumCell-1].velocity_normal = -points[solParam.NumCell-2].velocity_normal;
-//    points[solParam.NumCell-1].velocity = sqrt(pow(points[solParam.NumCell-1].velocity_tau,2) + pow(points[solParam.NumCell-1].velocity_normal,2));
-//    points[solParam.NumCell-1].temp = -points[solParam.NumCell-2].temp +  2.*border.up_temp;
-//    // дополнительные рассчитываемые величины
-//    points[solParam.NumCell-1].density = points[solParam.NumCell-1].pressure * mixture.molarMass() /UniversalGasConstant / points[solParam.NumCell-1].temp;
-//    points[solParam.NumCell-1].soundSpeed = sqrt(solParam.Gamma*points[solParam.NumCell-1].pressure/points[solParam.NumCell-1].density);
-//}
-
-void AbstractSolver::useBorder()
-{
-   border->updatePoints(points);
+    border->updatePoints(points);
 }
 
 

@@ -24,8 +24,31 @@ int main()
     std::string outputData = GetCurrentWorkingDir();
     std::cout << "Current directory is: " << outputData << std::endl;
 
-    // Ar
+    //////////////////////////////////////////////////////////////
+    ///////////////////// Border Condition for Couette ///////////
+    //////////////////////////////////////////////////////////////
+    double T_up_wall = 1000;
+    double T_down_wall = 1000;
+    double velocity_up = 300;
+    double velocity_down = 0;
 
+    BorderConditionCouette borderConditionCouette;
+    borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
+
+    //////////////////////////////////////////////////////////////
+    ///////////////////// Border Condition for Couette ///////////
+    /////////////////////////// Personal /////////////////////////
+    T_up_wall = 1000;
+    velocity_up = 0;
+    double start_velocity_normal = 10;
+
+    BorderConditionPersonal borderConditionPersonal;
+    borderConditionPersonal.setWallParameters(0, 0, T_up_wall, T_down_wall); // в данном кейсе (со сплошной среджой и стенкой) значимым является только значения на верхней стенке
+
+    //////////////////////////////////////////////////////////////
+
+
+    // Ar
     MixtureComponent argon;
     argon.name = "Ar";
     //argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
@@ -65,6 +88,8 @@ int main()
     ///////////////////// Start param for Couette ////////////////
     ////////////////////////////  O2_O  /////////////////////////
 
+    UniformDistributionBorder startParamCouetteO2_O;
+    UniformDistributionBorderPersonal startParamCouetteO2_OPersonal;
     macroParam startParamO2_O(O2_O);
     startParamO2_O.density = 0.03168;
     startParamO2_O.fractionArray[0] = 0.99;
@@ -75,13 +100,20 @@ int main()
 
     startParamO2_O.temp = 140; //140
     startParamO2_O.velocity_tau = 0;
-    startParamO2_O.velocity_normal = 1;
+    startParamO2_O.velocity_normal = 0;
 
+    startParamCouetteO2_O.setBorderCondition(&borderConditionCouette);
+    startParamCouetteO2_O.setDistributionParameter(startParamO2_O);
+
+    startParamCouetteO2_OPersonal.setBorderCondition(&borderConditionPersonal);
+    startParamCouetteO2_OPersonal.setDistributionParameter(startParamO2_O);
+    startParamCouetteO2_OPersonal.setNormalVelocity(start_velocity_normal);
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Couette ////////////////
     ////////////////////////////  Ar  ///////////////////////////
 
-
+    UniformDistributionBorder startParamCouetteAr;
+    UniformDistributionBorderPersonal startParamCouetteArPersonal;
     macroParam startParamAr(Ar);
     startParamAr.density = 0.03168;
     startParamAr.fractionArray[0] = 1;
@@ -91,10 +123,19 @@ int main()
     startParamAr.velocity_tau = 0;
     startParamAr.velocity_normal = 0;
 
+
+    startParamCouetteAr.setBorderCondition(&borderConditionCouette);
+    startParamCouetteAr.setDistributionParameter(startParamAr);
+
+    startParamCouetteArPersonal.setBorderCondition(&borderConditionPersonal);
+    startParamCouetteArPersonal.setDistributionParameter(startParamAr);
+    startParamCouetteArPersonal.setNormalVelocity(start_velocity_normal);
+
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Soda ///////////////////
     //////////////////////////////////////////////////////////////
 
+    GapDistribution startParamSoda;
     macroParam leftStartParam(Ar);
     macroParam rightStartParam(Ar);
 
@@ -105,12 +146,14 @@ int main()
     rightStartParam.pressure = 0.1;
     rightStartParam.velocity = 0;
 
+    startParamSoda.setDistributionParameter(leftStartParam, rightStartParam);
+
     //////////////////////////////////////////////////////////////
 
     solverParams solParam;
     solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.67;   // Ar
-//    solParam.Gamma    = 1.32;   // O2_O
+//    solParam.Gamma    = 1.67;   // Ar
+    solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
@@ -126,30 +169,19 @@ int main()
     reader.read();
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
-    double T1wall = 1000;
-    double T2wall = 1000;
-    double velocity1 = 0;
-    double velocity2 = 0;
-    double h = 1;
 
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-//    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+//    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+    double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
     solver.setDelta_h(h / (solParam.NumCell - 2));
 
-    // в следующих строчках супер сложные зависимости, скорее всего надо создавать какой-то отдельный класс для начальных и граничных уловий,
-    // ибо то, что есть сейчас супер завязано на определнной последовательности и выглядит не интуитивно
-    // т.е. что-то задается в конструкторе, что-то в вызыываемом методе, что-то не может быть вызвано без предварительного вызова другого и т.д, хотя логически
-    // оно немного и связано (типо начальное распределение, а точнее его значение в фиктивных ячейках, зависит от граничных условий),
 
-    //solver.setBorderConditions();  // for soda
-    solver.setBorderConditions(velocity1, velocity2, T2wall, T1wall);  // for couette
+    solver.setBorderConditions(&borderConditionPersonal);  // for couette
 
-    solver.setStartDistribution(startParamAr); // for couette Ar
-//    solver.setStartDistribution(startParamO2_O); // for couette O2_O
-    //solver.setStartDistribution(leftStartParam, rightStartParam); // for soda
+    solver.setStartDistribution(&startParamCouetteO2_OPersonal); // for couette Ar
 
     solver.solve();
 }

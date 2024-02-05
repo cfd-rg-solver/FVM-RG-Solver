@@ -27,7 +27,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
         points[0].pressure = points[0].density / mixture.molarMass(points[0].fractionArray) * UniversalGasConstant * points[0].temp;
     else
         points[0].density = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (UniversalGasConstant * points[0].temp);
-    points[0].soundSpeed = sqrt(gamma*points[0].pressure/points[0].density);
 
 
     //solParam.NumCell-1
@@ -48,7 +47,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam> &points)
         points[N-1].pressure = points[N-1].density / mixture.molarMass(y_c) * UniversalGasConstant * points[N-1].temp;
     else
         points[N-1].density = points[N-1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[N-1].temp);
-    points[N-1].soundSpeed = sqrt(gamma*points[N-1].pressure/points[N-1].density);
 }
 
 void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
@@ -77,9 +75,6 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
 
     // дополнительные рассчитываемые величины
 
-    points[0].soundSpeed = sqrt(gamma*points[0].pressure/points[0].density);
-
-
     //solParam.NumCell-1
     points[N-1].mixture = mixture;
     if(presEq)
@@ -98,5 +93,4 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
         points[N-1].pressure = points[N-1].density / mixture.molarMass(y_c) * UniversalGasConstant * points[N-1].temp;
     else
         points[N-1].density = points[N-1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[N-1].temp);
-    points[N-1].soundSpeed = sqrt(gamma*points[N-1].pressure/points[N-1].density);
 }
