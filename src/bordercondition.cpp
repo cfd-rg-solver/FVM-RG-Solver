@@ -94,3 +94,11 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
     else
         points[N-1].density = points[N-1].pressure * mixture.molarMass(y_c) / (UniversalGasConstant * points[N-1].temp);
 }
+
+void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
+{
+    // todo
+    // v_n * density_n = v_0 * density_0
+    // density_n * pow(v_n,2) + pressure_n = density_0 * pow(v_0,2) + pressure_0
+    // ...
+}

@@ -9,8 +9,10 @@ enum SystemOfEquationType
     couette2,
     couette2Alt,
     couette2AltBinary,
-    soda
+    soda,
+    shockwave1
 };
+
 struct SystemOfEquation
 {
     SystemOfEquation(){};
@@ -139,4 +141,22 @@ struct Soda : public SystemOfEquation
 
 
     double gamma = 1.4;
+};
+
+struct Shockwave1 : public SystemOfEquation
+{
+    // One-Temp SystemOfEquation for a gas mixture //
+    // todo 
+    Shockwave1(){systemType = SystemOfEquationType::shockwave1;};
+    void prepareSolving(vector<macroParam> & points);
+    void prepareIndex();
+
+    double getDensity(size_t i);
+    double getVelocity(size_t i);
+    double getTemp(size_t i); // todo 
+
+    void updateU(double dh, double dt);
+    void updateBorderU(vector<macroParam> & points){};
+    void computeF(vector<macroParam>& points, double dh);
+
 };

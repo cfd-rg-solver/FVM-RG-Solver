@@ -31,6 +31,14 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
     system->setEqSolver(eqSolver);
 }
 
+// void AbstractSolver::setShockWaveBorderConditions(double up_velocity_, double up_temp_)
+// {
+//     border.up_velocity = up_velocity_;
+//     border.down_velocity = 0.;
+//     border.up_temp =  up_temp_;
+//     return;
+// } // todo
+
 void AbstractSolver::setWriter(DataWriter *writer_)
 {
     writer = writer_;

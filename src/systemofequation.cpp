@@ -79,7 +79,7 @@ void SystemOfEquation::prepareVectorSizes()
         R[i].resize(numberOfCells);
 }
 
-
+//////////////////////////////////////////////////////////////
 void Couette2::prepareSolving(vector<macroParam> & points)
 {
 
@@ -310,7 +310,9 @@ void Couette2::computeF(vector<macroParam> &points, double dh)
         F[energy][i] += -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy + (p1.pressure - (bulk + 4./3.*etta)* dv_normal_dy) * p1.velocity_normal;
     }
 }
+//////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////
 void Couette2Alt::prepareVectorSizes()
 {
     SystemOfEquation::prepareVectorSizes();
@@ -468,7 +470,9 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
     }
 }
+//////////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////
 void Couette2AltBinary::prepareSolving(vector<macroParam> &points)
 {
     temperature.resize(numberOfCells);
@@ -795,4 +799,79 @@ void Soda::computeF(vector<macroParam> &points, double dh)
         F[v_tau][i] = points[i].density * pow(points[i].velocity,2) +  points[i].pressure;
         F[energy][i] =  points[i].velocity * (U[energy][i] + points[i].pressure);
     }
+}
+
+//////////////////////////////////////////////////////////////
+
+void Shockwave1::prepareSolving(vector<macroParam> &points)
+{
+    // todo
+}
+
+void Shockwave1::prepareIndex()
+{
+    // todo
+    v_tau = numberOfComponents;
+    v_normal = numberOfComponents + 1;
+    energy = numberOfComponents + 2;
+}
+
+double Shockwave1::getDensity(size_t i)
+{
+    return U[0][i];
+}
+
+double Shockwave1::getVelocity(size_t i)
+{
+    double v_t = U[v_tau][i] / getDensity(i);
+    double v_n = U[v_normal][i] / getDensity(i);
+    double v = sqrt(pow(v_t, 2) + pow(v_n, 2));
+    return v;
+}
+
+double Shockwave1::getTemp(size_t i)
+{
+    double E_energy = U[energy][i] / getDensity(i); // полная энергия E
+    double U_energy = E_energy - 0.5 * pow(getVelocity(i),2)// внутренняя энергия U
+
+    // todo nonlinear equation solver
+    // однокомпонентная - U_energy = 3*n*k*T/(2*density) + k*T/mass + <e_i>_vibr/mass + e_c/mass
+    // многокомпонентная - U_energy = 3*n*k*T/(2*density) + 
+    // + sum([k*T/mass[i])*fractionArray[i] for i in range(numberOfComponents)]) + 
+    // + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) + 
+    // + sum([fractionArray[i]*e_c/mass[i] for i in range(numberOfComponents)])
+
+    return T
+}
+
+void Shockwave1::updateU(double dh, double dt)
+{
+#pragma omp parallel for schedule(static)
+    for (auto i = 1; i < numberOfCells - 1; i++)
+    {
+        for (int j = 0; j < systemOrder; j++)
+        {
+            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1]) / (/*2.**/dh)) * dt;
+        }
+    }
+}
+
+void Shockwave1::updateBorderU(vector<macroParam>& points) {
+    // todo: is it ok to get energy like that?
+    for (int i : {0, (int)(numberOfCells - 1)})
+    {
+        U[0][i] = points[i].density;
+        for (size_t j = 1; j < numberOfComponents; j++)
+            U[j][i] = points[i].densityArray[j];
+        U[v_tau][i] = points[i].density * points[i].velocity_tau;
+        U[v_normal][i] = points[i].density * points[i].velocity_normal;
+
+        U[energy][i] = energyCalculator->calcEnergy(points[i]);
+    }
+    return;
+}
+
+void Shockwave1::computeFv(vector<macroParam>& points, double dh)
+{
+    // todo
 }
