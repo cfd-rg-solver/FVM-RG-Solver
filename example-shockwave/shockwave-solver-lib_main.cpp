@@ -1,11 +1,9 @@
 #include "godunovsolver.h"
 #include "bordercondition.h"
 #include "mixture.h"
-#include <tomsolver/tomsolver.hpp>
+#include <Python.h>
 #include <filesystem>
 #include <iostream>
-
-using namespace tomsolver;
 
 
 std::string GetCurrentWorkingDir( void ) {
@@ -72,7 +70,6 @@ int main()
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992E-26;
     argon.numberAtoms = 1;
-    argon.density = 0.800773; // todo какое ???
     // argon.numberVibrLvl = ?;
     // argon.epsilonDevK = ?
     // argon.sigma = 3.33E-10; ?
@@ -82,28 +79,25 @@ int main()
     // рассматриваем уравнения граничных условий,
     // пусть left = 0, right = n: 
     double velocity_left = 0;
-    double density_left = argon.density; // todo какое ???
+    double density_left = 0.800773; // todo какое ???
     double T_left = 1000;
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass; // todo норм ???
     double energy_left = 3 * kB * T_left / (2 * argon.mass); // одноатомный аргон
 
-    SymVec f{
-        "v_n * rho_n - v_0 * rho_0"_f,
-        "rho_n * v_n^2 + p_n - rho_0 * v_0^2 - p_0"_f,
-        "rho_n * v_n * (E_n + v_n^2/2 + p_n/rho_n) - rho_0 * v_0 * (E_0 + v_0^2/2 + p_0/rho_0)"_f,
-    };
-    f.Subs(VarsTable{
-            {"v_0", velocity_left},
-            {"rho_0", density_left},
-            {"p_0", pressure_left},
-            {"E_0", energy_left}
-    });
-    auto ans = Solve(f);
-
-    double velocity_right = ans["v_n"];
-    double density_right = ans["rho_n"];
-    double T_right = ans["E_n"] / (3 * kB / (2 * argon.mass)); // одноатомный аргон
-    double pressure_right = ans["p_n"];
+    Py_Initialize();
+    PyObject *name, *load_module, *func, *callfunc, *args;
+    name = PyUnicode_FromString((char*)"nonlinear_border_system_solver");
+    load_module = PyImport_Import(name);
+    func = PyObject_GetAttrString(load_module, (char*)"solver");
+    args = PyTuple_Pack(4,
+        PyFloat_FromDouble(velocity_left),
+        PyFloat_FromDouble(density_left),
+        PyFloat_FromDouble(pressure_left),
+        PyFloat_FromDouble(energy_left)
+    );
+    callfunc = PyObject(func, args);
+    vector<double> solver_out = PyTuple_AsVector(vallfunc);
+    Py_Finalize();
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
