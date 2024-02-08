@@ -5,7 +5,7 @@ project(${PROJECT_MAIN} LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#add_executable(${PROJECT_MAIN} soda-solver-lib_main.cpp)
-#add_executable(${PROJECT_MAIN} couette-solver-lib_main.cpp)
+add_executable(${PROJECT_MAIN} shockwave-solver-lib_main.cpp)
+
 target_link_libraries(${PROJECT_MAIN} FVM-RG-Solver)
 

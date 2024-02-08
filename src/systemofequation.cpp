@@ -65,7 +65,6 @@ void SystemOfEquation::prepareVectorSizes()
     for(size_t i = 0 ; i <  U.size(); i++)
         U[i].resize(numberOfCells);
 
-
     F.resize(systemOrder);
     for(size_t i = 0 ; i <  F.size(); i++)
         F[i].resize(numberOfCells);
@@ -73,6 +72,10 @@ void SystemOfEquation::prepareVectorSizes()
     Flux.resize(systemOrder);
     for(size_t i = 0 ; i <  Flux.size(); i++)
         Flux[i].resize(numberOfCells-1); // на одну меньше, т.к. через грани
+
+    Fv.resize(systemOrder);
+    for (size_t i = 0; i < Fv.size(); i++)
+        Fv[i].resize(numberOfCells);
 
     R.resize(systemOrder);
     for(size_t i = 0 ; i <  R.size(); i++)
@@ -614,7 +617,7 @@ void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
                 F[j][i] = p1.density * p1.velocity_normal;
         }
         F[v_tau][i] = p1.density * p1.velocity_tau * p1.velocity_normal;
-        F[v_normal][i] = p1.density *pow(p1.velocity_normal,2) + p1.pressure;
+        F[v_normal][i] = p1.density * pow(p1.velocity_normal,2) + p1.pressure;
         F[energy][i] =  p1.pressure * p1.velocity_normal + p1.density * p1.velocity_normal * getEnergy(i);
     }
 }
@@ -805,15 +808,20 @@ void Soda::computeF(vector<macroParam> &points, double dh)
 
 void Shockwave1::prepareSolving(vector<macroParam> &points)
 {
-    // todo
+    #pragma omp parallel for schedule(static)
+    for (auto i = 0; i < numberOfCells; i++)
+    {
+        U[0][i] = points[i].density;
+        U[v_normal][i] = points[i].density * points[i].velocity_normal;
+        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity, 2) * points[i].density;
+    }
 }
 
 void Shockwave1::prepareIndex()
 {
-    // todo
-    v_tau = numberOfComponents;
-    v_normal = numberOfComponents + 1;
-    energy = numberOfComponents + 2;
+    systemOrder = 3; // однокомпонентная постановка
+    v_normal = 1;
+    energy = 2;
 }
 
 double Shockwave1::getDensity(size_t i)
@@ -832,26 +840,33 @@ double Shockwave1::getVelocity(size_t i)
 double Shockwave1::getTemp(size_t i)
 {
     double E_energy = U[energy][i] / getDensity(i); // полная энергия E
-    double U_energy = E_energy - 0.5 * pow(getVelocity(i),2)// внутренняя энергия U
+    double U_energy = E_energy - 0.5 * pow(getVelocity(i), 2); // внутренняя энергия U
 
-    // todo nonlinear equation solver
     // однокомпонентная - U_energy = 3*n*k*T/(2*density) + k*T/mass + <e_i>_vibr/mass + e_c/mass
-    // многокомпонентная - U_energy = 3*n*k*T/(2*density) + 
+    // todo многокомпонентная - U_energy = 3*n*k*T/(2*density) + 
     // + sum([k*T/mass[i])*fractionArray[i] for i in range(numberOfComponents)]) + 
     // + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) + 
     // + sum([fractionArray[i]*e_c/mass[i] for i in range(numberOfComponents)])
 
-    return T
+    double n_kB = UniversalGasConstant / mixture.molarMass() * getDensity(i);
+    double T = U_energy * 2./3. / (n_kB) * getDensity(i);
+
+    return T;
 }
+
+double Shockwave1::getEnergy(size_t i) {
+    return U[energy][i] / getDensity(i); // из однотемпературной модели
+}
+
 
 void Shockwave1::updateU(double dh, double dt)
 {
-#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
         {
-            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1]) / (/*2.**/dh)) * dt;
+            U[j][i] += (0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1]) / (dh)) * dt;
         }
     }
 }
@@ -861,17 +876,117 @@ void Shockwave1::updateBorderU(vector<macroParam>& points) {
     for (int i : {0, (int)(numberOfCells - 1)})
     {
         U[0][i] = points[i].density;
-        for (size_t j = 1; j < numberOfComponents; j++)
-            U[j][i] = points[i].densityArray[j];
-        U[v_tau][i] = points[i].density * points[i].velocity_tau;
         U[v_normal][i] = points[i].density * points[i].velocity_normal;
-
         U[energy][i] = energyCalculator->calcEnergy(points[i]);
     }
     return;
 }
 
+
+void Shockwave1::computeF(vector<macroParam>& points, double dh)
+{
+    Mixture mixture = points[0].mixture;
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < numberOfCells; i++)
+    {
+        // Переобозначаем величины в ячейках (не в фиктивных):
+        macroParam p0, p1, p2;
+        double denominator = 1.;
+        if (i != 0 && i != numberOfCells - 1)
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = 2. * dh;
+        }
+        else if (i == 0)
+        {
+            p0 = points[i];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = dh;
+        }
+        else if (i == (numberOfCells - 1))
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i];
+            denominator = dh;
+        }
+
+        // Рассчитываем производные:
+        vector<double> dy_dy(0);
+        // Учёт граничных условий:
+        if (i == 0 || i == numberOfCells - 1) 
+        {
+            fill(dy_dy.begin(), dy_dy.end(), border->get_dyc_dy());
+        } 
+        else 
+        {
+            dy_dy[0] = (p2.fractionArray[0] - p0.fractionArray[0]) / denominator;
+        }
+        double dT_dy = (p2.temp - p0.temp) / denominator;
+
+        // 1-е уравнение (однокомпонентная постановка) в векторе F с консервативными составляющими:
+        F[0][i] = p1.density * p1.velocity_normal;
+        // Последние 2 уравнения в векторе F с консервативными составляющими:
+        F[v_normal][i] = p1.density * pow(p1.velocity_normal, 2) + p1.pressure;
+        F[energy][i] = p1.density * p1.velocity_normal * getEnergy(i) + p1.pressure * p1.velocity_normal;
+    }
+}
+
 void Shockwave1::computeFv(vector<macroParam>& points, double dh)
 {
-    // todo
+    Mixture mixture = points[0].mixture;
+    #pragma omp parallel for schedule(static)
+    for (int i = 0; i < numberOfCells; i++)
+    {
+        // Переобозначаем величины в ячейках (не в фиктивных):
+        macroParam p0, p1, p2;
+        double denominator = 1.;
+        if (i != 0 && i != numberOfCells - 1)
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = 2. * dh;
+        }
+        else if (i == 0)
+        {
+            p0 = points[i];
+            p1 = points[i];
+            p2 = points[i + 1];
+            denominator = dh;
+        }
+        else if (i == (numberOfCells - 1))
+        {
+            p0 = points[i - 1];
+            p1 = points[i];
+            p2 = points[i];
+            denominator = dh;
+        }
+
+        // Рассчитываем производные:
+        double dv_normal_dy = (p2.velocity_normal - p0.velocity_normal) / denominator;
+        double dT_dy = (p2.temp - p0.temp) / denominator;
+        vector<double> dy_dy(1);
+        // Учёт граничных условий:
+        if (i == 0 || i == numberOfCells - 1) {
+            fill(dy_dy.begin(), dy_dy.end(), border->get_dyc_dy());
+        }
+        else {
+            dy_dy[0] = (p2.fractionArray[0] - p0.fractionArray[0]) / denominator;
+        }
+
+        // Расчет потоковых членов:
+        double lambda = coeffSolver->lambda(p1);
+        double etta = coeffSolver->shareViscositySimple(p1);
+        double bulk = coeffSolver->bulcViscositySimple(p1);
+
+        // 1-е уравнение (однокомпонентная постановка) в векторе F с вязкими составляющими:
+        Fv[0][i] = 0;
+        // Последние 2 уравнения в векторе F с вязкими составляющими:
+        Fv[v_normal][i] = -(bulk + 4. / 3. * etta) * dv_normal_dy;
+        Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_normal_dy * p1.velocity_normal;
+    }
 }

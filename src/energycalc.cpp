@@ -32,9 +32,10 @@ double OneTempApprox::getVibrEnergy(macroParam &point, size_t component)
     return res;
 }
 
-double OneTempApprox::getVibrEnergyMultiAtom(macroParam& point, size_t component) {
-    // todo: what changes?
-}
+// double OneTempApprox::getVibrEnergyMultiAtom(macroParam& point, size_t component) {
+//    // todo: what changes?
+//
+// }
 
 double OneTempApprox::avgVibrEnergyDiff(macroParam &point, size_t component)
 {

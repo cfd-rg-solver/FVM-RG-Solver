@@ -35,11 +35,13 @@ struct BorderConditionSoda : public BorderCondition
 struct BorderConditionShockwave : public BorderCondition
 {
     void updatePoints(vector<macroParam>& points);
-    void setWallParameters(double up_velocity_, double up_temp_, double up_pressure_, double up_density_)
+    void setBorderParameters(double left_velocity_, double left_density_, double left_temp_,
+                            double right_velocity_, double right_density_, double right_temp_)
     {
-        up_velocity = up_velocity_; up_temp = up_temp_; up_pressure = up_pressure_; up_density = up_density_;
+        left_velocity = left_velocity_; left_density = left_density_; left_temp = left_temp_;
+        right_velocity = right_velocity_, right_density = right_density_; right_temp = right_temp_;
     };
     double get_dyc_dy() { return 0; };
 protected:
-    double up_velocity, up_temp, up_pressure, up_density;
+    double left_velocity, left_density, left_temp, right_velocity, right_density, right_temp;
 };
