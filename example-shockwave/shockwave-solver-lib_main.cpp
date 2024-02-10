@@ -23,11 +23,11 @@ int main()
     //////////////////////////// CH4 ////////////////////////////
 
     /// CH4 (methane) /// 
-    MixtureComponent methane;
-    methane.name = "methane";
-    methane.molarMass = 0.0160425; // kg/mol
-    methane.mass = 2.656e-26; // kg
-    methane.numberAtoms = 5;
+    //MixtureComponent methane;
+    //methane.name = "methane";
+    //methane.molarMass = 0.0160425; // kg/mol
+    //methane.mass = 2.656e-26; // kg
+    //methane.numberAtoms = 5;
     // methane.density = 0.657; // kg/m^3, when about 20 C
     // methane.numberVibrLvl = ?;
     // methane.epsilonDevK = ?
@@ -36,23 +36,23 @@ int main()
     /////////////////////
 
     /// Create mixture ///
-    std::vector<MixtureComponent> tmp1 = { methane }; // - однокомпонентная смесь
-    Mixture CH4(tmp1);
+    // std::vector<MixtureComponent> tmp1 = { methane }; // - однокомпонентная смесь
+    // Mixture CH4(tmp1);
     /////////////////////
 
     //////////////////////////////////////////////////////////////
     ////////////////// Start param for Shockwave /////////////////
     ////////////////////////////  CH4  ///////////////////////////
-    UniformDistributionBorder startParamShockwaveCH4;
-    UniformDistributionBorderPersonal startParamShockwaveCH4Personal;
-    macroParam startParamCH4(CH4);
+    // UniformDistributionBorder startParamShockwaveCH4;
+    // UniformDistributionBorderPersonal startParamShockwaveCH4Personal;
+    // macroParam startParamCH4(CH4);
 
-    startParamCH4.temp = 200; // Kelvin
-    startParamCH4.velocity_normal = 0;
+    // startParamCH4.temp = 200; // Kelvin
+    // startParamCH4.velocity_normal = 0;
 
-    startParamCH4.density = 0.971; // kg/m^3, 200K https://www.engineeringtoolbox.com/methane-density-specific-weight-temperature-pressure-d_2020.html
-    startParamCH4.fractionArray[0] = 1; // однокомпонентная смесь
-    startParamCH4.densityArray[0] = startParamCH4.fractionArray[0] * startParamCH4.density;
+    // startParamCH4.density = 0.971; // kg/m^3, 200K https://www.engineeringtoolbox.com/methane-density-specific-weight-temperature-pressure-d_2020.html
+    // startParamCH4.fractionArray[0] = 1; // однокомпонентная смесь
+    // startParamCH4.densityArray[0] = startParamCH4.fractionArray[0] * startParamCH4.density;
 
     // startParamShockwaveCH4.setBorderCondition(&borderConditionShockwave);
     // startParamShockwaveCH4.setDistributionParameter(startParamCH4);
@@ -81,11 +81,12 @@ int main()
     double density_left = 0.800773; // todo какое ???
     double T_left = 1000;
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass; // todo норм ???
-    double energy_left = 3 * kB * T_left / (2 * argon.mass); // одноатомный аргон
+    // double energy_left = 3 * kB * T_left / (2 * argon.mass); // одноатомный аргон
 
     double velocity_right = -1.0105851262163877e-12;
     double density_right = 15.216801268294677;
     double T_right = 52.62426615690848;
+    double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass; // todo норм ???
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
@@ -101,19 +102,16 @@ int main()
     //////////////////////////////////////////////////////////////
     ////////////////// Start param for Shockwave /////////////////
     ////////////////////////////  Ar  ///////////////////////////
-    UniformDistributionBorder startParamShockwaveAr;
-    UniformDistributionBorderPersonal startParamShockwaveArPersonal;
-    macroParam startParamAr(Ar);
-
-    startParamAr.temp = 200; // Kelvin
-    startParamAr.velocity_normal = 0;
-
-    startParamAr.density = 2.409; // kg/m^3, 200K https://www.engineeringtoolbox.com/argon-density-specific-weight-temperature-pressure-d_2089.html
-    startParamAr.fractionArray[0] = 1; // однокомпонентная смесь
-    startParamCH4.densityArray[0] = startParamAr.fractionArray[0] * startParamAr.density;
-
-    startParamShockwaveAr.setBorderCondition(&borderConditionShockwave);
-    startParamShockwaveAr.setDistributionParameter(startParamAr);
+    GapDistribution startParamShockwaveAr;
+    macroParam leftStartParam(Ar);
+    macroParam rightStartParam(Ar);
+    leftStartParam.density = density_left;
+    leftStartParam.pressure = pressure_left;
+    leftStartParam.velocity = velocity_left;
+    rightStartParam.density = density_right;
+    rightStartParam.pressure = pressure_right;
+    rightStartParam.velocity = velocity_right;
+    startParamShockwaveAr.setDistributionParameter(leftStartParam, rightStartParam);
     //////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////////////////////////
@@ -149,6 +147,7 @@ int main()
     solver.setObserver(&watcher);
     solver.setDelta_h(h / (solParam.NumCell - 2));
     solver.setBorderConditions(&borderConditionShockwave);  // for shockwave
+    solver.setStartDistribution(&startParamShockwaveAr); // for shockwave
     solver.solve();
     //////////////////////////////////////////////////////////////
 

@@ -112,6 +112,11 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
             auto *tmp = new Soda();
             return tmp;
         }
+        case SystemOfEquationType::shockwave1:
+        {
+            auto* tmp = new Shockwave1();
+            return tmp;
+        }
     }
     return nullptr;
 }
@@ -168,7 +173,7 @@ void AbstractSolver::setDt()
 void AbstractSolver::updatePoints()
 {
     auto size = points.size()-1;
-    #pragma omp parallel for schedule(static)
+    // #pragma omp parallel for schedule(static)
     for(int i = 0; i < size + 1; i++)
 //    for(int i = 1; i < size; i++)
     {

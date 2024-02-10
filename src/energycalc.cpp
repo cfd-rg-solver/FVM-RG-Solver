@@ -19,6 +19,7 @@ double OneTempApprox::getEntalp(macroParam &point, size_t component)
 
 double OneTempApprox::getTrRotEnegry(macroParam &point, size_t component)
 {
+    if (point.mixture.components.size() == 1) { return 0; }
     int i = point.mixture.components[component].numberAtoms;
     double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
     return U;
@@ -26,8 +27,8 @@ double OneTempApprox::getTrRotEnegry(macroParam &point, size_t component)
 
 double OneTempApprox::getVibrEnergy(macroParam &point, size_t component)
 {
-    if(point.mixture.components[component].numberAtoms == 1)
-        return 0;
+    if (point.mixture.components.size() == 1) { return 0; }
+    if (point.mixture.components[component].numberAtoms == 1) { return 0;}
     double res = avgVibrEnergy(point , component) * point.fractionArray[component] / point.mixture.mass(component);
     return res;
 }
