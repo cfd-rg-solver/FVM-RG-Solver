@@ -1,7 +1,6 @@
 #include "godunovsolver.h"
 #include "bordercondition.h"
 #include "mixture.h"
-#include <Python.h>
 #include <filesystem>
 #include <iostream>
 
@@ -55,8 +54,8 @@ int main()
     startParamCH4.fractionArray[0] = 1; // однокомпонентная смесь
     startParamCH4.densityArray[0] = startParamCH4.fractionArray[0] * startParamCH4.density;
 
-    startParamShockwaveCH4.setBorderCondition(&borderConditionShockwave);
-    startParamShockwaveCH4.setDistributionParameter(startParamCH4);
+    // startParamShockwaveCH4.setBorderCondition(&borderConditionShockwave);
+    // startParamShockwaveCH4.setDistributionParameter(startParamCH4);
     //////////////////////////////////////////////////////////////
 
     
@@ -84,20 +83,9 @@ int main()
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass; // todo норм ???
     double energy_left = 3 * kB * T_left / (2 * argon.mass); // одноатомный аргон
 
-    Py_Initialize();
-    PyObject *name, *load_module, *func, *callfunc, *args;
-    name = PyUnicode_FromString((char*)"nonlinear_border_system_solver");
-    load_module = PyImport_Import(name);
-    func = PyObject_GetAttrString(load_module, (char*)"solver");
-    args = PyTuple_Pack(4,
-        PyFloat_FromDouble(velocity_left),
-        PyFloat_FromDouble(density_left),
-        PyFloat_FromDouble(pressure_left),
-        PyFloat_FromDouble(energy_left)
-    );
-    callfunc = PyObject(func, args);
-    vector<double> solver_out = PyTuple_AsVector(vallfunc);
-    Py_Finalize();
+    double velocity_right = -1.0105851262163877e-12;
+    double density_right = 15.216801268294677;
+    double T_right = 52.62426615690848;
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
