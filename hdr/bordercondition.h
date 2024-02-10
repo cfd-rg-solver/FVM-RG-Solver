@@ -39,7 +39,7 @@ struct BorderConditionShockwave : public BorderCondition
                             double right_velocity_, double right_density_, double right_temp_)
     {
         left_velocity = left_velocity_; left_density = left_density_; left_temp = left_temp_;
-        right_velocity = right_velocity_, right_density = right_density_; right_temp = right_temp_;
+        right_velocity = right_velocity_; right_density = right_density_; right_temp = right_temp_;
     };
     double get_dyc_dy() { return 0; };
 protected:
