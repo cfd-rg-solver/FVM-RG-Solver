@@ -831,9 +831,7 @@ double Shockwave1::getDensity(size_t i)
 
 double Shockwave1::getVelocity(size_t i)
 {
-    double v_t = U[v_tau][i] / getDensity(i);
-    double v_n = U[v_normal][i] / getDensity(i);
-    double v = sqrt(pow(v_t, 2) + pow(v_n, 2));
+    double v = U[v_normal][i] / getDensity(i);
     return v;
 }
 
@@ -886,7 +884,7 @@ void Shockwave1::updateBorderU(vector<macroParam>& points) {
 void Shockwave1::computeF(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+    // #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
@@ -914,17 +912,6 @@ void Shockwave1::computeF(vector<macroParam>& points, double dh)
             denominator = dh;
         }
 
-        // Рассчитываем производные:
-        vector<double> dy_dy(0);
-        // Учёт граничных условий:
-        if (i == 0 || i == numberOfCells - 1) 
-        {
-            fill(dy_dy.begin(), dy_dy.end(), border->get_dyc_dy());
-        } 
-        else 
-        {
-            dy_dy[0] = (p2.fractionArray[0] - p0.fractionArray[0]) / denominator;
-        }
         double dT_dy = (p2.temp - p0.temp) / denominator;
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с консервативными составляющими:
