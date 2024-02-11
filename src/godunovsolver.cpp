@@ -12,7 +12,9 @@ void GodunovSolver::solve()
         T += timeSolvind.last();
 
         system->computeF(points, delta_h);
-        if(system->systemType == SystemOfEquationType::couette2Alt || system->systemType == SystemOfEquationType::couette2AltBinary)
+        if(system->systemType == SystemOfEquationType::couette2Alt ||
+            system->systemType == SystemOfEquationType::couette2AltBinary ||
+            system->systemType == SystemOfEquationType::shockwave1)
             system->computeFv(points, delta_h);
         riemannSolver->computeFlux(system);
         //riemannSolver->computeFlux(system, delta_h);

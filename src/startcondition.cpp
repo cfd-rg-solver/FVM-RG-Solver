@@ -54,22 +54,22 @@ void UniformDistributionBorder::setStartDistribution(vector<macroParam> &points)
 void GapDistribution::setStartDistribution(vector<macroParam> &points)
 {
     Mixture mixture = left.mixture;
-    for(size_t i = 0; i < points.size()/2; i++)
+    for(size_t i = 0; i < points.size()/2 + 1; i++)
     {
         points[i].mixture = mixture;
         points[i].pressure = left.pressure;
         points[i].density  = left.density;
-        points[i].velocity_tau = left.velocity;
-        points[i].velocity_normal = 0;
+        points[i].velocity_tau = 0;
+        points[i].velocity_normal = left.velocity;
         points[i].velocity = left.velocity;
     }
-    for(size_t i = points.size()/2; i < points.size(); i++)
+    for(size_t i = points.size()/2 + 1; i < points.size(); i++)
     {
         points[i].mixture = mixture;
         points[i].pressure = right.pressure;
         points[i].density  = right.density;
-        points[i].velocity_tau = right.velocity;
-        points[i].velocity_normal = 0;
+        points[i].velocity_tau = 0;
+        points[i].velocity_normal = right.velocity;
         points[i].velocity = right.velocity;
     }
 }

@@ -2,9 +2,9 @@
 
 double OneTempApprox::calcEnergy(macroParam &point)
 {
-    double UTrRot = getTrRotEnegry(point, 0) + getTrRotEnegry(point, 1);
-    double UVibr =  getVibrEnergy(point, 0) + getVibrEnergy(point, 1);
-    double E = point.density * (UTrRot + UVibr) + 0.5*pow(point.velocity,2)*point.density;
+    double UTrRot = getTrRotEnegry(point, 0);
+    double UVibr =  getVibrEnergy(point, 0);
+    double E = point.density * (UTrRot + UVibr) + 0.5*pow(point.velocity,2)*point.density; // rho * E
     return E;
 }
 double OneTempApprox::getEntalp(macroParam &point, size_t component)
@@ -19,7 +19,7 @@ double OneTempApprox::getEntalp(macroParam &point, size_t component)
 
 double OneTempApprox::getTrRotEnegry(macroParam &point, size_t component)
 {
-    if (point.mixture.components.size() == 1) { return 0; }
+    if (point.mixture.components.size() == 1) { return 3./2. * kB * point.temp / point.density; } // for now for a single component monoatomic gas
     int i = point.mixture.components[component].numberAtoms;
     double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
     return U;

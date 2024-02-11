@@ -97,6 +97,8 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
 
 void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 {
+    size_t N = points.size();
+
     points[0].velocity_normal = points[1].velocity_normal;
     points[0].velocity = points[0].velocity_normal;
 
@@ -106,5 +108,13 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
     points[0].density = points[1].density;
     points[0].temp = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (points[0].density * UniversalGasConstant); // из уравнения состояния ид газа
 
+    points[N-1].velocity_normal = points[N-2].velocity_normal;
+    points[N-1].velocity = points[N-1].velocity_normal;
+
+    Mixture mixture2 = points[N-2].mixture;
+
+    points[N-1].pressure = points[N-2].pressure;
+    points[N-1].density = points[N-2].density;
+    points[N-1].temp = points[N-1].pressure * mixture2.molarMass(points[N-1].fractionArray) / (points[N-1].density * UniversalGasConstant); // из уравнения состояния ид газа
 
 }
