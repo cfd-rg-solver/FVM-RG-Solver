@@ -871,6 +871,7 @@ void Shockwave1::updateU(double dh, double dt)
 
 void Shockwave1::updateBorderU(vector<macroParam>& points) {
     // todo: is it ok to get energy like that?
+    // wasn't, but now is valid
     for (int i : {0, (int)(numberOfCells - 1)})
     {
         U[0][i] = points[i].density;

@@ -32,7 +32,7 @@ struct BorderConditionSoda : public BorderCondition
 };
 
 
-struct BorderConditionShockwave : public BorderCondition
+struct BorderConditionShockwave : public BorderCondition // don't see the use of this class, setBorderParameters should set initial gas distribution
 {
     void updatePoints(vector<macroParam>& points);
     void setBorderParameters(double left_velocity_, double left_density_, double left_temp_,
@@ -43,5 +43,5 @@ struct BorderConditionShockwave : public BorderCondition
     };
     double get_dyc_dy() { return 0; };
 protected:
-    double left_velocity, left_density, left_temp, right_velocity, right_density, right_temp;
+    double left_velocity, left_density, left_temp, right_velocity, right_density, right_temp; // these values wasn't used anywhere
 };
