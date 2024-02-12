@@ -156,7 +156,7 @@ struct Shockwave1 : public SystemOfEquation
     double getEnergy(size_t i);
 
     // по надобности определить нормально
-    double getPressure(size_t i) { return 0; };
+    double getPressure(size_t i);
     double getVelocityTau(size_t i) { return 0; };
     double getVelocityNormal(size_t i) { return 0; };
 
