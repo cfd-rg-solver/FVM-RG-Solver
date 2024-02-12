@@ -1,19 +1,18 @@
 import numpy as np
 from scipy.optimize import fsolve
+import matplotlib.pyplot as plt
 
+velocity_left = 1615
+density_left = 1.759942
+T_left = 300
 
-velocity_left = 0
-density_left = 0.800773
+gamma = 1.667 # argon
+argon_molarMass = 0.039948 # argon
+argon_mass = 6.633521356992e-26 # argon
 
-T_left = 1000
-UniversalGasConstant = 8.3144598
-kB=1.38064852e-23
-argon_molarMass = 0.039948
-pressure_left = UniversalGasConstant * T_left * density_left / argon_molarMass
-
-argon_mass = 6.633521356992e-26
-energy_left = 3. * kB * T_left / (2. * argon_mass)
-
+R = 8.3144598
+kB = 1.38064852e-23
+Ma = 5
 
 def solver(velocity_left, density_left, T_left):
     
@@ -33,11 +32,48 @@ def solver(velocity_left, density_left, T_left):
             x[1] * np.power(x[0],2) + R*x[2]*x[1]/argon_molarMass - rho_0 * np.power(v_0,2) - R*T_0*rho_0/argon_molarMass,
             x[1] * x[0] * (3*kB*x[2]/(2*argon_mass) + np.power(x[0],2)/2 + R*x[2]*x[1]/(argon_molarMass*x[1])) - rho_0 * v_0 * (3*kB*T_0/(2*argon_mass) + np.power(v_0,2)/2 + R*T_0*rho_0/(argon_molarMass*rho_0))
             ]
-
-    ans = fsolve(func, [1, 1, 1])
+    
+    vs, rhos, Ts = [], [], []
+    for x in range(1, 800):
+        cur_ans = fsolve(func, [x, x/100, x])
+        if any(np.isclose(func(cur_ans), [0.0,0.0,0.0])):
+            vs.append(cur_ans[0])
+            rhos.append(cur_ans[1])
+            Ts.append(cur_ans[2])
+    ans = [np.median(vs), np.median(rhos), np.median(Ts)]
+    
+    print(func(ans)) # подставляет полученное решение в систему, на выход должен вывести околонулевые числа
+    
+    # plt.plot(vs)
+    # plt.show()
+    # plt.plot(rhos)
+    # plt.show()
+    # plt.plot(Ts)
+    # plt.show()
+    
     return ans
 
+print("Getting answer via numeric scipy.fsolver:")
 ans = solver(velocity_left, density_left, T_left)
 print("v_n = ", ans[0])
 print("rho_n = ", ans[1])
 print("T_n = ", ans[2])
+
+################################################################################################
+
+def solver_approx(velocity_left, density_left, T_left):
+
+    density_right = ((gamma + 1) * pow(Ma,2))/(2 + (gamma-1)*pow(Ma,2))*density_left
+    velocity_right = velocity_left*density_left/density_right # из системы
+
+    pressure_left = R * T_left * density_left / argon_molarMass # из уравнения состояния
+    pressure_right = (pow(Ma,2)*2*gamma - (gamma-1))/(gamma+1)*pressure_left
+    T_right = pressure_right/(density_right*R/argon_molarMass)
+
+    return velocity_right, density_right, T_right
+
+print("Getting answer via approximate solver:")
+ans2 = solver_approx(velocity_left, density_left, T_left)
+print("v_n = ", ans2[0])
+print("rho_n = ", ans2[1])
+print("T_n = ", ans2[2])

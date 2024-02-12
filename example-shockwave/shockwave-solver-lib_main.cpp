@@ -67,26 +67,26 @@ int main()
     MixtureComponent argon;
     argon.name = "argon";
     argon.molarMass = 0.039948;
-    argon.mass = 6.633521356992E-26;
+    argon.mass = 6.633521356992e-26;
     argon.numberAtoms = 1;
     // argon.numberVibrLvl = ?;
     // argon.epsilonDevK = ?
-    // argon.sigma = 3.33E-10; ?
+    // argon.sigma = 3.33e-10; ?
     // argon.omega_e = ?
     /////////////////////
 
     // рассматриваем уравнения граничных условий,
     // пусть left = 0, right = n:
     double velocity_left = 1615; // shock wave, so the velocity is supersonic, let's set it to 1615 m/s ~ 5 Ma for argon at room temperature
-    double density_left = 1.759942; // calculated for atmospheric pressure
-    double T_left = 300;
-    double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass; // todo норм ??? +
+    double density_left = 1.759942; // kg/m^3, calculated for atmospheric pressure
+    double T_left = 300; // Kelvin
+    double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass;
     // double energy_left = 3 * kB * T_left / (2 * argon.mass); // одноатомный аргон
 
-    double velocity_right = -1.0105851262163877e-12; // recalculated ...
-    double density_right = 15.216801268294677;
-    double T_right = 52.62426615690848; // smth is wrong, even for initial conditions it is a bit strange that the gas is so cold on the right border
-    double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass; // todo норм ??? +
+    double velocity_right = 452.0778769113248; // recalculated ...
+    double density_right = 6.287205092669588;
+    double T_right = 2609.9281339791883; // smth is wrong, even for initial conditions it is a bit strange that the gas is so cold on the right border
+    double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
@@ -119,7 +119,7 @@ int main()
     //////////////////////////////////////////////////////////////
     solverParams solParam;
     solParam.NumCell = 102; // число ячеек (с учетом двух фиктивных)
-    solParam.Gamma = 1.667 // for argon // 1.32; // показатель адиабаты c_p/c_v, CH4
+    solParam.Gamma = 1.667; // показатель адиабаты c_p/c_v, argon
     solParam.CFL = 0.9; // число Куранта
     solParam.MaxIter = 1e7; // максимальное кол-во итераций
     solParam.Ma = 5; // число Маха

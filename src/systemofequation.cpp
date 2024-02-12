@@ -856,6 +856,9 @@ double Shockwave1::getEnergy(size_t i) {
     return U[energy][i] / getDensity(i); // из однотемпературной модели
 }
 
+double Shockwave1::getPressure(size_t i) {
+    return UniversalGasConstant * getTemp(i) * getDensity(i) / mixture.molarMass();
+}
 
 void Shockwave1::updateU(double dh, double dt)
 {
