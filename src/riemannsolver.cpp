@@ -345,42 +345,43 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         //надо видимо делать для точного метода какой-то особый случай, ну или здесь внутри прописывать if-ы и в системе ввести поле которое сможет сказать о типе
         //указателя базового класса, чтобы можно было определять тип объекта по указателю
 
-        double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
-        double etta = system->coeffSolver->shareViscositySimple(point);
-        double lambda = system->coeffSolver->lambda(point);
+        // double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
+        // double etta = system->coeffSolver->shareViscositySimple(point);
+        // double lambda = system->coeffSolver->lambda(point);
 
-        // Рассчитываем производные в точке i
-        double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
-        double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
-        vector<double> dy_dy(system->mixture.NumberOfComponents);
+        // // Рассчитываем производные в точке i
+        // double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
+        // double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
+        // vector<double> dy_dy(system->mixture.NumberOfComponents);
 
-        //учёт граничных условий
-        if(i == 0 || i == system->numberOfCells-1)
-            fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
-        else
-        {
-            for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-            {
-                dy_dy[j] = 0;
-            }
-        }
+        // //учёт граничных условий
+        // if(i == 0 || i == system->numberOfCells-1)
+        //     fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
+        // else
+        // {
+        //     for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+        //     {
+        //         dy_dy[j] = 0;
+        //     }
+        // }
         //заполнение вектора потоков
-        for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-        {
-            if(j!=0)
-                //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
-                system->Flux[j][i] = -point.density * 0 * dy_dy[j];
-            else
-                system->Flux[j][i] = 0;
-        }
-        system->Flux[system->v_tau][i] = -etta * dv_dy;
-        system->Flux[system->v_normal][i] = 0;
-        system->Flux[system->energy][i] = 0;
-        for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
-        {
-            system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
-        }
-        system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
+        // for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+        // {
+        //     if(j!=0)
+        //         //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
+        //         system->Flux[j][i] = -point.density * 0 * dy_dy[j];
+        //     else
+        //         system->Flux[j][i] = 0;
+        // }
+        system->Flux[0][i] = point.density * point.velocity;
+        // system->Flux[system->v_tau][i] = -etta * dv_dy;
+        system->Flux[system->v_normal][i] = point.density * pow(point.velocity, 2) + point.pressure;
+        // system->Flux[system->energy][i] = 0;
+        // for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
+        // {
+        //     system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
+        // }
+        system->Flux[system->energy][i] = point.density * point.velocity * (3. / 2. * point.pressure / point.density) + point.pressure * point.velocity;
     }
 }
 

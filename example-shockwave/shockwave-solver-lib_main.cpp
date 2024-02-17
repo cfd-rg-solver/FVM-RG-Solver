@@ -68,11 +68,11 @@ int main()
     argon.name = "argon";
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992e-26;
+    argon.numberVibrLvl = 0;
+    argon.epsilonDevK = 1.8845852298E-21/kB; // ! LJ potential parameter, can not be neglected, or transport coefficients won't be calculated
+    argon.sigma = 3.33e-10; // ! same
     argon.numberAtoms = 1;
-    // argon.numberVibrLvl = ?;
-    // argon.epsilonDevK = ?
-    // argon.sigma = 3.33e-10; ?
-    // argon.omega_e = ?
+    argon.omega_e = 0;
     /////////////////////
 
     // рассматриваем уравнения граничных условий,
@@ -140,12 +140,11 @@ int main()
 
     //////////////////////////////////////////////////////////////
     // GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
-    GodunovSolver solver(Ar, solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
-    double h = 1;
+    GodunovSolver solver(Ar, solParam, SystemOfEquationType::shockwave1, RiemannSolverType::ExacRiemanSolver);
+    double h = 1; // m
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
-    solver.setDelta_h(h / (solParam.NumCell - 2));
     solver.setBorderConditions(&borderConditionShockwave);  // for shockwave
     solver.setStartDistribution(&startParamShockwaveAr); // for shockwave
     solver.solve();

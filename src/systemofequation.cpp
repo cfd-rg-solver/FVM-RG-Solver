@@ -813,7 +813,7 @@ void Shockwave1::prepareSolving(vector<macroParam> &points)
     {
         U[0][i] = points[i].density;
         U[v_normal][i] = points[i].density * points[i].velocity_normal;
-        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity, 2) * points[i].density;
+        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_normal, 2) * points[i].density;
     }
 }
 
@@ -830,6 +830,12 @@ double Shockwave1::getDensity(size_t i)
 }
 
 double Shockwave1::getVelocity(size_t i)
+{
+    double v = U[v_normal][i] / getDensity(i);
+    return v;
+}
+
+double Shockwave1::getVelocityNormal(size_t i)
 {
     double v = U[v_normal][i] / getDensity(i);
     return v;
@@ -873,13 +879,12 @@ void Shockwave1::updateU(double dh, double dt)
 }
 
 void Shockwave1::updateBorderU(vector<macroParam>& points) {
-    // todo: is it ok to get energy like that?
-    // wasn't, but now is valid
     for (int i : {0, (int)(numberOfCells - 1)})
     {
         U[0][i] = points[i].density;
         U[v_normal][i] = points[i].density * points[i].velocity_normal;
-        U[energy][i] = energyCalculator->calcEnergy(points[i]);
+        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_normal, 2) * points[i].density;
+        //or energyCalculator->calcEnergy(points[i]);
     }
     return;
 }

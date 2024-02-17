@@ -154,11 +154,9 @@ struct Shockwave1 : public SystemOfEquation
     double getVelocity(size_t i);
     double getTemp(size_t i);
     double getEnergy(size_t i);
-
-    // по надобности определить нормально
     double getPressure(size_t i);
     double getVelocityTau(size_t i) { return 0; };
-    double getVelocityNormal(size_t i) { return 0; };
+    double getVelocityNormal(size_t i);
 
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
