@@ -50,6 +50,13 @@ struct solverParams
     int lambdaSol   = 0;    // Кол-во длин пробега для расчета
     int PlotIter    = 0;    // Кол-во итераци, через которое отрисывыввается график
     int MaxIter     = 10000000; // максимальное кол-во шагов по времени
+    int typePlot    = 0;    // Тип отображения на графике :
+        // 0 - абс. давлени
+        // 1 - абс. плотноть
+        // 2 - абс. скорость
+        // 3 - абс. температура
+    int typeRightBorder = 1;//  Тип граничного условия справа
+    int typeLeftBorder = 1; //  Тип граничного условия слева
 };
 class Matrix
 {
@@ -192,21 +199,21 @@ public:
     {
         vector<double> output;
         for(int i = 0; i < div.size(); i ++)
-             output.push_back(pow(div[i],param));
+            output.push_back(pow(div[i],param));
         return output;
     }
     static Matrix SQRT(vector<double> div)
     {
         vector<double> output;
         for(int i = 0; i < div.size(); i ++)
-             output.push_back(sqrt(div[i]));
+            output.push_back(sqrt(div[i]));
         return output;
     }
     static Matrix REVERSE(vector<double> div)
     {
         vector<double> output;
         for(int i = 0; i < div.size(); i ++)
-             output.push_back(1.0/div[i]);
+            output.push_back(1.0/div[i]);
         return output;
     }
 };

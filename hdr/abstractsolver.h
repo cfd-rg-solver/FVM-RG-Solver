@@ -66,8 +66,8 @@ protected:
 
     //подготавливает размеры всех векторов
     virtual void prepareVectorSizes();
-//    //подготавливает размеры всех векторов по заданным параметрам
-//    virtual void prepareVectorSizes();
+    //    //подготавливает размеры всех векторов по заданным параметрам
+    //    virtual void prepareVectorSizes();
 
     // устанавливает временной шаг
     void setDt();
@@ -82,8 +82,8 @@ protected:
     // хранит значение макропараметров в каждой ячейке
     vector<macroParam> points;
 
-//    //скорость звука в каждой ячейке
-//    Matrix sound_speed;
+    //    //скорость звука в каждой ячейке
+    //    Matrix sound_speed;
 
     // шаг сетки
     double delta_h = 0;

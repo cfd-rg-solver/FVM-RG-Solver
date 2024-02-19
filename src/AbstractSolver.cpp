@@ -31,14 +31,6 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
     system->setEqSolver(eqSolver);
 }
 
-// void AbstractSolver::setShockWaveBorderConditions(double up_velocity_, double up_temp_)
-// {
-//     border.up_velocity = up_velocity_;
-//     border.down_velocity = 0.;
-//     border.up_temp =  up_temp_;
-//     return;
-// } // todo
-
 void AbstractSolver::setWriter(DataWriter *writer_)
 {
     writer = writer_;
@@ -92,31 +84,31 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
 {
     switch(type)
     {
-        case SystemOfEquationType::couette2:
-        {
-            auto *tmp = new Couette2();
-            return tmp;
-        }
-        case SystemOfEquationType::couette2Alt:
-        {
-            auto *tmp = new Couette2Alt();
-            return tmp;
-        }
-        case SystemOfEquationType::couette2AltBinary:
-        {
-            auto *tmp = new Couette2AltBinary();
-            return tmp;
-        }
-        case SystemOfEquationType::soda:
-        {
-            auto *tmp = new Soda();
-            return tmp;
-        }
-        case SystemOfEquationType::shockwave1:
-        {
-            auto* tmp = new Shockwave1();
-            return tmp;
-        }
+    case SystemOfEquationType::couette2:
+    {
+        auto *tmp = new Couette2();
+        return tmp;
+    }
+    case SystemOfEquationType::couette2Alt:
+    {
+        auto *tmp = new Couette2Alt();
+        return tmp;
+    }
+    case SystemOfEquationType::couette2AltBinary:
+    {
+        auto *tmp = new Couette2AltBinary();
+        return tmp;
+    }
+    case SystemOfEquationType::soda:
+    {
+        auto *tmp = new Soda();
+        return tmp;
+    }
+    case SystemOfEquationType::shockwave1:
+    {
+        auto* tmp = new Shockwave1();
+        return tmp;
+    }
     }
     return nullptr;
 }
@@ -126,22 +118,22 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
     switch(type)
     {
     case RiemannSolverType::HLLCSolver:
-        {
-                return new struct HLLCSolver();
-        }
+    {
+        return new struct HLLCSolver();
+    }
     case RiemannSolverType::HLLESolver:
-        {
-                return new struct HLLESolver();
-        }
+    {
+        return new struct HLLESolver();
+    }
     case RiemannSolverType::HLLSimple:
-        {
-                return new struct HLLSimple();
-        }
+    {
+        return new struct HLLSimple();
+    }
 
     case RiemannSolverType::ExacRiemanSolver:
-        {
-                return new struct ExacRiemanSolver();
-        }
+    {
+        return new struct ExacRiemanSolver();
+    }
     }
     return nullptr;
 }
@@ -173,9 +165,9 @@ void AbstractSolver::setDt()
 void AbstractSolver::updatePoints()
 {
     auto size = points.size()-1;
-    // #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0; i < size + 1; i++)
-//    for(int i = 1; i < size; i++)
+    //    for(int i = 1; i < size; i++)
     {
         points[i].velocity_tau = system->getVelocityTau(i);
         points[i].velocity_normal = system->getVelocityNormal(i);
@@ -183,11 +175,11 @@ void AbstractSolver::updatePoints()
         points[i].density = system->getDensity(i);
         points[i].pressure = system->getPressure(i);
 
-        // for(size_t j = 0; j < mixture.NumberOfComponents; j++)
-        // {
-        //     points[i].densityArray[j] =  system->getDensity(i,j); // тут косяк TODO
-        //     points[i].fractionArray[j] = points[i].densityArray[j] / points[i].density;
-        // }
+        for(size_t j = 0; j < mixture.NumberOfComponents; j++)
+        {
+            points[i].densityArray[j] =  system->getDensity(i,j); // тут косяк TODO
+            points[i].fractionArray[j] = points[i].densityArray[j] / points[i].density;
+        }
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].temp = system->getTemp(i);
     }
@@ -208,4 +200,3 @@ bool AbstractSolver::observerCheck(size_t currentIteration)
     }
     return true;
 }
-

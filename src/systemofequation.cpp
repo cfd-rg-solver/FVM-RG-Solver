@@ -65,6 +65,7 @@ void SystemOfEquation::prepareVectorSizes()
     for(size_t i = 0 ; i <  U.size(); i++)
         U[i].resize(numberOfCells);
 
+
     F.resize(systemOrder);
     for(size_t i = 0 ; i <  F.size(); i++)
         F[i].resize(numberOfCells);
@@ -73,20 +74,16 @@ void SystemOfEquation::prepareVectorSizes()
     for(size_t i = 0 ; i <  Flux.size(); i++)
         Flux[i].resize(numberOfCells-1); // на одну меньше, т.к. через грани
 
-    Fv.resize(systemOrder);
-    for (size_t i = 0; i < Fv.size(); i++)
-        Fv[i].resize(numberOfCells);
-
     R.resize(systemOrder);
     for(size_t i = 0 ; i <  R.size(); i++)
         R[i].resize(numberOfCells);
 }
 
-//////////////////////////////////////////////////////////////
+
 void Couette2::prepareSolving(vector<macroParam> & points)
 {
 
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(auto i  = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
@@ -156,7 +153,7 @@ double Couette2::getTemp(size_t i)
 
 void Couette2::updateU(double dh, double dt)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(auto i  = 1; i < numberOfCells-1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -166,7 +163,7 @@ void Couette2::updateU(double dh, double dt)
     }
 }
 
-void Couette2::updateBorderU(vector<macroParam> &points)
+void Couette2::updateBorderU(vector<macroParam> &points) // ! change calculation of conservative varibles vector in the fictious cells on the basis on BC type
 {
     for(int i : {0, (int)(numberOfCells-1)})
     {
@@ -243,7 +240,7 @@ void Couette2::updateBorderU(vector<macroParam> &points)
 void Couette2::computeF(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -313,9 +310,7 @@ void Couette2::computeF(vector<macroParam> &points, double dh)
         F[energy][i] += -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy + (p1.pressure - (bulk + 4./3.*etta)* dv_normal_dy) * p1.velocity_normal;
     }
 }
-//////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////
 void Couette2Alt::prepareVectorSizes()
 {
     SystemOfEquation::prepareVectorSizes();
@@ -327,7 +322,7 @@ void Couette2Alt::prepareVectorSizes()
 
 void Couette2Alt::updateU(double dh, double dt)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(auto i  = 1; i < numberOfCells-1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -340,7 +335,7 @@ void Couette2Alt::updateU(double dh, double dt)
 void Couette2Alt::computeF(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -384,7 +379,7 @@ void Couette2Alt::computeF(vector<macroParam> &points, double dh)
 
         double dT_dy;
         dT_dy = (p2.temp - p0.temp) / denominator;
-//        double lambda = coeffSolver->lambda(p1);
+        //        double lambda = coeffSolver->lambda(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
@@ -402,7 +397,7 @@ void Couette2Alt::computeF(vector<macroParam> &points, double dh)
 void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -458,9 +453,9 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                F[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
+                Fv[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
             else
-                F[j][i] = 0;
+                Fv[j][i] = 0;
         }
         Fv[v_tau][i] = - etta * dv_tau_dy;
         Fv[v_normal][i] = - (bulk + 4./3.*etta)* dv_normal_dy;
@@ -473,13 +468,11 @@ void Couette2Alt::computeFv(vector<macroParam> &points, double dh)
         Fv[energy][i] = -lambda*dT_dy - etta* p1.velocity_tau*dv_tau_dy - (bulk + 4./3.*etta)* dv_normal_dy * p1.velocity_normal;
     }
 }
-//////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////
 void Couette2AltBinary::prepareSolving(vector<macroParam> &points)
 {
     temperature.resize(numberOfCells);
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(auto i  = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
@@ -534,7 +527,7 @@ double Couette2AltBinary::getTemp(size_t i)
 
 void Couette2AltBinary::updateU(double dh, double dt)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(auto i  = 1; i < numberOfCells-1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -545,7 +538,7 @@ void Couette2AltBinary::updateU(double dh, double dt)
     calcAndRemeberTemp();
 }
 
-void Couette2AltBinary::updateBorderU(vector<macroParam> &points)
+void Couette2AltBinary::updateBorderU(vector<macroParam> &points) // ! change calculation of conservative varibles vector in the fictious cells on the basis on BC type
 {
     for(int i : {0, (int)(numberOfCells-1)})
     {
@@ -563,7 +556,7 @@ void Couette2AltBinary::updateBorderU(vector<macroParam> &points)
 void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -607,7 +600,7 @@ void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
 
         double dT_dy;
         dT_dy = (p2.temp - p0.temp) / denominator;
-//        double lambda = coeffSolver->lambda(p1);
+        //        double lambda = coeffSolver->lambda(p1);
 
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
@@ -617,7 +610,7 @@ void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
                 F[j][i] = p1.density * p1.velocity_normal;
         }
         F[v_tau][i] = p1.density * p1.velocity_tau * p1.velocity_normal;
-        F[v_normal][i] = p1.density * pow(p1.velocity_normal,2) + p1.pressure;
+        F[v_normal][i] = p1.density *pow(p1.velocity_normal,2) + p1.pressure;
         F[energy][i] =  p1.pressure * p1.velocity_normal + p1.density * p1.velocity_normal * getEnergy(i);
     }
 }
@@ -625,7 +618,7 @@ void Couette2AltBinary::computeF(vector<macroParam> &points, double dh)
 void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < numberOfCells; i++)
     {
         macroParam p0, p1, p2;
@@ -681,9 +674,9 @@ void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
         for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
         {
             if(j!=0)
-                F[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
+                Fv[j][i] = -p1.density * coeffSolver->effDiffusion(p1,j) * dy_dy[j];
             else
-                F[j][i] = 0;
+                Fv[j][i] = 0;
         }
         Fv[v_tau][i] = - etta * dv_tau_dy;
         Fv[v_normal][i] = - (bulk + 4./3.*etta)* dv_normal_dy;
@@ -698,7 +691,7 @@ void Couette2AltBinary::computeFv(vector<macroParam> &points, double dh)
 }
 void Couette2AltBinary::calcAndRemeberTemp()
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0; i < numberOfCells; i++)
     {
         macroParam p0(mixture);
@@ -808,7 +801,7 @@ void Soda::computeF(vector<macroParam> &points, double dh)
 
 void Shockwave1::prepareSolving(vector<macroParam> &points)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (auto i = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
@@ -817,11 +810,20 @@ void Shockwave1::prepareSolving(vector<macroParam> &points)
     }
 }
 
+void Shockwave1::prepareVectorSizes()
+{
+    SystemOfEquation::prepareVectorSizes();
+
+    Fv.resize(systemOrder);
+    for(size_t i = 0 ; i <  Fv.size(); i++)
+        Fv[i].resize(numberOfCells);
+}
+
 void Shockwave1::prepareIndex()
 {
-    systemOrder = 3; // однокомпонентная постановка
-    v_normal = 1;
-    energy = 2;
+    systemOrder = numberOfComponents + 2; // однокомпонентная постановка
+    v_normal = numberOfComponents ;
+    energy = numberOfComponents + 1;
 }
 
 double Shockwave1::getDensity(size_t i)
@@ -847,9 +849,9 @@ double Shockwave1::getTemp(size_t i)
     double U_energy = E_energy - 0.5 * pow(getVelocity(i), 2); // внутренняя энергия U
 
     // однокомпонентная - U_energy = 3*n*k*T/(2*density) + k*T/mass + <e_i>_vibr/mass + e_c/mass
-    // todo многокомпонентная - U_energy = 3*n*k*T/(2*density) + 
-    // + sum([k*T/mass[i])*fractionArray[i] for i in range(numberOfComponents)]) + 
-    // + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) + 
+    // todo многокомпонентная - U_energy = 3*n*k*T/(2*density) +
+    // + sum([k*T/mass[i])*fractionArray[i] for i in range(numberOfComponents)]) +
+    // + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) +
     // + sum([fractionArray[i]*e_c/mass[i] for i in range(numberOfComponents)])
 
     double n_kB = UniversalGasConstant / mixture.molarMass() * getDensity(i);
@@ -868,7 +870,7 @@ double Shockwave1::getPressure(size_t i) {
 
 void Shockwave1::updateU(double dh, double dt)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -921,7 +923,7 @@ void Shockwave1::computeF(vector<macroParam>& points, double dh)
             denominator = dh;
         }
 
-        double dT_dy = (p2.temp - p0.temp) / denominator;
+        // double dT_dy = (p2.temp - p0.temp) / denominator;
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с консервативными составляющими:
         F[0][i] = p1.density * p1.velocity_normal;
@@ -934,7 +936,7 @@ void Shockwave1::computeF(vector<macroParam>& points, double dh)
 void Shockwave1::computeFv(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
@@ -980,9 +982,13 @@ void Shockwave1::computeFv(vector<macroParam>& points, double dh)
         double bulk = coeffSolver->bulcViscositySimple(p1);
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с вязкими составляющими:
-        Fv[0][i] = 0;
+        for(size_t j = 0 ; j <mixture.NumberOfComponents; j++)
+        {
+            Fv[j][i] = 0;
+        }
         // Последние 2 уравнения в векторе F с вязкими составляющими:
         Fv[v_normal][i] = -(bulk + 4. / 3. * etta) * dv_normal_dy;
         Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_normal_dy * p1.velocity_normal;
+
     }
 }

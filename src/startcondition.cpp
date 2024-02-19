@@ -59,17 +59,23 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
         points[i].mixture = mixture;
         points[i].pressure = left.pressure;
         points[i].density  = left.density;
+        points[i].fractionArray = left.fractionArray;
+        points[i].densityArray = left.densityArray;
         points[i].velocity_tau = 0;
         points[i].velocity_normal = left.velocity;
         points[i].velocity = left.velocity;
+        points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
     }
     for(size_t i = points.size()/2 + 1; i < points.size(); i++)
     {
         points[i].mixture = mixture;
         points[i].pressure = right.pressure;
         points[i].density  = right.density;
+        points[i].fractionArray = left.fractionArray;
+        points[i].densityArray = left.densityArray;
         points[i].velocity_tau = 0;
         points[i].velocity_normal = right.velocity;
         points[i].velocity = right.velocity;
+        points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
     }
 }

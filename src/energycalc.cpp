@@ -2,16 +2,16 @@
 
 double OneTempApprox::calcEnergy(macroParam &point)
 {
-    double UTrRot = getTrRotEnegry(point, 0);
-    double UVibr =  getVibrEnergy(point, 0);
-    double E = point.density * (UTrRot + UVibr) + 0.5*pow(point.velocity,2)*point.density; // rho * E
+    double UTrRot = getTrRotEnegry(point, 0) + getTrRotEnegry(point, 1); // ! so here is binary mixture is considered
+    double UVibr =  getVibrEnergy(point, 0) + getVibrEnergy(point, 1);
+    double E = point.density * (UTrRot + UVibr) + 0.5*pow(point.velocity,2)*point.density; // ! so here is rho*E
     return E;
 }
 double OneTempApprox::getEntalp(macroParam &point, size_t component)
 {
-    double Tr = 5/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
+    double Tr = 5/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass; // ! why mass fraction is here?
     double Rot = 0;
-    if(point.mixture.components[component].numberAtoms == 2)
+    if(point.mixture.components[component].numberAtoms > 1)
         Rot = kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
     double res = Tr + Rot + getVibrEnergy(point, component);
     return res;
@@ -19,24 +19,18 @@ double OneTempApprox::getEntalp(macroParam &point, size_t component)
 
 double OneTempApprox::getTrRotEnegry(macroParam &point, size_t component)
 {
-    if (point.mixture.components.size() == 1) { return 3./2. * kB * point.temp / point.density; } // for now for a single component monoatomic gas
     int i = point.mixture.components[component].numberAtoms;
-    double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass;
+    double U = (i * 2 + 1)/2. * kB * point.temp * point.fractionArray[component] / point.mixture.components[component].mass; // only two-atom molecules are considered
     return U;
 }
 
 double OneTempApprox::getVibrEnergy(macroParam &point, size_t component)
 {
-    if (point.mixture.components.size() == 1) { return 0; }
-    if (point.mixture.components[component].numberAtoms == 1) { return 0;}
-    double res = avgVibrEnergy(point , component) * point.fractionArray[component] / point.mixture.mass(component);
+    if(point.mixture.components[component].numberAtoms == 1)
+        return 0;
+    double res = avgVibrEnergy(point , component) * point.fractionArray[component] / point.mixture.mass(component); // ! here the fraction is also included
     return res;
 }
-
-// double OneTempApprox::getVibrEnergyMultiAtom(macroParam& point, size_t component) {
-//    // todo: what changes?
-//
-// }
 
 double OneTempApprox::avgVibrEnergyDiff(macroParam &point, size_t component)
 {
@@ -68,9 +62,10 @@ double OneTempApprox::avgVibrEnergy(macroParam &point, size_t component)
 
     double sum = 0;
     double Z = Zvibr(point, component);
+    double s_i = 1; // ! for binary molecules
     for(size_t i = 0; i < point.mixture.components[component].numberVibrLvl; i++)
     {
-        sum += vibrEnergyLvl(i, point, component) / Z * exp (-vibrEnergyLvl(i, point, component) / ( kB * point.temp));
+        sum += s_i * vibrEnergyLvl(i, point, component) / Z * exp (-vibrEnergyLvl(i, point, component) / ( kB * point.temp));
     }
     return sum;
 }
@@ -86,7 +81,7 @@ double OneTempApprox::ZvibrDiff(macroParam &point, size_t component)
         return 0;
 
     double sum = 0;
-    double s_i = 1; // только для O2
+    double s_i = 1; // ! for binary molecules
     for(size_t i = 0; i < point.mixture.components[component].numberVibrLvl; i++)
     {
         double eps_ic = vibrEnergyLvl(i, point, component);
@@ -101,10 +96,10 @@ double OneTempApprox::Zvibr(macroParam &point, size_t component)
         return 0;
 
     double sum = 0;
-    double s_i = 1; // только для O2
+    double s_i = 1; // ! for binary molecules
     for(size_t i = 0; i < point.mixture.components[component].numberVibrLvl; i++)
     {
-        sum += exp (-vibrEnergyLvl(i, point, component) / ( kB * point.temp));
+        sum += s_i * exp (-vibrEnergyLvl(i, point, component) / ( kB * point.temp));
     }
     return sum;
 }
