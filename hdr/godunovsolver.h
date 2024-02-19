@@ -3,7 +3,7 @@
 #include "abstractsolver.h"
 struct GodunovSolver: public AbstractSolver
 {
-    GodunovSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType) :
+    GodunovSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type,RiemannSolverType riemannType):
         AbstractSolver(mixture_,solParam_, type,riemannType){};
 
 
@@ -17,5 +17,5 @@ protected:
     // обновляет вектор U
     void updateU();
 
-//    vector<macroParam>rezultAfterPStart;
+    //    vector<macroParam>rezultAfterPStart;
 };

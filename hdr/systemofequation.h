@@ -12,7 +12,6 @@ enum SystemOfEquationType
     soda,
     shockwave1
 };
-
 struct SystemOfEquation
 {
     SystemOfEquation(){};
@@ -62,7 +61,7 @@ struct SystemOfEquation
     solverParams solParam;
     SystemOfEquationType systemType;
 
-    vector<Matrix> U, R, F, Flux, Fv;
+    vector<Matrix> U, R, F, Flux;
 };
 
 
@@ -150,6 +149,8 @@ struct Shockwave1 : public SystemOfEquation
     void prepareSolving(vector<macroParam> & points);
     void prepareIndex();
 
+    void prepareVectorSizes();
+
     double getDensity(size_t i);
     double getVelocity(size_t i);
     double getTemp(size_t i);
@@ -163,4 +164,5 @@ struct Shockwave1 : public SystemOfEquation
     void computeF(vector<macroParam>& points, double dh);
     void computeFv(vector<macroParam>& points, double dh);
 
+    vector<Matrix> Fv;
 };

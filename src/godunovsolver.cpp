@@ -10,13 +10,20 @@ void GodunovSolver::solve()
         // Устанавливаем текущий временной шаг
         setDt();
         T += timeSolvind.last();
+        // if(i%10000 == 0)
+        // {
+        //     std::cout<<i<<" next time set "<< T <<std::endl;
+        // }
 
         system->computeF(points, delta_h);
+
         if(system->systemType == SystemOfEquationType::couette2Alt ||
             system->systemType == SystemOfEquationType::couette2AltBinary ||
             system->systemType == SystemOfEquationType::shockwave1)
             system->computeFv(points, delta_h);
+
         riemannSolver->computeFlux(system);
+
         //riemannSolver->computeFlux(system, delta_h);
         //riemannSolver->computeFlux(system,timeSolvind.last(),delta_h);
 
@@ -28,14 +35,15 @@ void GodunovSolver::solve()
 
         // Обновляем вектор макропараметров
         updatePoints();
+
         // обновляем вектор U с учётом граничных условий
-        system->updateBorderU(points);
+        system->updateBorderU(points); // this one should be calculated on the basis of boundary conditions type
 
         //записать данные, если это требуется
         //writePoints(T*1000000); // микросек
 
         double max;
-        if(i%10000 == 0)
+        if(i%100 == 0)
         {
             std::cout<<i<<" iteration"<<std::endl;
             writePoints(T*1000000); // микросек

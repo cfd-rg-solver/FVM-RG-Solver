@@ -6,7 +6,7 @@
 void HLLCSolver::computeFlux(SystemOfEquation* system)
 {
     toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < system->numberOfCells - 1; i++)
     {
         double u0, u1, v0, v1, a0, a1, rho0, rho1, p0, p1, E0, E1, H0, H1, avg_H, S0, S1, S_star, pvrs, p_star, vLeft, vRight;
@@ -42,33 +42,33 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
         a1 = sqrt((solParam.Gamma - 1.) * (H1 - 0.5 * pow(u1, 2)));
         avg_a = sqrt((solParam.Gamma - 1.) * (avg_H - 0.5 * pow(avg_u, 2)));
 
-//        Davis relations:
+        //        Davis relations:
 
-//        S0 = min(vLeft - a0, vRight - a1);
-//        S1 = max(vLeft + a0, vRight + a1);
+        //        S0 = min(vLeft - a0, vRight - a1);
+        //        S1 = max(vLeft + a0, vRight + a1);
 
-//        Roe relations:
+        //        Roe relations:
 
         S0 = avg_u - avg_a;
         S1 = avg_u + avg_a;
 
-//        S0 = -dh/dt;
-//        S1 = dh/dt;
+        //        S0 = -dh/dt;
+        //        S1 = dh/dt;
 
-//        Einfeldt relations:
+        //        Einfeldt relations:
 
-//        double eta, d;
+        //        double eta, d;
 
-//        eta = 0.5 * sqrt(rho0 * rho1) / pow(sqrt(rho0) + sqrt(rho1), 2);
-//        d = sqrt((sqrt(rho0) * pow(a0, 2) + sqrt(rho1) * pow(a1, 2)) / (sqrt(rho0) + sqrt(rho1)) + eta * pow(u1 - u0, 2));
+        //        eta = 0.5 * sqrt(rho0 * rho1) / pow(sqrt(rho0) + sqrt(rho1), 2);
+        //        d = sqrt((sqrt(rho0) * pow(a0, 2) + sqrt(rho1) * pow(a1, 2)) / (sqrt(rho0) + sqrt(rho1)) + eta * pow(u1 - u0, 2));
 
-//        S0 = avg_u - d;
-//        S1 = avg_u + d;
+        //        S0 = avg_u - d;
+        //        S1 = avg_u + d;
 
         toMaxVelocity(max(fabs(S0),fabs(S1)));
 
         S_star = (p1 - p0 + pow(rho0, 2) * u0 * (S0 - u0) - pow(rho1, 2) * u1 * (S1 - u1))
-            / (pow(rho0, 2) * (S0 - u0) - pow(rho1, 2) * (S1 - u1));
+                 / (pow(rho0, 2) * (S0 - u0) - pow(rho1, 2) * (S1 - u1));
 
 
         //        S_star = (pow(rho1,2)*S0*(v1 - S1) - pow(rho0,2)*S1*(v0 - S0)) / (pow(rho1,2)*(v1 - S1) - pow(rho0,2)*(v0 - S0));
@@ -125,7 +125,7 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
 void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
 {
     toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < system->numberOfCells - 1; i++)
     {
         double H0, H1, c0, c1, u0, u1, v0,v1,V0,V1, rho0, rho1,p0,p1,E0,E1, u_avg,v_avg, H_avg, c_avg, b0, b1, S0, S1,S_star;
@@ -147,8 +147,8 @@ void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
         p0 = system->getPressure(i);
         p1 = system->getPressure(i + 1);
 
-//        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
-//        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
+        //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
+        //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
         H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i); //! Mistake (the same for enthalpy)
         H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
 
@@ -168,28 +168,28 @@ void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
         S0 = (std::min)({v_avg - c_avg, v0 - c0});
         S1 = (std::max)({v_avg + c_avg, v1 + c1});
 
-//        Davis relations:
+        //        Davis relations:
 
-//        S0 = min(vLeft - a0, vRight - a1);
-//        S1 = max(vLeft + a0, vRight + a1);
+        //        S0 = min(vLeft - a0, vRight - a1);
+        //        S1 = max(vLeft + a0, vRight + a1);
 
-//        Roe relations:
+        //        Roe relations:
 
         //S0 = v_avg - c_avg;
         //S1 = v_avg + c_avg;
 
-//        S0 = -dh/dt;
-//        S1 = dh/dt;
+        //        S0 = -dh/dt;
+        //        S1 = dh/dt;
 
-//        Einfeldt relations:
+        //        Einfeldt relations:
 
-//        double eta, d;
+        //        double eta, d;
 
-//        eta = 0.5 * sqrt(rho0 * rho1) / pow(sqrt(rho0) + sqrt(rho1), 2);
-//        d = sqrt((sqrt(rho0) * pow(a0, 2) + sqrt(rho1) * pow(a1, 2)) / (sqrt(rho0) + sqrt(rho1)) + eta * pow(u1 - u0, 2));
+        //        eta = 0.5 * sqrt(rho0 * rho1) / pow(sqrt(rho0) + sqrt(rho1), 2);
+        //        d = sqrt((sqrt(rho0) * pow(a0, 2) + sqrt(rho1) * pow(a1, 2)) / (sqrt(rho0) + sqrt(rho1)) + eta * pow(u1 - u0, 2));
 
-//        S0 = avg_u - d;
-//        S1 = avg_u + d;
+        //        S0 = avg_u - d;
+        //        S1 = avg_u + d;
 
         toMaxVelocity(max(fabs(S0),fabs(S1)));
         //S0 = (avg_u - avg_a);
@@ -201,7 +201,7 @@ void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
         //        S0 = min(v0, v1);
         //        S1 = max(v0, v1);
         S_star = (p1 - p0 + pow(rho0,2) * v0 * (S0 - v0) - pow(rho1,2) * v1 * (S1 - v1))
-            / (pow(rho0,2) * (S0 - v0) - pow(rho1,2) * (S1 - v1)) ;
+                 / (pow(rho0,2) * (S0 - v0) - pow(rho1,2) * (S1 - v1)) ;
 
 
         //        S_star = (pow(rho1,2)*S0*(v1 - S1) - pow(rho0,2)*S1*(v0 - S0)) / (pow(rho1,2)*(v1 - S1) - pow(rho0,2)*(v0 - S0));
@@ -258,7 +258,7 @@ void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
 void HLLESolver::computeFlux(SystemOfEquation *system)
 {
     toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells-1; i++)
     {
         double H0, H1, c0, c1, u0, u1, v0,v1,V0,V1, rho0, rho1, u_avg,v_avg, H_avg, c_avg, b0, b1, b_plus, b_minus;
@@ -272,8 +272,8 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
         V0 = sqrt(pow(u0,2) + pow(v0,2));
         V1 = sqrt(pow(u1,2) + pow(v1,2));
 
-//        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
-//        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
+        //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
+        //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
         H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i); //! Mistake (the same for enthalpy)
         H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
 
@@ -309,7 +309,7 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
 
 void HLLSimple::computeFlux(SystemOfEquation *system, double dt, double dh)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
         double SR, SL, FL, FR, UL, UR;
@@ -328,7 +328,7 @@ void HLLSimple::computeFlux(SystemOfEquation *system, double dt, double dh)
 
 void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
 {
-    #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
         macroParam left,right,point;
@@ -345,43 +345,42 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         //надо видимо делать для точного метода какой-то особый случай, ну или здесь внутри прописывать if-ы и в системе ввести поле которое сможет сказать о типе
         //указателя базового класса, чтобы можно было определять тип объекта по указателю
 
-        // double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
-        // double etta = system->coeffSolver->shareViscositySimple(point);
-        // double lambda = system->coeffSolver->lambda(point);
+        double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
+        double etta = system->coeffSolver->shareViscositySimple(point);
+        double lambda = system->coeffSolver->lambda(point);
 
-        // // Рассчитываем производные в точке i
-        // double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
-        // double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
-        // vector<double> dy_dy(system->mixture.NumberOfComponents);
+        // Рассчитываем производные в точке i
+        double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
+        double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
+        vector<double> dy_dy(system->mixture.NumberOfComponents);
 
-        // //учёт граничных условий
-        // if(i == 0 || i == system->numberOfCells-1)
-        //     fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
-        // else
-        // {
-        //     for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-        //     {
-        //         dy_dy[j] = 0;
-        //     }
-        // }
+        //учёт граничных условий
+        if(i == 0 || i == system->numberOfCells-1)
+            fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
+        else
+        {
+            for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+            {
+                dy_dy[j] = 0;
+            }
+        }
         //заполнение вектора потоков
-        // for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-        // {
-        //     if(j!=0)
-        //         //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
-        //         system->Flux[j][i] = -point.density * 0 * dy_dy[j];
-        //     else
-        //         system->Flux[j][i] = 0;
-        // }
-        system->Flux[0][i] = point.density * point.velocity;
-        // system->Flux[system->v_tau][i] = -etta * dv_dy;
-        system->Flux[system->v_normal][i] = point.density * pow(point.velocity, 2) + point.pressure;
-        // system->Flux[system->energy][i] = 0;
-        // for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
-        // {
-        //     system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
-        // }
-        system->Flux[system->energy][i] = point.density * point.velocity * (3. / 2. * point.pressure / point.density) + point.pressure * point.velocity;
+        for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
+        {
+            if(j!=0)
+                //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
+                system->Flux[j][i] = -point.density * 0 * dy_dy[j];
+            else
+                system->Flux[j][i] = 0;
+        }
+        system->Flux[system->v_tau][i] = -etta * dv_dy;
+        system->Flux[system->v_normal][i] = 0;
+        system->Flux[system->energy][i] = 0;
+        for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
+        {
+            system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
+        }
+        system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
     }
 }
 
@@ -395,9 +394,9 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     double right_soundspeed=sqrt( Gamma*right.pressure/right.density);
 
     double p_star= 0.5*(left.pressure+right.pressure) +
-            0.125 * ( left.velocity-right.velocity ) *
-            ( left.density+right.density ) *
-            ( left_soundspeed+right_soundspeed );
+                    0.125 * ( left.velocity-right.velocity ) *
+                        ( left.density+right.density ) *
+                        ( left_soundspeed+right_soundspeed );
     p_star=std::max(p_star,TOL);
     double pMin=std::min(left.pressure,right.pressure);
     double pMax=std::max(left.pressure,right.pressure);
@@ -411,11 +410,11 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     }
     else if ( p_star<pMin )
     {
-       double temp1= ( Gamma-1.0 ) / ( 2.0*Gamma );
-       p_star= pow(( left_soundspeed+right_soundspeed+0.5*(Gamma-1.0 )*
-                   ( left.velocity-right.velocity ) ) /
-                   (left_soundspeed/pow(left.pressure,temp1) +
-                   right_soundspeed/pow(right.pressure,temp1)), 1.0/temp1);
+        double temp1= ( Gamma-1.0 ) / ( 2.0*Gamma );
+        p_star= pow(( left_soundspeed+right_soundspeed+0.5*(Gamma-1.0 )*
+                                                               ( left.velocity-right.velocity ) ) /
+                         (left_soundspeed/pow(left.pressure,temp1) +
+                          right_soundspeed/pow(right.pressure,temp1)), 1.0/temp1);
     }
     double f1 = 0, f2 = 0, f_d = 0 ;
     for(double iteration = 1;iteration < maxIteration; iteration++)
@@ -425,29 +424,29 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
 
         if (p_star<=left.pressure)
             f1=2.0/ ( Gamma-1.0 ) *left_soundspeed*
-                    (pow(p_star/left.pressure,(Gamma-1.0 )/(2.0*Gamma))- 1.0) ;
+                 (pow(p_star/left.pressure,(Gamma-1.0 )/(2.0*Gamma))- 1.0) ;
         else
             f1= ( p_star-left.pressure ) *temp1;
         if (p_star<=left.pressure)
             f_d= pow( p_star/left.pressure,-(Gamma+1.0 )/( 2.0*Gamma ))/
-                    ( left.density*left_soundspeed );
+                  ( left.density*left_soundspeed );
         else
             f_d=temp1* ( 1.0-0.5* ( p_star-left.pressure ) /
-                         ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *left.pressure ) );
+                                     ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *left.pressure ) );
         //RIGHT
         temp1 = sqrt ( ( 2.0/ ( Gamma+1.0 ) /right.density ) /
-                       ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *right.pressure ) );
+                     ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *right.pressure ) );
         if (p_star<=right.pressure)
             f2=2.0/ ( Gamma-1.0 ) *right_soundspeed*
-                    (pow(p_star/right.pressure,(Gamma-1.0 )/(2.0*Gamma))- 1.0) ;
+                 (pow(p_star/right.pressure,(Gamma-1.0 )/(2.0*Gamma))- 1.0) ;
         else
             f2= ( p_star-right.pressure ) *temp1;
         if (p_star<=right.pressure)
             f_d= f_d + pow( p_star/right.pressure,-(Gamma+1.0 )/( 2.0*Gamma ))/
-                    ( right.density*right_soundspeed );
+                            ( right.density*right_soundspeed );
         else
             f_d=f_d + temp1* ( 1.0-0.5* ( p_star-right.pressure ) /
-                         ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *right.pressure ) );
+                                           ( p_star+ ( Gamma-1.0 ) / ( Gamma+1.0 ) *right.pressure ) );
         double p_new = p_star - (f1+f2 - (left.velocity - right.velocity))/f_d;
         if(fabs(p_new - p_star)/(0.5*abs(p_new + p_star)) < TOL)
             break;
@@ -456,14 +455,14 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     // calculate star speed */
     double star_speed=0.5* ( left.velocity + right.velocity ) +0.5* ( f2-f1 );
     double left_star_density, left_tail_speed, left_head_speed,
-            right_star_density, right_tail_speed,right_head_speed;
+        right_star_density, right_tail_speed,right_head_speed;
     //LEFT
     if ( p_star>=left.pressure ) {
-            // SHOCK
+        // SHOCK
         left_star_density = left.density * ( p_star / left.pressure + ( Gamma-1.0 ) / ( Gamma+1.0 ) ) /
-                ( ( Gamma-1.0 ) / ( Gamma+1.0 ) * p_star / left.pressure + 1.0 );
+                            ( ( Gamma-1.0 ) / ( Gamma+1.0 ) * p_star / left.pressure + 1.0 );
         left_tail_speed = left.velocity -left_soundspeed * sqrt ( ( Gamma+1.0 ) / ( 2.0*Gamma ) * p_star/left.pressure +
-                ( Gamma-1.0 ) / ( 2.0*Gamma ) );
+                                                                 ( Gamma-1.0 ) / ( 2.0*Gamma ) );
         left_head_speed = left_tail_speed;
     }
     else // % left_wave_ == kRarefaction
@@ -476,11 +475,11 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     if ( p_star>=right.pressure )
     {
         right_star_density = right.density *
-                            ( p_star / right.pressure + ( Gamma-1.0 ) / ( Gamma+1.0 ) ) /
-                            ( ( Gamma-1.0 ) / ( Gamma+1.0 ) * p_star / right.pressure + 1.0 );
+                             ( p_star / right.pressure + ( Gamma-1.0 ) / ( Gamma+1.0 ) ) /
+                             ( ( Gamma-1.0 ) / ( Gamma+1.0 ) * p_star / right.pressure + 1.0 );
         right_tail_speed = right.velocity +
-           right_soundspeed * sqrt ( ( Gamma+1.0 ) / ( 2.0*Gamma ) * p_star/right.pressure +
-           ( Gamma-1.0 ) / ( 2.0*Gamma ) );
+                           right_soundspeed * sqrt ( ( Gamma+1.0 ) / ( 2.0*Gamma ) * p_star/right.pressure +
+                                                   ( Gamma-1.0 ) / ( 2.0*Gamma ) );
         right_head_speed = right_tail_speed;
     }
     else // % right_wave_ == kRarefaction
@@ -538,7 +537,7 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
         }
     }
     else// % the queried u is right of contact discontinuity
-        //%------------------------------------------------------------------------
+    //%------------------------------------------------------------------------
     {
         if ( p_star>=right.pressure )  //% the right wave is a shock
         {

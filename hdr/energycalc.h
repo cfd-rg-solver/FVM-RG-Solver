@@ -23,7 +23,6 @@ struct OneTempApprox : public EnergyCalc
 private:
     double getTrRotEnegry(macroParam & point, size_t component);
     double getVibrEnergy(macroParam & point, size_t component);
-    double getVibrEnergyMultiAtom(macroParam & point, size_t component); // todo
     double avgVibrEnergyDiff(macroParam &point, size_t component);
     double avgVibrEnergy(macroParam &point, size_t component);
     double vibrEnergyLvl(int lvl, macroParam &point, size_t component);

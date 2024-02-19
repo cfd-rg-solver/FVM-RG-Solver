@@ -117,7 +117,7 @@ double CoeffSolver2Comp1Temp::binaryDiffusion(macroParam currentPoint, size_t co
     double M = 0;
     if(comp1 != comp2)
         M = 1 / ( currentPoint.fractionArray[comp1] / currentPoint.mixture.molarMass(comp1) +
-                  currentPoint.fractionArray[comp2] / currentPoint.mixture.molarMass(comp2));
+                 currentPoint.fractionArray[comp2] / currentPoint.mixture.molarMass(comp2));
     else
         M = currentPoint.mixture.molarMass(comp1);
     double R = UniversalGasConstant;
