@@ -266,29 +266,32 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
         u0 = system->getVelocityNormal(i);
         u1 = system->getVelocityNormal(i+1);
 
-        v0 = system->getVelocityTau(i);
-        v1 = system->getVelocityTau(i+1);
+        // v0 = system->getVelocityTau(i);
+        // v1 = system->getVelocityTau(i+1);
 
-        V0 = sqrt(pow(u0,2) + pow(v0,2));
-        V1 = sqrt(pow(u1,2) + pow(v1,2));
+        // V0 = sqrt(pow(u0,2) + pow(v0,2));
+        // V1 = sqrt(pow(u1,2) + pow(v1,2));
 
         //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
         //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
-        H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i); //! Mistake (the same for enthalpy)
-        H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
+        // H0 = system->getEnergy(i) - pow(V0,2) + system->getPressure(i)/system->getDensity(i);
+        H0 = system->getEnergy(i) - pow(u0,2) / 2 + system->getPressure(i)/system->getDensity(i); // ! check the enthalpy
+        // H1 = system->getEnergy(i+1) - pow(V1,2) + system->getPressure(i+1)/system->getDensity(i+1);
+        H1 = system->getEnergy(i+1) - pow(u1,2) / 2 + system->getPressure(i+1)/system->getDensity(i+1);
 
 
-        c0 = sqrt((solParam.Gamma - 1.)*(H0 - 0.5 * pow(V0,2)));
-        c1 = sqrt((solParam.Gamma - 1.)*(H1 - 0.5 * pow(V1,2)));
+        c0 = sqrt((solParam.Gamma - 1.)*(fabs(H0 - 0.5 * pow(u0,2)))); // ! check the
+        c1 = sqrt((solParam.Gamma - 1.)*(fabs(H1 - 0.5 * pow(u1,2))));
 
         rho0 = sqrt(system->getDensity(i));
         rho1 = sqrt(system->getDensity(i+1));
 
         u_avg = (rho0 * u0 + rho1 * u1) / (rho0 + rho1);
-        v_avg = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
+        // v_avg = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
 
         H_avg = (rho0 * H0 + rho1 * H1) / (rho0 + rho1);
-        c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
+        // c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
+        c_avg = sqrt((solParam.Gamma)*(fabs(H_avg - 0.5 * pow(u_avg,2) )));
 
         b0 = (std::min)({u_avg - c_avg, u0 - c0});
         b1 = (std::max)({u_avg + c_avg, u1 + c1});

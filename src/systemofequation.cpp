@@ -843,10 +843,11 @@ double Shockwave1::getVelocityNormal(size_t i)
     return v;
 }
 
+
 double Shockwave1::getTemp(size_t i)
 {
-    double E_energy = U[energy][i] / getDensity(i); // полная энергия E
-    double U_energy = E_energy - 0.5 * pow(getVelocity(i), 2); // внутренняя энергия U
+    // double E_energy = U[energy][i] / getDensity(i); // полная энергия E
+    // double U_energy = E_energy - 0.5 * pow(getVelocity(i), 2); // внутренняя энергия U
 
     // однокомпонентная - U_energy = 3*n*k*T/(2*density) + k*T/mass + <e_i>_vibr/mass + e_c/mass
     // todo многокомпонентная - U_energy = 3*n*k*T/(2*density) +
@@ -854,10 +855,14 @@ double Shockwave1::getTemp(size_t i)
     // + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) +
     // + sum([fractionArray[i]*e_c/mass[i] for i in range(numberOfComponents)])
 
-    double n_kB = UniversalGasConstant / mixture.molarMass() * getDensity(i);
-    double T = U_energy * 2./3. / (n_kB) * getDensity(i);
+    // double n_kB = UniversalGasConstant / mixture.molarMass() * getDensity(i);
+    // double T = U_energy * 2./3. / (n_kB) * getDensity(i);
 
-    return T;
+    double U = getEnergy(i) - pow(getVelocity(i),2)/2.;
+    double n_kB = UniversalGasConstant / mixture.molarMass() * getDensity(i);
+    return U * 2./3. / (n_kB) * getDensity(i);
+
+    // return T;
 }
 
 double Shockwave1::getEnergy(size_t i) {
@@ -865,7 +870,9 @@ double Shockwave1::getEnergy(size_t i) {
 }
 
 double Shockwave1::getPressure(size_t i) {
-    return UniversalGasConstant * getTemp(i) * getDensity(i) / mixture.molarMass();
+    // return UniversalGasConstant * getTemp(i) * getDensity(i) / mixture.molarMass();
+    double rho = getDensity(i);
+    return (getEnergy(i) - 0.5 * pow(getVelocity(i),2)) * 2./3. * rho;
 }
 
 void Shockwave1::updateU(double dh, double dt)
