@@ -57,13 +57,13 @@ int main()
     ///
     // рассматриваем уравнения граничных условий, пусть left = 0, right = n:
     double velocity_left = 1615; // shock wave, so the velocity is supersonic, let's set it to 1615 m/s ~ 5 Ma for argon at room temperature
-    double density_left = 1.759942; // kg/m^3, calculated for atmospheric pressure
+    double density_left = 1.601547; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass;
 
-    double velocity_right = 452.0778769113248;
-    double density_right = 6.287205092669588;
-    double T_right = 2609.9281339791883;
+    double velocity_right = 452.3453;
+    double density_right = 5.717973;
+    double T_right = 2605.026;
     double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
@@ -116,11 +116,11 @@ int main()
 
     solverParams solParam;
     solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    //    solParam.Gamma    = 1.67;   // Ar
-    solParam.Gamma    = 1.32;   // O2_O
+    solParam.Gamma    = 1.67;   // Ar
+    // solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
-    solParam.Ma       = 0.1;    // Число маха
+    solParam.Ma       = 5;    // Число маха
 
     double precision = 1E-5; // точность
     Observer watcher(precision);

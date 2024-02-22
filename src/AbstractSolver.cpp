@@ -169,10 +169,10 @@ void AbstractSolver::updatePoints()
     for(int i = 0; i < size + 1; i++)
     //    for(int i = 1; i < size; i++)
     {
+        points[i].density = system->getDensity(i);
         points[i].velocity_tau = system->getVelocityTau(i);
         points[i].velocity_normal = system->getVelocityNormal(i);
         points[i].velocity = system->getVelocity(i);
-        points[i].density = system->getDensity(i);
         points[i].pressure = system->getPressure(i);
 
         for(size_t j = 0; j < mixture.NumberOfComponents; j++)
