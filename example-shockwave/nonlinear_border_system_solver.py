@@ -16,9 +16,9 @@ kB = 1.38064852e-23
 
 # set parameters
 speed_of_sound_ar_room = 323 # m/s
-Ma = 5
+Ma = 3.8
 T_left = 300 # K
-pressure = 100000 # Pa
+pressure = 6.66 # Pa
 
 # calculated parameters
 velocity_left = Ma * speed_of_sound_ar_room

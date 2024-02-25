@@ -56,14 +56,14 @@ int main()
     /////////////////////////////////////////////////////////////
     ///
     // рассматриваем уравнения граничных условий, пусть left = 0, right = n:
-    double velocity_left = 1615; // shock wave, so the velocity is supersonic, let's set it to 1615 m/s ~ 5 Ma for argon at room temperature
-    double density_left = 1.601547; // kg/m^3, calculated for atmospheric pressure
+    double velocity_left = 1227.4; // shock wave, so the velocity is supersonic, let's set it to 1615 m/s ~ 5 Ma for argon at room temperature
+    double density_left = 0.00010666; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass;
 
-    double velocity_right = 452.3453;
-    double density_right = 5.717973;
-    double T_right = 2605.026;
+    double velocity_right = 370.7071;
+    double density_right = 0.000353;
+    double T_right = 1612.93;
     double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
@@ -113,16 +113,21 @@ int main()
     startParamShockwaveAr.setDistributionParameter(leftStartParam, rightStartParam);
 
     //////////////////////////////////////////////////////////////
+    ///
+    ///
+
+    double viscocity_argon = 22.7e-5; // approximate argon viscocity at low prassure
+    double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length
 
     solverParams solParam;
-    solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 1e2 / 2 + 2;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.67;   // Ar
     // solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
-    solParam.Ma       = 5;    // Число маха
+    solParam.Ma       = 3.8;    // Число маха
 
-    double precision = 1E-5; // точность
+    double precision = 1E-7; // точность
     Observer watcher(precision);
     watcher.setPeriodicity(10000);
 
@@ -136,7 +141,7 @@ int main()
 
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
     GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
-    double h = 1;
+    double h = 30 * MFP; // m
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
