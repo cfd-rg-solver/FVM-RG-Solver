@@ -125,7 +125,7 @@ int main()
     // solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
-    solParam.Ma       = 3.8;    // Число маха
+    solParam.Ma       = 3.8;    // Число Маха
 
     double precision = 1E-7; // точность
     Observer watcher(precision);
