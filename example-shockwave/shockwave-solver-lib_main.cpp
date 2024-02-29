@@ -118,6 +118,7 @@ int main()
 
     double viscocity_argon = 22.7e-5; // approximate argon viscocity at low prassure
     double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length
+    std::cout << "mean free path: " << MFP << std::endl;
 
     solverParams solParam;
     solParam.NumCell     = 1e2 / 2 + 2;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
