@@ -68,8 +68,9 @@ int main()
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
-        velocity_left, density_left, T_left,
-        velocity_right, density_right, T_right);
+
+        velocity_right, density_right, T_right,
+        velocity_left, density_left, T_left);
 
 
     //////////////////////////////////////////////////////////////
@@ -110,7 +111,7 @@ int main()
     rightStartParam.fractionArray[0] = 1;
     rightStartParam.densityArray[0] = rightStartParam.fractionArray[0] * rightStartParam.density;
 
-    startParamShockwaveAr.setDistributionParameter(leftStartParam, rightStartParam);
+    startParamShockwaveAr.setDistributionParameter(rightStartParam, leftStartParam);
 
     //////////////////////////////////////////////////////////////
     ///
