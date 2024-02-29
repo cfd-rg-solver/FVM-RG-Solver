@@ -258,7 +258,7 @@ void HLLCSolver::computeFlux(SystemOfEquation* system, double dt, double dh)
 void HLLESolver::computeFlux(SystemOfEquation *system)
 {
     toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
-#pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells-1; i++)
     {
         double H0, H1, c0, c1, u0, u1, v0,v1,V0,V1, rho0, rho1, u_avg,v_avg, H_avg, c_avg, b0, b1, b_plus, b_minus;

@@ -877,7 +877,7 @@ double Shockwave1::getPressure(size_t i) {
 
 void Shockwave1::updateU(double dh, double dt)
 {
-#pragma omp parallel for schedule(static)
+    //#pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)

@@ -71,8 +71,8 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
         points[i].mixture = mixture;
         points[i].pressure = right.pressure;
         points[i].density  = right.density;
-        points[i].fractionArray = left.fractionArray;
-        points[i].densityArray = left.densityArray;
+        points[i].fractionArray = right.fractionArray;
+        points[i].densityArray = right.densityArray;
         points[i].velocity_tau = 0;
         points[i].velocity_normal = right.velocity;
         points[i].velocity = right.velocity;
