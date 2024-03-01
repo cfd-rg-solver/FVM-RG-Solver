@@ -5,13 +5,15 @@
 
 void HLLCSolver::computeFlux(SystemOfEquation* system)
 {
+    double u0, u1, v0, v1, a0, a1, rho0, rho1, p0, p1, E0, E1, H0, H1, avg_H, S0, S1, S_star, vLeft, vRight;
+    vector<double> U_star_0(system->systemOrder), U_star_1(system->systemOrder);
+    double avg_a, avg_u; //  avg_v, avg_rho, avg_p, avg_vel, avg_c;
+
     toMaxVelocity(-1); // для обнуления максимальной сигнальной скорости
-#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < system->numberOfCells - 1; i++)
     {
-        double u0, u1, v0, v1, a0, a1, rho0, rho1, p0, p1, E0, E1, H0, H1, avg_H, S0, S1, S_star, pvrs, p_star, vLeft, vRight;
-        vector<double> U_star_0(system->systemOrder), U_star_1(system->systemOrder);
-        double avg_a, avg_u, avg_v, avg_rho, avg_p, avg_vel, avg_c;
+
 
         // тут u - нормальная составляющая, v - касательная
         u0 = system->getVelocityNormal(i);
@@ -34,11 +36,11 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
         p0 = system->getPressure(i);
         p1 = system->getPressure(i + 1);
 
-        H0 = E0 - pow(u0,2) + p0 / rho0;
-        H1 = E1 - pow(u1,2) + p1 / rho1;
+        H0 = E0 + p0 / rho0; // E0 - pow(u0,2) + p0 / rho0; the 1st one is according to Toro's paper, the 2nd is a common enthalpy definition
+        H1 = E1 + p1 / rho1; // E1 - pow(u1,2) + p1 / rho1;
         avg_H = (sqrt(rho0) * H0 + sqrt(rho1) * H1) / (sqrt(rho0) + sqrt(rho1));
 
-        a0 = sqrt((solParam.Gamma - 1.) * (H0 - 0.5 * pow(u0, 2)));
+        a0 = sqrt((solParam.Gamma - 1.) * (H0 - 0.5 * pow(u0, 2))); // ? speed of sound is sqrt( (gamma - 1) * h), h - common enthalpy
         a1 = sqrt((solParam.Gamma - 1.) * (H1 - 0.5 * pow(u1, 2)));
         avg_a = sqrt((solParam.Gamma - 1.) * (avg_H - 0.5 * pow(avg_u, 2)));
 
@@ -49,15 +51,15 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
 
         //        Roe relations:
 
-        S0 = u0 - a0; // avg_u - avg_a;
-        S1 = u1 + a1;
+        S0 = (std::min)({avg_u - avg_a, u0 - a0});
+        S1 = (std::max)({avg_u + avg_a, u1 + a1});
 
 
 
         toMaxVelocity(max(fabs(S0),fabs(S1)));
 
-        S_star = (p1 - p0 + pow(rho0, 2) * u0 * (S0 - u0) - pow(rho1, 2) * u1 * (S1 - u1))
-                 / (pow(rho0, 2) * (S0 - u0) - pow(rho1, 2) * (S1 - u1));
+        S_star = (p1 - p0 + rho0 * u0 * (S0 - u0) - rho1 * u1 * (S1 - u1))
+                 / (rho0 * (S0 - u0) - rho1 * (S1 - u1));
 
 
         //        S_star = (pow(rho1,2)*S0*(v1 - S1) - pow(rho0,2)*S1*(v0 - S0)) / (pow(rho1,2)*(v1 - S1) - pow(rho0,2)*(v0 - S0));
@@ -76,8 +78,8 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
         U_star_0[system->v_normal] = coeff_0 * S_star;
         U_star_1[system->v_normal] = coeff_1 * S_star;
 
-        U_star_0[system->energy] = coeff_0 * (E0  + (S_star - u0) * (S_star + p0 / (rho0 * (S0 - u0))));
-        U_star_1[system->energy] = coeff_1 * (E1  + (S_star - u1) * (S_star + p1 / (rho1 * (S1 - u1))));
+        U_star_0[system->energy] = coeff_0 * (E0 / rho0  + (S_star - u0) * (S_star + p0 / (rho0 * (S0 - u0))));
+        U_star_1[system->energy] = coeff_1 * (E1 / rho1  + (S_star - u1) * (S_star + p1 / (rho1 * (S1 - u1))));
 
 
         if (S0 >= 0)
@@ -98,14 +100,14 @@ void HLLCSolver::computeFlux(SystemOfEquation* system)
         {
             for (size_t j = 0; j < system->systemOrder; j++)
             {
-                system->Flux[j][i] = system->F[j][i] + S_star * (U_star_0[j] - system->U[j][i]);
+                system->Flux[j][i] = system->F[j][i] + S0 * (U_star_0[j] - system->U[j][i]);
             }
         }
         else if (S_star <= 0 && S1 >= 0)
         {
             for (size_t j = 0; j < system->systemOrder; j++)
             {
-                system->Flux[j][i] = system->F[j][i + 1] + S_star * (U_star_1[j] - system->U[j][i + 1]);
+                system->Flux[j][i] = system->F[j][i + 1] + S1 * (U_star_1[j] - system->U[j][i + 1]);
             }
         }
     }
@@ -324,8 +326,8 @@ void HLLSimple::computeFlux(SystemOfEquation *system)
 
         SR = (std::max)({u0 + c0, uStar + cStar});
         SL = (std::min)({u1 - c1, uStar - cStar});
-        // toMaxVelocity((std::max)({fabs(SR), fabs(SL)}));
-        toMaxVelocity(fabs(uStar));
+        toMaxVelocity((std::max)({fabs(SR), fabs(SL)}));
+        // toMaxVelocity(max(fabs(uStar));
         for(size_t j = 0; j < system->systemOrder; j++)
         {
             FR = system->F[j][i+1];

@@ -69,7 +69,8 @@ int main()
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
         velocity_left, density_left, T_left,
-        velocity_right, density_right, T_right);
+        velocity_right, density_right, T_right
+        );
 
 
     //////////////////////////////////////////////////////////////
@@ -121,11 +122,11 @@ int main()
     std::cout << "mean free path: " << MFP << std::endl;
 
     solverParams solParam;
-    solParam.NumCell     = 1e2 / 2 + 2;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 1e2 + 2;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.67;   // Ar
     // solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
-    solParam.MaxIter     = 10000000; // максимальное кол-во итареций
+    solParam.MaxIter     = 1000000; // максимальное кол-во итареций
     solParam.Ma       = 3.8;    // Число Маха
 
     double precision = 1E-7; // точность
@@ -140,9 +141,10 @@ int main()
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
 
-    // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
+    // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLSimple);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLSimple);
     double h = 30 * MFP; // m
+    // double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
