@@ -38,6 +38,7 @@ struct HLLESolver : public RiemannSolver
 
 struct HLLSimple : public RiemannSolver
 {
+    void computeFlux(SystemOfEquation *system);
     void computeFlux(SystemOfEquation *system, double dt, double dh);
 };
 
