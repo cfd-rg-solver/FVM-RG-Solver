@@ -44,7 +44,8 @@ struct HLLSimple : public RiemannSolver
 
 struct ExacRiemanSolver : public RiemannSolver
 {
-    void computeFlux(SystemOfEquation *system, double dh);
+    // void computeFlux(SystemOfEquation *system, double dh);
+    void computeFlux(SystemOfEquation *system);
 
 private:
      macroParam exacRiemanSolver(macroParam left, macroParam right, double Gamma);
