@@ -882,7 +882,7 @@ void Shockwave1::updateU(double dh, double dt)
     {
         for (int j = 0; j < systemOrder; j++)
         {
-            U[j][i] += (0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1]) / (dh)) * dt;
+            U[j][i] += (0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i + 1] - Fv[j][i - 1]) / (2*dh)) * dt;
         }
     }
 }
@@ -902,33 +902,35 @@ void Shockwave1::updateBorderU(vector<macroParam>& points) {
 void Shockwave1::computeF(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
+    macroParam p1;
     // #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
-        macroParam p0, p1, p2;
-        double denominator = 1.;
-        if (i != 0 && i != numberOfCells - 1)
-        {
-            p0 = points[i - 1];
-            p1 = points[i];
-            p2 = points[i + 1];
-            denominator = 2. * dh;
-        }
-        else if (i == 0)
-        {
-            p0 = points[i];
-            p1 = points[i];
-            p2 = points[i + 1];
-            denominator = dh;
-        }
-        else if (i == (numberOfCells - 1))
-        {
-            p0 = points[i - 1];
-            p1 = points[i];
-            p2 = points[i];
-            denominator = dh;
-        }
+        p1 = points[i];
+        // macroParam p0, p1, p2;
+        // double denominator = 1.;
+        // if (i != 0 && i != numberOfCells - 1)
+        // {
+        //     p0 = points[i - 1];
+        //     p1 = points[i];
+        //     p2 = points[i + 1];
+        //     denominator = 2. * dh;
+        // }
+        // else if (i == 0)
+        // {
+        //     p0 = points[i];
+        //     p1 = points[i];
+        //     p2 = points[i + 1];
+        //     denominator = dh;
+        // }
+        // else if (i == (numberOfCells - 1))
+        // {
+        //     p0 = points[i - 1];
+        //     p1 = points[i];
+        //     p2 = points[i];
+        //     denominator = dh;
+        // }
 
         // double dT_dy = (p2.temp - p0.temp) / denominator;
 

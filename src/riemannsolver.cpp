@@ -371,9 +371,10 @@ void HLLSimple::computeFlux(SystemOfEquation *system, double dt, double dh)
     }
 }
 
-void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
+void ExacRiemanSolver::computeFlux(SystemOfEquation *system)
 {
-#pragma omp parallel for schedule(static)
+    toMaxVelocity(-1);
+    #pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
         macroParam left,right,point;
@@ -384,48 +385,22 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system, double dh)
         left.velocity = system->getVelocity(i);
         right.velocity= system->getVelocity(i+1);
 
-        point = exacRiemanSolver(left,right, solParam.Gamma);
+        point = exacRiemanSolver(left, right, solParam.Gamma);
         point.mixture = system->mixture;
-        //тут конкретная реализация под задачу сода, ибо этот момент я видимо не продумал архитектуру,
-        //надо видимо делать для точного метода какой-то особый случай, ну или здесь внутри прописывать if-ы и в системе ввести поле которое сможет сказать о типе
-        //указателя базового класса, чтобы можно было определять тип объекта по указателю
 
-        double T = point.pressure/(point.density*UniversalGasConstant/point.mixture.molarMass());
-        double etta = system->coeffSolver->shareViscositySimple(point);
-        double lambda = system->coeffSolver->lambda(point);
 
-        // Рассчитываем производные в точке i
-        double dv_dy = (system->getVelocity(i+1) - system->getVelocity(i)) / (dh);
-        double dT_dy = (system->getTemp(i+1) - system->getTemp(i)) / (dh);
-        vector<double> dy_dy(system->mixture.NumberOfComponents);
+        // specifically for SW problem, for now for a 1-component monoatomic gas
 
-        //учёт граничных условий
-        if(i == 0 || i == system->numberOfCells-1)
-            fill(dy_dy.begin(), dy_dy.end(),system->border->get_dyc_dy());
-        else
-        {
-            for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-            {
-                dy_dy[j] = 0;
-            }
-        }
-        //заполнение вектора потоков
-        for(size_t j = 0 ; j <system->mixture.NumberOfComponents; j++)
-        {
-            if(j!=0)
-                //system->Flux[j][i] = -point.density * system->mixture.getEffDiff(j) * dy_dy[j];
-                system->Flux[j][i] = -point.density * 0 * dy_dy[j];
-            else
-                system->Flux[j][i] = 0;
-        }
-        system->Flux[system->v_tau][i] = -etta * dv_dy;
-        system->Flux[system->v_normal][i] = 0;
-        system->Flux[system->energy][i] = 0;
+        double fullEnergy = 3. / 2. * point.pressure/point.density + pow(point.velocity, 2) / 2.;
+
         for(size_t j = 0 ; j < system->mixture.NumberOfComponents; j++)
         {
-            system->Flux[system->energy][i]+= - point.density * 0/*system->mixture.getEffDiff(j)*/*dy_dy[j]  /*system->mixture.getEntalp(i)*/;
+            system->Flux[j][i] = point.density * point.velocity;
         }
-        system->Flux[system->energy][i] += -lambda*dT_dy - etta*point.velocity*dv_dy;
+
+        system->Flux[system->v_normal][i] = point.density * pow(point.velocity, 2) + point.pressure;
+        system->Flux[system->energy][i] = point.density * point.velocity * fullEnergy + point.pressure * point.velocity;
+
     }
 }
 
@@ -434,7 +409,7 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     double maxIteration = 40; // макс число итераций
     double TOL=1e-8;
     double lambda = 0; // линия на грани КО
-    macroParam ret(left.mixture);;
+    macroParam ret(left.mixture);
     double left_soundspeed=sqrt ( Gamma*left.pressure/left.density );
     double right_soundspeed=sqrt( Gamma*right.pressure/right.density);
 
@@ -499,6 +474,9 @@ macroParam ExacRiemanSolver::exacRiemanSolver(macroParam left, macroParam right,
     }
     // calculate star speed */
     double star_speed=0.5* ( left.velocity + right.velocity ) +0.5* ( f2-f1 );
+
+    toMaxVelocity(star_speed);
+
     double left_star_density, left_tail_speed, left_head_speed,
         right_star_density, right_tail_speed,right_head_speed;
     //LEFT
