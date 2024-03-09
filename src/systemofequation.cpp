@@ -805,8 +805,8 @@ void Shockwave1::prepareSolving(vector<macroParam> &points)
     for (auto i = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
-        U[v_normal][i] = points[i].density * points[i].velocity_normal;
-        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_normal, 2) * points[i].density;
+        U[v_tau][i] = points[i].density * points[i].velocity_tau;
+        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_tau, 2) * points[i].density;
     }
 }
 
@@ -823,6 +823,7 @@ void Shockwave1::prepareIndex()
 {
     systemOrder = numberOfComponents + 2; // однокомпонентная постановка
     v_normal = numberOfComponents ;
+    v_tau = numberOfComponents;
     energy = numberOfComponents + 1;
 }
 
@@ -833,13 +834,13 @@ double Shockwave1::getDensity(size_t i)
 
 double Shockwave1::getVelocity(size_t i)
 {
-    double v = U[v_normal][i] / getDensity(i);
+    double v = U[v_tau][i] / getDensity(i);
     return v;
 }
 
-double Shockwave1::getVelocityNormal(size_t i)
+double Shockwave1::getVelocityTau(size_t i)
 {
-    double v = U[v_normal][i] / getDensity(i);
+    double v = U[v_tau][i] / getDensity(i);
     return v;
 }
 
@@ -891,8 +892,8 @@ void Shockwave1::updateBorderU(vector<macroParam>& points) {
     for (int i : {0, (int)(numberOfCells - 1)})
     {
         U[0][i] = points[i].density;
-        U[v_normal][i] = points[i].density * points[i].velocity_normal;
-        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_normal, 2) * points[i].density;
+        U[v_tau][i] = points[i].density * points[i].velocity_tau;
+        U[energy][i] = points[i].pressure / (2. / 3.) + 0.5 * pow(points[i].velocity_tau, 2) * points[i].density;
         //or energyCalculator->calcEnergy(points[i]);
     }
     return;
@@ -908,37 +909,11 @@ void Shockwave1::computeF(vector<macroParam>& points, double dh)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
         p1 = points[i];
-        // macroParam p0, p1, p2;
-        // double denominator = 1.;
-        // if (i != 0 && i != numberOfCells - 1)
-        // {
-        //     p0 = points[i - 1];
-        //     p1 = points[i];
-        //     p2 = points[i + 1];
-        //     denominator = 2. * dh;
-        // }
-        // else if (i == 0)
-        // {
-        //     p0 = points[i];
-        //     p1 = points[i];
-        //     p2 = points[i + 1];
-        //     denominator = dh;
-        // }
-        // else if (i == (numberOfCells - 1))
-        // {
-        //     p0 = points[i - 1];
-        //     p1 = points[i];
-        //     p2 = points[i];
-        //     denominator = dh;
-        // }
-
-        // double dT_dy = (p2.temp - p0.temp) / denominator;
-
         // 1-е уравнение (однокомпонентная постановка) в векторе F с консервативными составляющими:
-        F[0][i] = p1.density * p1.velocity_normal;
+        F[0][i] = p1.density * p1.velocity_tau;
         // Последние 2 уравнения в векторе F с консервативными составляющими:
-        F[v_normal][i] = p1.density * pow(p1.velocity_normal, 2) + p1.pressure;
-        F[energy][i] = p1.density * p1.velocity_normal * getEnergy(i) + p1.pressure * p1.velocity_normal;
+        F[v_tau][i] = p1.density * pow(p1.velocity_tau, 2) + p1.pressure;
+        F[energy][i] = p1.density * p1.velocity_tau * getEnergy(i) + p1.pressure * p1.velocity_tau;
     }
 }
 
@@ -974,7 +949,7 @@ void Shockwave1::computeFv(vector<macroParam>& points, double dh)
         }
 
         // Рассчитываем производные:
-        double dv_normal_dy = (p2.velocity_normal - p0.velocity_normal) / denominator;
+        double dv_tau_dy = (p2.velocity_tau - p0.velocity_tau) / denominator;
         double dT_dy = (p2.temp - p0.temp) / denominator;
         vector<double> dy_dy(1);
         // Учёт граничных условий:
@@ -996,8 +971,7 @@ void Shockwave1::computeFv(vector<macroParam>& points, double dh)
             Fv[j][i] = 0;
         }
         // Последние 2 уравнения в векторе F с вязкими составляющими:
-        Fv[v_normal][i] = -(bulk + 4. / 3. * etta) * dv_normal_dy;
-        Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_normal_dy * p1.velocity_normal;
-
+        Fv[v_tau][i] = -(bulk + 4. / 3. * etta) * dv_tau_dy;
+        Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_tau_dy * p1.velocity_tau;
     }
 }
