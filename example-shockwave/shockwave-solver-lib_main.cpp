@@ -39,18 +39,6 @@ int main()
     std::vector<MixtureComponent> tmp2 = {argon};
     Mixture Ar(tmp2);
 
-    //////////////////////////////////////////////////////////////
-    ///////////////////// Border Condition for Couette ///////////
-    //////////////////////////////////////////////////////////////
-    double T_up_wall = 1000;
-    double T_down_wall = 1000;
-    double velocity_up = 300;
-    double velocity_down = 0;
-
-    BorderConditionCouette borderConditionCouette;
-    borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
-
-
     ///////////////////////////////////////////////////////////////
     ///////////////////// Border Condition for Shock Wave ////////
     /////////////////////////////////////////////////////////////
@@ -69,28 +57,9 @@ int main()
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
         velocity_left, density_left, T_left,
-        velocity_right, density_right, T_right
+                velocity_right, density_right, T_right
+
         );
-
-
-    //////////////////////////////////////////////////////////////
-    ///////////////////// Start param for Couette ////////////////
-    ////////////////////////////  Ar  ///////////////////////////
-
-    UniformDistributionBorder startParamCouetteAr;
-    // UniformDistributionBorderPersonal startParamCouetteArPersonal;
-    macroParam startParamAr(Ar);
-    startParamAr.density = 0.03168;
-    startParamAr.fractionArray[0] = 1;
-    startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
-
-    startParamAr.temp = 140; //140
-    startParamAr.velocity_tau = 0;
-    startParamAr.velocity_normal = 0;
-
-
-    startParamCouetteAr.setBorderCondition(&borderConditionCouette);
-    startParamCouetteAr.setDistributionParameter(startParamAr);
 
     //////////////////////////////////////////////////////////////
     ////////////////// Start param for Shockwave /////////////////
@@ -101,12 +70,16 @@ int main()
 
     leftStartParam.density = density_left;
     leftStartParam.pressure = pressure_left;
+    leftStartParam.velocity_tau = velocity_left;
+    leftStartParam.velocity_normal = 0;
     leftStartParam.velocity = velocity_left;
     leftStartParam.fractionArray[0] = 1;
     leftStartParam.densityArray[0] =  leftStartParam.fractionArray[0] * leftStartParam.density;
 
     rightStartParam.density = density_right;
     rightStartParam.pressure = pressure_right;
+    rightStartParam.velocity_normal = 0;
+    rightStartParam.velocity_tau = velocity_right;
     rightStartParam.velocity = velocity_right;
     rightStartParam.fractionArray[0] = 1;
     rightStartParam.densityArray[0] = rightStartParam.fractionArray[0] * rightStartParam.density;
@@ -143,9 +116,9 @@ int main()
     reader.getPoints(startParameters);
 
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::ExacRiemanSolver);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
     double h = 30 * MFP; // m
-    // double h = 1;
+//    double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);

@@ -63,8 +63,8 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
             points[i].density  = left.density;
             points[i].fractionArray = left.fractionArray;
             points[i].densityArray = left.densityArray;
-            points[i].velocity_tau = 0;
-            points[i].velocity_normal = left.velocity;
+            points[i].velocity_tau = left.velocity_tau;
+            points[i].velocity_normal = left.velocity_normal;
             points[i].velocity = left.velocity;
             points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
         }
@@ -75,8 +75,8 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
             points[i].density  = right.density;
             points[i].fractionArray = right.fractionArray;
             points[i].densityArray = right.densityArray;
-            points[i].velocity_tau = 0;
-            points[i].velocity_normal = right.velocity;
+            points[i].velocity_tau = right.velocity_tau;
+            points[i].velocity_normal = right.velocity_normal;
             points[i].velocity = right.velocity;
             points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
         }
@@ -89,8 +89,8 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
             points[i].density  = left.density;
             points[i].fractionArray = left.fractionArray;
             points[i].densityArray = left.densityArray;
-            points[i].velocity_tau = 0;
-            points[i].velocity_normal = left.velocity;
+            points[i].velocity_tau = left.velocity_tau;
+            points[i].velocity_normal = left.velocity_normal;
             points[i].velocity = left.velocity;
             points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
         }
@@ -101,8 +101,8 @@ void GapDistribution::setStartDistribution(vector<macroParam> &points)
             points[i].density  = right.density;
             points[i].fractionArray = right.fractionArray;
             points[i].densityArray = right.densityArray;
-            points[i].velocity_tau = 0;
-            points[i].velocity_normal = right.velocity;
+            points[i].velocity_tau = right.velocity_tau;
+            points[i].velocity_normal = right.velocity_normal;
             points[i].velocity = right.velocity;
             points[i].temp = points[i].pressure * points[i].mixture.molarMass() / points[i].density / UniversalGasConstant;
         }
