@@ -57,8 +57,7 @@ int main()
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
         velocity_left, density_left, T_left,
-                velocity_right, density_right, T_right
-
+        velocity_right, density_right, T_right
         );
 
     //////////////////////////////////////////////////////////////

@@ -47,7 +47,7 @@ void UniformDistributionBorder::setStartDistribution(vector<macroParam> &points)
         points[i].velocity = fabs(points[i].velocity_tau);
     }
     // для points[0] и points[solParam.NumCell-1] (!важно что идёт после цикла!)
-    borderCondition->updatePoints(points); // usingBorderCondition
+    borderCondition->updatePointsStart(points); // usingBorderCondition
     return;
 }
 

@@ -1,21 +1,41 @@
 #pragma once
 #include "global.h"
 #include "macroparam.h"
+#include "coeffsolver.h"
 
 struct BorderCondition
 {
     virtual void updatePoints(vector<macroParam> &points) = 0;
-
+    virtual void updatePointsStart(vector<macroParam> &points){updatePoints(points);};
+    void setCoeffSolver(CoeffSolver* coeffSolver_){coeffSolver = coeffSolver_;};
+    void setDeltaH(double delta_h_){delta_h = delta_h_;};
     virtual double get_dyc_dy(){return 0;}; //затычка для более серьёзных условий
+protected:
+    CoeffSolver* coeffSolver;
+    double delta_h;
 };
 
 struct BorderConditionCouette : public BorderCondition
 {
     void updatePoints(vector<macroParam> &points);
     void setWallParameters(double up_velocity_ , double down_velocity_ , double up_temp_ , double down_temp_)
-    {up_velocity = up_velocity_ ; down_velocity = down_velocity_; up_temp = up_temp_; down_temp = down_temp_;};
+        {up_velocity = up_velocity_ ; down_velocity = down_velocity_; up_temp = up_temp_; down_temp = down_temp_;};
     double get_dyc_dy(){return 0;};
 protected:
+    double up_velocity , down_velocity, up_temp , down_temp;
+};
+
+struct BorderConditionCouetteSlip : public BorderConditionCouette
+{
+    void updatePointsStart(vector<macroParam> &points);
+    void updatePoints(vector<macroParam> &points);
+    void setWallParameters(double up_velocity_ , double down_velocity_ , double up_temp_ , double down_temp_)
+        {up_velocity = up_velocity_ ; down_velocity = down_velocity_; up_temp = up_temp_; down_temp = down_temp_;};
+    double get_dyc_dy(){return 0;};
+protected:
+    double calcVelocityHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity);
+    double calcTempHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity, double wallTemperature, double velocityHalf);
+    double interp1(double value1, double value2);
     double up_velocity , down_velocity, up_temp , down_temp;
 };
 

@@ -38,12 +38,8 @@ int main()
     //////////////////////////////////////////////////////////////
     ///////////////////// Border Condition for Couette ///////////
     /////////////////////////// Personal /////////////////////////
-    T_up_wall = 1000;
-    velocity_up = 0;
-    double start_velocity_normal = 10;
-
-    BorderConditionPersonal borderConditionPersonal;
-    borderConditionPersonal.setWallParameters(0, 0, T_up_wall, T_down_wall); // в данном кейсе (со сплошной среджой и стенкой) значимым является только значения на верхней стенке
+    BorderConditionCouetteSlip borderConditionCouetteSlip;
+    borderConditionCouetteSlip.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
 
     //////////////////////////////////////////////////////////////
 
@@ -56,6 +52,7 @@ int main()
     argon.molarMass = 0.039948;
     argon.mass = 6.633521356992E-26;
     argon.epsilonDevK = 1.8845852298E-21/kB; //! Mistake
+    argon.numberAtoms = 1;
     argon.sigma = 3.33E-10;
 
     // O2/O
@@ -89,7 +86,6 @@ int main()
     ////////////////////////////  O2_O  /////////////////////////
 
     UniformDistributionBorder startParamCouetteO2_O;
-    UniformDistributionBorderPersonal startParamCouetteO2_OPersonal;
     macroParam startParamO2_O(O2_O);
     startParamO2_O.density = 0.03168;
     startParamO2_O.fractionArray[0] = 0.99;
@@ -98,46 +94,40 @@ int main()
     startParamO2_O.fractionArray[1] = 0.01;
     startParamO2_O.densityArray[1] =  startParamO2_O.fractionArray[1] * startParamO2_O.density;
 
-    startParamO2_O.temp = 140; //140
+    startParamO2_O.temp = 900; //140
     startParamO2_O.velocity_tau = 0;
     startParamO2_O.velocity_normal = 0;
 
     startParamCouetteO2_O.setBorderCondition(&borderConditionCouette);
     startParamCouetteO2_O.setDistributionParameter(startParamO2_O);
 
-    startParamCouetteO2_OPersonal.setBorderCondition(&borderConditionPersonal);
-    startParamCouetteO2_OPersonal.setDistributionParameter(startParamO2_O);
-    startParamCouetteO2_OPersonal.setNormalVelocity(start_velocity_normal);
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Couette ////////////////
     ////////////////////////////  Ar  ///////////////////////////
 
     UniformDistributionBorder startParamCouetteAr;
-    UniformDistributionBorderPersonal startParamCouetteArPersonal;
+    UniformDistributionBorder startParamCouetteArSlip; // Slip Border
     macroParam startParamAr(Ar);
     startParamAr.density = 0.03168;
     startParamAr.fractionArray[0] = 1;
     startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
 
-    startParamAr.temp = 140; //140
+    startParamAr.temp = 900; //140
     startParamAr.velocity_tau = 0;
     startParamAr.velocity_normal = 0;
-
 
     startParamCouetteAr.setBorderCondition(&borderConditionCouette);
     startParamCouetteAr.setDistributionParameter(startParamAr);
 
-    startParamCouetteArPersonal.setBorderCondition(&borderConditionPersonal);
-    startParamCouetteArPersonal.setDistributionParameter(startParamAr);
-    startParamCouetteArPersonal.setNormalVelocity(start_velocity_normal);
-
+    startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
+    startParamCouetteArSlip.setDistributionParameter(startParamAr);
 
     //////////////////////////////////////////////////////////////
 
     solverParams solParam;
     solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-//    solParam.Gamma    = 1.67;   // Ar
-    solParam.Gamma    = 1.32;   // O2_O
+    solParam.Gamma    = 1.67;   // Ar
+//    solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
@@ -154,8 +144,8 @@ int main()
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
 
-//    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
+//    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
@@ -163,9 +153,11 @@ int main()
     solver.setDelta_h(h / (solParam.NumCell - 2));
 
 
-    solver.setBorderConditions(&borderConditionCouette);  // for couette
+    //solver.setBorderConditions(&borderConditionCouette);
+    solver.setBorderConditions(&borderConditionCouetteSlip); // Slip border
 
-    solver.setStartDistribution(&startParamCouetteO2_O); // for couette Ar
+    //solver.setStartDistribution(&startParamCouetteAr);
+    solver.setStartDistribution(&startParamCouetteArSlip); // Slip border
 
     solver.solve();
 }

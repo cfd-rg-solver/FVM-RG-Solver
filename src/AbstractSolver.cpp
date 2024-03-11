@@ -68,6 +68,8 @@ void AbstractSolver::setBorderConditions(BorderCondition *border_)
 {
     border = border_;
     system->setBorderCondition(border);
+    border->setCoeffSolver(coeffSolver);
+    border->setDeltaH(delta_h);
 }
 
 void AbstractSolver::correctData()
@@ -157,7 +159,7 @@ void AbstractSolver::setDt()
     if(max!=0)
         dt = solParam.CFL*delta_h/max;
     else
-        dt = 0.000001;
+        dt = 0.00001;
     timeSolvind.push_back(dt);
     return;
 }
