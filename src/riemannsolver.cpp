@@ -256,16 +256,10 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
     //#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells-1; i++)
     {
-        double H0, H1, c0, c1, u0, u1, v0,v1,V0,V1, rho0, rho1, u_avg,v_avg, H_avg, c_avg, b0, b1, b_plus, b_minus;
-
-        u0 = system->getVelocityNormal(i);
-        u1 = system->getVelocityNormal(i+1);
+        double H0, H1, c0, c1, v0,v1,rho0, rho1,v_avg, H_avg, c_avg, b0, b1, b_plus, b_minus;
 
         v0 = system->getVelocityTau(i);
         v1 = system->getVelocityTau(i+1);
-
-        V0 = sqrt(pow(u0,2) + pow(v0,2));
-        V1 = sqrt(pow(u1,2) + pow(v1,2));
 
         //        H0 = (system->getPressure(i))/(system->getDensity(i)) + pow(V0,2)/2;
         //        H1 = (system->getPressure(i+1))/(system->getDensity(i+1))+ pow(V1,2)/2;
@@ -280,21 +274,20 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
         H1 = system->getEnergy(i+1) + system->getPressure(i+1)/system->getDensity(i+1);
 
 
-        c0 = sqrt((solParam.Gamma - 1.)*(fabs(H0 - 0.5 * pow(V0,2))));
-        c1 = sqrt((solParam.Gamma - 1.)*(fabs(H1 - 0.5 * pow(V1,2))));
+        c0 = sqrt((solParam.Gamma - 1.)*(fabs(H0 - 0.5 * pow(v0,2))));
+        c1 = sqrt((solParam.Gamma - 1.)*(fabs(H1 - 0.5 * pow(v1,2))));
 
         rho0 = sqrt(system->getDensity(i));
         rho1 = sqrt(system->getDensity(i+1));
 
-        u_avg = (rho0 * u0 + rho1 * u1) / (rho0 + rho1);
         v_avg = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
 
         H_avg = (rho0 * H0 + rho1 * H1) / (rho0 + rho1);
         // c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
-        c_avg = sqrt((solParam.Gamma - 1)*(fabs(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2)) )));
+        c_avg = sqrt((solParam.Gamma - 1)*(fabs(H_avg - 0.5 * pow(v_avg,2) )));
 
-        b0 = (std::min)({v_avg - c_avg, u0 - c0});
-        b1 = (std::max)({v_avg + c_avg, u1 + c1});
+        b0 = (std::min)({v_avg - c_avg, v0 - c0});
+        b1 = (std::max)({v_avg + c_avg, v1 + c1});
 
         toMaxVelocity(max(fabs(b0),fabs(b1)));
 
@@ -318,8 +311,8 @@ void HLLSimple::computeFlux(SystemOfEquation *system)
     {
 
 
-        u0 = system->getVelocityNormal(i);
-        u1 = system->getVelocityNormal(i+1);
+        u0 = system->getVelocityTau(i);
+        u1 = system->getVelocityTau(i+1);
 
         H0 = system->getEnergy(i) + system->getPressure(i)/system->getDensity(i);
         H1 = system->getEnergy(i+1) + system->getPressure(i+1)/system->getDensity(i+1);
@@ -398,7 +391,7 @@ void ExacRiemanSolver::computeFlux(SystemOfEquation *system)
             system->Flux[j][i] = point.density * point.velocity;
         }
 
-        system->Flux[system->v_normal][i] = point.density * pow(point.velocity, 2) + point.pressure;
+        system->Flux[system->v_tau][i] = point.density * pow(point.velocity, 2) + point.pressure;
         system->Flux[system->energy][i] = point.density * point.velocity * fullEnergy + point.pressure * point.velocity;
 
     }

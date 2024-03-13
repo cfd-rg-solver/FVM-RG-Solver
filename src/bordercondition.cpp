@@ -106,6 +106,30 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
         points[0].velocity_tau = left_velocity;
         points[0].velocity = left_velocity;
 
+        points[0].density = left_density;
+        points[0].densityArray[0] = left_density; // !!! only for 1 component gas
+        points[0].fractionArray = points[1].fractionArray;
+
+        points[0].temp = left_temp;
+        points[0].pressure = points[0].density * UniversalGasConstant * points[0].temp / mixture.molarMass(points[0].fractionArray);
+
+        points[N-1].velocity_normal = 0;
+        points[N-1].velocity_tau = right_velocity;
+        points[N-1].velocity = right_velocity;
+
+        points[N-1].density = right_density;
+        points[N-1].densityArray[0] = right_density; // !!! only for 1 component gas
+        points[N-1].fractionArray = points[N-2].fractionArray;
+
+        points[N-1].temp = right_temp;
+        points[N-1].pressure = points[N-1].density * UniversalGasConstant * points[N-1].temp / mixture.molarMass(points[N-1].fractionArray) ;
+    }
+    // works strange
+    else {
+        points[0].velocity_normal = 0;
+        points[0].velocity_tau = points[0].velocity_tau;
+        points[0].velocity = points[0].velocity_tau;
+
         points[0].densityArray = points[1].densityArray;
         points[0].fractionArray = points[1].fractionArray;
 
@@ -114,8 +138,8 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
         points[0].temp = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (points[0].density * UniversalGasConstant); // из уравнения состояния ид газа
 
         points[N-1].velocity_normal = 0;
-        points[N-1].velocity_tau = right_velocity;
-        points[N-1].velocity = right_velocity;
+        points[N-1].velocity_tau = points[N-1].velocity_tau;
+        points[N-1].velocity = points[N-1].velocity_tau;
 
         points[N-1].densityArray = points[N-2].densityArray;
         points[N-1].fractionArray = points[N-2].fractionArray;
@@ -123,31 +147,6 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
         points[N-1].pressure = points[N-2].pressure;
         points[N-1].density = points[N-2].density;
         points[N-1].temp = points[N-1].pressure * mixture.molarMass(points[N-1].fractionArray) / (points[N-1].density * UniversalGasConstant); // из уравнения состояния ид газа
-    }
-
-    // ! another option (check if correct)
-    else { // not changed
-        points[0].velocity_normal = left_velocity;
-        points[0].velocity_tau = 0;
-        points[0].velocity = points[0].velocity_normal;
-
-        points[0].densityArray = points[1].densityArray;
-        points[0].fractionArray = points[1].fractionArray;
-
-        points[0].density = left_density;
-        points[0].temp = left_temp;
-        points[0].pressure = points[0].density * UniversalGasConstant * points[0].temp / mixture.molarMass(points[0].fractionArray);
-
-        points[N-1].velocity_normal = right_velocity;
-        points[N-1].velocity_tau = 0;
-        points[N-1].velocity = points[N-1].velocity_normal;
-
-        points[N-1].densityArray = points[N-2].densityArray;
-        points[N-1].fractionArray = points[N-2].fractionArray;
-
-        points[N-1].density = right_density;
-        points[N-1].temp = right_temp;
-        points[N-1].pressure = points[N-1].density * UniversalGasConstant * points[N-1].temp / mixture.molarMass(points[N-1].fractionArray) ;
     }
 
 }
