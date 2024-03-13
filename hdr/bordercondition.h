@@ -29,14 +29,13 @@ struct BorderConditionCouetteSlip : public BorderConditionCouette
 {
     void updatePointsStart(vector<macroParam> &points);
     void updatePoints(vector<macroParam> &points);
-    void setWallParameters(double up_velocity_ , double down_velocity_ , double up_temp_ , double down_temp_)
-        {up_velocity = up_velocity_ ; down_velocity = down_velocity_; up_temp = up_temp_; down_temp = down_temp_;};
     double get_dyc_dy(){return 0;};
 protected:
-    double calcVelocityHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity);
-    double calcTempHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity, double wallTemperature, double velocityHalf);
+    double calcVelocityHalf(macroParam p1, size_t component, string side);
+    double calcTempHalf(macroParam p1, size_t component, double velocityHalf, string side);
     double interp1(double value1, double value2);
-    double up_velocity , down_velocity, up_temp , down_temp;
+    double down_temp_last, up_temp_last;
+    vector<double> fraction_array_down_last, fraction_array_up_last;
 };
 
 

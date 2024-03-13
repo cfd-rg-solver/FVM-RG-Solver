@@ -89,7 +89,7 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
 
 void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 {
-    bool BCtype = 1;
+    bool BCtype = 0;
     size_t N = points.size();
     Mixture mixture = points[1].mixture;
 
@@ -118,26 +118,24 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
     }
 
     // ! another option (check if correct)
-    else { // not changed
-        points[0].velocity_normal = left_velocity;
-        points[0].velocity_tau = 0;
-        points[0].velocity = points[0].velocity_normal;
-
-        points[0].densityArray = points[1].densityArray;
-        points[0].fractionArray = points[1].fractionArray;
+    else {
+        points[0].velocity_normal = 0;
+        points[0].velocity_tau = left_velocity;
+        points[0].velocity = points[0].velocity_tau;
 
         points[0].density = left_density;
+        points[0].densityArray[0] = left_density;
+        points[0].fractionArray = points[1].fractionArray;
         points[0].temp = left_temp;
         points[0].pressure = points[0].density * UniversalGasConstant * points[0].temp / mixture.molarMass(points[0].fractionArray);
 
-        points[N-1].velocity_normal = right_velocity;
-        points[N-1].velocity_tau = 0;
-        points[N-1].velocity = points[N-1].velocity_normal;
-
-        points[N-1].densityArray = points[N-2].densityArray;
-        points[N-1].fractionArray = points[N-2].fractionArray;
+        points[N-1].velocity_normal = 0;
+        points[N-1].velocity_tau = right_velocity;
+        points[N-1].velocity = points[N-1].velocity_tau;
 
         points[N-1].density = right_density;
+        points[N-1].densityArray[0] = right_density;
+        points[N-1].fractionArray = points[N-2].fractionArray;
         points[N-1].temp = right_temp;
         points[N-1].pressure = points[N-1].density * UniversalGasConstant * points[N-1].temp / mixture.molarMass(points[N-1].fractionArray) ;
     }
@@ -189,6 +187,9 @@ void BorderConditionCouetteSlip::updatePointsStart(vector<macroParam> &points)
         for(int i = 0; i < points[0].mixture.components.size(); i++)
             points[0].densityArray[i] = points[0].density * points[0].fractionArray[i];
 
+        // remember for next iteration
+        down_temp_last = interp1(points[0].temp, points[1].temp); // questions!!! if start temp = wall temp - it's ok, in other cases - bad temp behaviour
+        fraction_array_down_last = points[0].densityArray;
 
         //solParam.NumCell-1
         points[N-1].mixture = mixture;
@@ -202,6 +203,14 @@ void BorderConditionCouetteSlip::updatePointsStart(vector<macroParam> &points)
 
         for(int i = 0; i < points[N-1].mixture.components.size(); i++)
             points[N-1].densityArray[i] = points[N-1].density * points[N-1].fractionArray[i];
+
+        // remember for next iteration
+        up_temp_last = interp1(points[N-1].temp, points[N-2].temp); // questions!!! if start temp = wall temp - it's ok, in other cases - bad temp behaviour
+        fraction_array_up_last = points[N-1].densityArray;
+    }
+    else
+    {
+        // TODO
     }
 }
 
@@ -211,6 +220,8 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
     bool presEq = 1;
     size_t N = points.size();
     Mixture mixture = points[1].mixture;
+    double velocityHalf;
+    double temperatureHalf;
     if(presEq)
     {
         //0
@@ -221,18 +232,17 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
         for(int i = 0; i < points[0].mixture.components.size(); i++)
             points[0].densityArray[i] = points[0].density * points[0].fractionArray[i];
 
-        double velocityHalf;
-        double temperatureHalf;
-
-        velocityHalf = calcVelocityHalf(points[0], points[1], 0, down_velocity);
-        temperatureHalf = calcTempHalf(points[0], points[1], 0, down_velocity, down_temp, velocityHalf);
+        velocityHalf = calcVelocityHalf(points[1], 0, "down");
+        temperatureHalf = calcTempHalf(points[1], 0, velocityHalf, "down");
 
         points[0].velocity_tau = -points[1].velocity_tau + 2.* velocityHalf;
         points[0].velocity_normal = -points[1].velocity_normal;
         points[0].velocity = sqrt(pow(fabs(points[0].velocity_tau),2) + pow(fabs(points[0].velocity_normal),2));
-        points[0].temp = -points[1].temp + temperatureHalf;
+        points[0].temp = -points[1].temp + 2 * temperatureHalf;
 
-
+        // remember for next iteration
+        down_temp_last = interp1(points[0].temp, points[1].temp);
+        fraction_array_down_last = points[0].densityArray;
 
         //solParam.NumCell-1
         points[N-1].mixture = mixture;
@@ -242,13 +252,17 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
         for(int i = 0; i < points[N-1].mixture.components.size(); i++)
             points[N-1].densityArray[i] = points[N-1].density * points[N-1].fractionArray[i];
 
-        velocityHalf = calcVelocityHalf(points[N-1], points[N-2], 0, up_velocity);
-        temperatureHalf = calcTempHalf(points[N-1], points[N-2], 0, up_velocity, up_temp, velocityHalf);
+        velocityHalf = calcVelocityHalf(points[N-2], 0, "up");
+        temperatureHalf = calcTempHalf(points[N-2], 0, velocityHalf, "up");
 
         points[N-1].velocity_tau = -points[N-2].velocity_tau + 2.* velocityHalf;
         points[N-1].velocity_normal = -points[N-2].velocity_normal;
         points[N-1].velocity = sqrt(pow(points[N-1].velocity_tau,2) + pow(points[N-1].velocity_normal,2));
         points[N-1].temp = -points[N-2].temp +  2.* temperatureHalf;
+
+        // remember for next iteration
+        up_temp_last = interp1(points[N-1].temp, points[N-2].temp);
+        fraction_array_up_last = points[N-1].densityArray;
     }
     else
     {
@@ -256,19 +270,27 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
     }
 }
 
-double BorderConditionCouetteSlip::calcVelocityHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity)
+double BorderConditionCouetteSlip::calcVelocityHalf(macroParam p1, size_t component, string side)
 {
     // p0 - ghost cell, p1 - real cell
     int i = component;
-    double sigma = p0.mixture.sigma(i);
-    double rhoHalf = p0.densityArray[i];
-    double m = p0.mixture.mass(i);
-    double M = p0.mixture.molarMass(i);
-    macroParam point(p0.mixture);
-    point.temp = interp1(p0.temp, p1.temp);
-    for(size_t j = 0; j < point.mixture.NumberOfComponents; j++)
+    double sigma = 0.5; // [0 1]
+    double rhoHalf = p1.densityArray[i];
+    double m = p1.mixture.mass(i);
+    double M = p1.mixture.molarMass(i);
+    macroParam point(p1.mixture);
+    double wallVelocity = 0;
+    if(side == "down")
     {
-        point.fractionArray[j] = interp1(p0.densityArray[j], p1.densityArray[j]);
+        point.temp = down_temp_last;
+        point.fractionArray = fraction_array_down_last;
+        wallVelocity = down_velocity;
+    }
+    else if(side == "up")
+    {
+        point.temp = up_temp_last;
+        point.fractionArray = fraction_array_up_last;
+        wallVelocity = up_velocity;
     }
     double mu = coeffSolver->shareViscositySimple(point);
     double T_last = point.temp;
@@ -278,19 +300,29 @@ double BorderConditionCouetteSlip::calcVelocityHalf(macroParam p0, macroParam p1
     return numerator / denominator;
 }
 
-double BorderConditionCouetteSlip::calcTempHalf(macroParam p0, macroParam p1, size_t component, double wallVelocity, double wallTemperature, double velocityHalf)
+double BorderConditionCouetteSlip::calcTempHalf(macroParam p1, size_t component, double velocityHalf, string side)
 {
     // p0 - ghost cell, p1 - real cell
     int i = component;
-    double sigma = p0.mixture.sigma(i);
-    double rhoHalf = p0.densityArray[i];
-    double m = p0.mixture.mass(i);
-    double M = p0.mixture.molarMass(i);
-    macroParam point(p0.mixture);
-    point.temp = interp1(p0.temp, p1.temp);
-    for(size_t j = 0; j < point.mixture.NumberOfComponents; j++)
+    double sigma = 0.5; // [0 1]
+    double rhoHalf = p1.densityArray[i];
+    double m = p1.mixture.mass(i);
+    double M = p1.mixture.molarMass(i);
+    macroParam point(p1.mixture);
+    double wallTemperature = 0, wallVelocity = 0;
+    if(side == "down")
     {
-        point.fractionArray[j] = interp1(p0.densityArray[j], p1.densityArray[j]);
+        point.temp = down_temp_last;
+        point.fractionArray = fraction_array_down_last;
+        wallTemperature = down_temp;
+        wallVelocity = down_velocity;
+    }
+    else if(side ==  "up")
+    {
+        point.temp = up_temp_last;
+        point.fractionArray = fraction_array_up_last;
+        wallTemperature = up_temp;
+        wallVelocity = up_velocity;
     }
     double T_last = point.temp;
     double mult = (2 - sigma) / (2 * sigma) * sqrt((M_PI * m) / (2 * kB * T_last)) * (M * coeffSolver->lambda(point)) / (UniversalGasConstant * rhoHalf);
@@ -302,5 +334,5 @@ double BorderConditionCouetteSlip::calcTempHalf(macroParam p0, macroParam p1, si
 
 double BorderConditionCouetteSlip::interp1(double value1, double value2)
 {
-    return (value1 + value2) / 2;
+    return ((value1 + value2) / 2.);
 }

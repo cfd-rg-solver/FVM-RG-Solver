@@ -41,7 +41,7 @@ set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
 )
 
 add_subdirectory(example-couette)
-#add_subdirectory(example-shockwave)
+add_subdirectory(example-shockwave)
 
 find_package(OpenMP)
 IF(OPENMP_FOUND)

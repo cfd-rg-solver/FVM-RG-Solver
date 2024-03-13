@@ -94,7 +94,7 @@ int main()
     startParamO2_O.fractionArray[1] = 0.01;
     startParamO2_O.densityArray[1] =  startParamO2_O.fractionArray[1] * startParamO2_O.density;
 
-    startParamO2_O.temp = 900; //140
+    startParamO2_O.temp = 1000; //140
     startParamO2_O.velocity_tau = 0;
     startParamO2_O.velocity_normal = 0;
 
@@ -112,7 +112,7 @@ int main()
     startParamAr.fractionArray[0] = 1;
     startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
 
-    startParamAr.temp = 900; //140
+    startParamAr.temp = 1000; //140
     startParamAr.velocity_tau = 0;
     startParamAr.velocity_normal = 0;
 
@@ -144,7 +144,7 @@ int main()
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
 
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLSimple);
 //    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));

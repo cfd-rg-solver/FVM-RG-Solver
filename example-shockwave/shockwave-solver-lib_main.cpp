@@ -115,7 +115,7 @@ int main()
     reader.getPoints(startParameters);
 
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLSimple);
     double h = 30 * MFP; // m
 //    double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));

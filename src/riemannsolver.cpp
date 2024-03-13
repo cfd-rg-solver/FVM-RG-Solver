@@ -313,7 +313,7 @@ void HLLSimple::computeFlux(SystemOfEquation *system)
     toMaxVelocity(-1);
     double SR, SL, FL, FR, UL, UR;
     double u0, u1, H0, H1, c0, c1, uStar, cStar;
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
 
