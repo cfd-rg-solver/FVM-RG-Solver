@@ -97,7 +97,7 @@ void BorderConditionPersonal::updatePoints(vector<macroParam> &points)
 
 void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 {
-    int BCtype = 2;
+    int BCtype = 0;
     size_t N = points.size();
     Mixture mixture = points[1].mixture;
 

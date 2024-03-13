@@ -286,8 +286,8 @@ void HLLESolver::computeFlux(SystemOfEquation *system)
         // c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
         c_avg = sqrt((solParam.Gamma - 1)*(fabs(H_avg - 0.5 * pow(v_avg,2) )));
 
-        b0 = (std::min)({v_avg - c_avg, v0 - c0});
-        b1 = (std::max)({v_avg + c_avg, v1 + c1});
+        b0 = (std::min)({v_avg - c_avg, 0 - c0});
+        b1 = (std::max)({v_avg + c_avg, 0 + c1});
 
         toMaxVelocity(max(fabs(b0),fabs(b1)));
 
@@ -309,8 +309,6 @@ void HLLSimple::computeFlux(SystemOfEquation *system)
 #pragma omp parallel for schedule(static)
     for(int i = 0 ; i < system->numberOfCells - 1; i++)
     {
-
-
         u0 = system->getVelocityTau(i);
         u1 = system->getVelocityTau(i+1);
 
