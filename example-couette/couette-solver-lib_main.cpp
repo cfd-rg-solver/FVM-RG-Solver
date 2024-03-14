@@ -144,7 +144,7 @@ int main()
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
 
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLSimple);
+    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
 //    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));

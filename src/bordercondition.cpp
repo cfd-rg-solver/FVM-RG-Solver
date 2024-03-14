@@ -240,7 +240,7 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
         points[0].temp = -points[1].temp + 2 * temperatureHalf;
         points[0].density = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (UniversalGasConstant * points[0].temp);
         // remember for next iteration
-        down_temp_last = points[0].temp; // interp1(points[0].temp, points[1].temp); ??
+        down_temp_last = temperatureHalf; // interp1(points[0].temp, points[1].temp); ??
         fraction_array_down_last = points[0].densityArray;
 
         //solParam.NumCell-1
@@ -260,7 +260,7 @@ void BorderConditionCouetteSlip::updatePoints(vector<macroParam> &points)
         points[N-1].density = points[N-1].pressure * mixture.molarMass(points[N-1].fractionArray) / (UniversalGasConstant * points[N-1].temp);
 
         // remember for next iteration
-        up_temp_last = points[N-1].temp; // interp1(points[N-1].temp, points[N-2].temp); ??
+        up_temp_last = temperatureHalf; // interp1(points[N-1].temp, points[N-2].temp); ??
         fraction_array_up_last = points[N-1].densityArray;
     }
     else
