@@ -108,11 +108,11 @@ int main()
     UniformDistributionBorder startParamCouetteAr;
     UniformDistributionBorder startParamCouetteArSlip; // Slip Border
     macroParam startParamAr(Ar);
-    startParamAr.density = 0.03168;
+    startParamAr.density = 0.00012786; // 0.03168;
     startParamAr.fractionArray[0] = 1;
     startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
 
-    startParamAr.temp = 1000; //140
+    startParamAr.temp = 900; //140
     startParamAr.velocity_tau = 0;
     startParamAr.velocity_normal = 0;
 
@@ -125,7 +125,7 @@ int main()
     //////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.67;   // Ar
 //    solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
