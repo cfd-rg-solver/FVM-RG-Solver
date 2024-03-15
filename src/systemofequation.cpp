@@ -822,7 +822,6 @@ void Shockwave1::prepareVectorSizes()
 void Shockwave1::prepareIndex()
 {
     systemOrder = numberOfComponents + 2; // однокомпонентная постановка
-    v_normal = numberOfComponents ;
     v_tau = numberOfComponents;
     energy = numberOfComponents + 1;
 }
