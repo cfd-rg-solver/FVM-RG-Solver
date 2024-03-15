@@ -35,31 +35,9 @@ int main()
     BorderConditionCouette borderConditionCouette;
     borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
 
-    //////////////////////////////////////////////////////////////
-    ///////////////////// Border Condition for Couette ///////////
-    /////////////////////////// Personal /////////////////////////
-    BorderConditionCouetteSlip borderConditionCouetteSlip;
-    borderConditionCouetteSlip.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
-
-    //////////////////////////////////////////////////////////////
-
-
-    // Ar
-    MixtureComponent argon;
-    argon.name = "Ar";
-    //argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
-    //argon.density = 0.800773;
-    argon.molarMass = 0.039948;
-    argon.mass = 6.633521356992E-26;
-    argon.epsilonDevK = 1.8845852298E-21/kB; //! Mistake
-    argon.numberAtoms = 1;
-    argon.sigma = 3.33E-10;
-
     // O2/O
-
     MixtureComponent Oxygen2;
     Oxygen2.name = "O2";
-//    Oxygen2.density = 1.42897e-3*0.99;
     Oxygen2.molarMass = 0.0319988;
     Oxygen2.mass = 5.313725014956E-26;
     Oxygen2.epsilonDevK = 1.48281651048e-21/kB;
@@ -76,11 +54,9 @@ int main()
     Oxygen.sigma = 2.75E-10;
     Oxygen.numberAtoms = 1;
 
-    std::vector<MixtureComponent> tmp1 = {Oxygen2,Oxygen};
-    Mixture O2_O(tmp1);
+    std::vector<MixtureComponent> tmp = {Oxygen2,Oxygen};
+    Mixture O2_O(tmp);
 
-    std::vector<MixtureComponent> tmp2 = {argon};
-    Mixture Ar(tmp2);
     //////////////////////////////////////////////////////////////
     ///////////////////// Start param for Couette ////////////////
     ////////////////////////////  O2_O  /////////////////////////
@@ -102,32 +78,10 @@ int main()
     startParamCouetteO2_O.setDistributionParameter(startParamO2_O);
 
     //////////////////////////////////////////////////////////////
-    ///////////////////// Start param for Couette ////////////////
-    ////////////////////////////  Ar  ///////////////////////////
-
-    UniformDistributionBorder startParamCouetteAr;
-    UniformDistributionBorder startParamCouetteArSlip; // Slip Border
-    macroParam startParamAr(Ar);
-    startParamAr.density = 0.00012786; // 0.03168;
-    startParamAr.fractionArray[0] = 1;
-    startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
-
-    startParamAr.temp = 900; //140
-    startParamAr.velocity_tau = 0;
-    startParamAr.velocity_normal = 0;
-
-    startParamCouetteAr.setBorderCondition(&borderConditionCouette);
-    startParamCouetteAr.setDistributionParameter(startParamAr);
-
-    startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
-    startParamCouetteArSlip.setDistributionParameter(startParamAr);
-
-    //////////////////////////////////////////////////////////////
 
     solverParams solParam;
     solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    solParam.Gamma    = 1.67;   // Ar
-//    solParam.Gamma    = 1.32;   // O2_O
+    solParam.Gamma    = 1.32;   // O2_O
     solParam.CFL      = 0.9;    // Число Куранта
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
@@ -144,20 +98,17 @@ int main()
     vector<macroParam> startParameters;
     reader.getPoints(startParameters);
 
-    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
-//    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
+//    GodunovSolver solver(Ar ,solParam, SystemOfEquationType::couette2Alt, RiemannSolverType::HLLESolver);
+    GodunovSolver solver(O2_O ,solParam, SystemOfEquationType::couette2AltBinary, RiemannSolverType::HLLESolver);
     double h = 1;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
     solver.setDelta_h(h / (solParam.NumCell - 2));
 
+    solver.setBorderConditions(&borderConditionCouette);
 
-    //solver.setBorderConditions(&borderConditionCouette);
-    solver.setBorderConditions(&borderConditionCouetteSlip); // Slip border
-
-    //solver.setStartDistribution(&startParamCouetteAr);
-    solver.setStartDistribution(&startParamCouetteArSlip); // Slip border
+    solver.setStartDistribution(&startParamCouetteO2_O);
 
     solver.solve();
 }
