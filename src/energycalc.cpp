@@ -103,3 +103,132 @@ double OneTempApprox::Zvibr(macroParam &point, size_t component)
     }
     return sum;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+
+/*  ---------- Energy Calculation For Methane (CH4)  ---------- */
+/*  could be potentially extended for any molecula with known:
+*   1. number of degenerative vibrational modes (numberModes);
+*   2. number of vibrational energy levels for each mode (numberVibrLvlByMode);
+*   3. degrees of degeneraticy for each mode (dByMode).
+*/
+
+double OneTempApproxMultiModes::calcEnergy(macroParam& point)
+{
+    double UTrRot = getTrRotEnegry(point, 0);
+    double UVibr = getVibrEnergy(point, 0); // TODO FIX gigantic
+    double E = point.density * (UTrRot + UVibr) + 0.5 * pow(point.velocity, 2) * point.density;
+    return E;
+}
+
+double OneTempApproxMultiModes::getTrRotEnegry(macroParam& point, size_t component)
+{
+    double n = Nav * point.density / point.mixture.components[component].molarMass; // todo ok? remove density here and lower?
+    double Utr = 3. / 2. * kB * point.temp * n / point.density;
+    double Urot = kB * point.temp / point.mixture.components[component].mass;
+    return Utr + Urot;
+}
+
+double OneTempApproxMultiModes::getVibrEnergy(macroParam& point, size_t component)
+{
+    double Uvibr = avgVibrEnergy(point, component) / point.mixture.mass(component);
+    return Uvibr;
+}
+
+double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t component)
+{
+    double m = point.mixture.components[component].mass; // todo: do we need this?
+
+    double e_1000 = vibrEnergyLvl(1, 0, 0, 0, point, component);
+    double e_0100 = vibrEnergyLvl(0, 1, 0, 0, point, component);
+    double e_0010 = vibrEnergyLvl(0, 0, 1, 0, point, component);
+    double e_0001 = vibrEnergyLvl(0, 0, 0, 1, point, component);
+
+    double sum = 0;
+
+    for (const auto& inds : point.mixture.components[component].possibleVibrInds) {
+     
+        double s = (inds[1] + 1) * (inds[2] + 1) * (inds[2] + 2) * (inds[3] + 1) * (inds[3] + 2) / 4.;
+
+        double Z = Zvibr(inds[0], inds[1], inds[2], inds[3], point, component);
+
+        double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
+
+        sum += s * e_0 / (Z)*exp(-e_0 / (kB * point.temp));
+    }
+
+    return sum;
+}
+
+double OneTempApproxMultiModes::vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
+{
+    MixtureComponent molecula = point.mixture.components[component];
+
+    double result = hc * (
+        molecula.omega_eByMode[0] * (lvl1 + molecula.dByMode[0] / 2.) +
+        molecula.omega_eByMode[1] * (lvl2 + molecula.dByMode[1] / 2.) +
+        molecula.omega_eByMode[2] * (lvl3 + molecula.dByMode[2] / 2.) +
+        molecula.omega_eByMode[3] * (lvl4 + molecula.dByMode[3] / 2.)
+        );
+
+    return result;
+}
+
+
+double OneTempApproxMultiModes::Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
+{
+
+    double e_1000 = vibrEnergyLvl(1, 0, 0, 0, point, component);
+    double e_0100 = vibrEnergyLvl(0, 1, 0, 0, point, component);
+    double e_0010 = vibrEnergyLvl(0, 0, 1, 0, point, component);
+    double e_0001 = vibrEnergyLvl(0, 0, 0, 1, point, component);
+
+    double sum = 0;
+
+    for (int i1 = 0; i1 <= lvl1; i1++)
+    {
+        for (int i2 = 0; i2 <= lvl2; i2++)
+        {
+            for (int i3 = 0; i3 <= lvl3; i3++)
+            {
+                for (int i4 = 0; i4 <= lvl4; i4++)
+                {
+                    double s = (i2 + 1) * (i3 + 1) * (i3 + 2) * (i4 + 1) * (i4 + 2) / 4.;
+
+                    double e_0 = i1 * e_1000 + i2 * e_0100 + i3 * e_0010 + i4 * e_0001;
+
+                    sum += s * exp(-e_0 / (kB * point.temp));
+                }
+            }
+        }
+    }
+    return sum;
+}
+
+double OneTempApproxMultiModes::getGamma(macroParam& point)
+{
+    /* function to calculate adiabatic index gamma = Cp/Cv */
+    // mass, U=energy - v^2/2
+    size_t component = 0; // we consider one-component methane gas
+    double Cv_tr = 3.0 / 2 * kB / point.mixture.mass(component);
+    double Cv_rot = kB / point.mixture.mass(component);
+
+    double h = getEntalp(point, component);
+    double nu_c = clight * point.mixture.components[component].omega_e;
+    double Cv_vibr = (kB / point.mixture.mass(component)) * pow(h * nu_c / (kB * point.temp), 2) * exp(h * nu_c / (kB * point.temp)) / pow(exp(h * nu_c / (kB * point.temp)) - 1, 2);
+
+    double Cv = Cv_tr + Cv_rot + Cv_vibr;
+
+    double gamma = (UniversalGasConstant / point.mixture.molarMass(component) + Cv) / Cv;
+    return gamma;
+}
+
+double OneTempApproxMultiModes::getEntalp(macroParam& point, size_t component)
+{
+    /* function to calculate specific entalpy h = p/rho + U */
+    double UTrRot = getTrRotEnegry(point, 0);
+    double UVibr = getVibrEnergy(point, 0);
+    double res = point.pressure / point.density + (UTrRot + UVibr);
+    return res;
+}

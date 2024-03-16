@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "global.h"
+
 struct MixtureComponent
 {
     double molarMass; // молярная масса
@@ -12,9 +13,18 @@ struct MixtureComponent
     double omega_e; // спектроскопическая постоянная
     int numberVibrLvl; // число колебательных уровней
     int numberAtoms;
+
+    double D_diss; // энергия диссоциации молекулы
+    int numberOfModes; // число вырожденных мод
+    std::vector<double> omega_eByMode; // спектроскопические постоянные для каждой вырожденной моды
+    std::vector<int> numberVibrLvlByMode; // количество колебательных уровней для каждой вырожденной моды
+    std::vector<int> dByMode; // степень вырожденности каждой моды
+    std::vector<std::vector<int>> possibleVibrInds; // набор возможных состояний молекулы по колебательным уровням мод
+
     //... какие-то другие параметры компонент
     std::string name;                    //название компоненты
 };
+
 struct Mixture
 {
     Mixture(){NumberOfComponents = 0;};

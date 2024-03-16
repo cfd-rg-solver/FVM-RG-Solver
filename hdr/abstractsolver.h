@@ -35,6 +35,9 @@ public:
     // устанавливает начальное распределение
     void setStartDistribution(StartCondition* startDist);
 
+    // устанавливает энергетические расчеты
+    void setEnergyCalculator(EnergyCalc* energyCalculator_);
+
     SystemOfEquation* system;
 
     RiemannSolver* riemannSolver;
@@ -52,6 +55,8 @@ public:
     BorderCondition* border;
 
     DataWriter* writer;
+
+    EnergyCalc* energyCalculator;
 
 protected:
 

@@ -13,9 +13,9 @@ int main()
     argon.mass = 6.633521356992E-26;
     argon.epsilonDevK = 1.8845852298E-21;
     argon.sigma = 3.33E-10;
-    Mixture Ar({argon});
+    Mixture mixture({argon});
 
-    macroParam startParam(Ar);
+    macroParam startParam(mixture);
     startParam.density = 1.7839;
     startParam.fractionArray[0] = 1;
     startParam.pressure = 218563.81; //218563.81
@@ -39,34 +39,19 @@ int main()
     DataWriter writer("D:/couette/couette-solver-lib");
 
     BorderConditionSoda borderSoda;
-    borderSoda.setBorderParameters( 0,  1,  1,
-                             0,  0.125,  0.1);
-
-    GapDistribution distributionSoda;
-    macroParam leftStartParam(Ar);
-    macroParam rightStartParam(Ar);
-
-    leftStartParam.density = 1;
-    leftStartParam.pressure = 1;
-    leftStartParam.velocity_tau = 0;
-    leftStartParam.fractionArray[0] = 1;
-    leftStartParam.densityArray[0] =  leftStartParam.fractionArray[0] * leftStartParam.density;
-
-    rightStartParam.density = 0.125;
-    rightStartParam.pressure = 0.1;
-    rightStartParam.velocity_tau = 0;
-    rightStartParam.fractionArray[0] = 1;
-    rightStartParam.densityArray[0] = rightStartParam.fractionArray[0] * rightStartParam.density;
-
-    distributionSoda.setDistributionParameter(leftStartParam, rightStartParam);
+    borderSoda.leftDensity = 1;
+    borderSoda.leftPressure = 1;
+    borderSoda.leftVelocity = 0;
+    borderSoda.rightDensity = 0.125;
+    borderSoda.rightPressure = 0.1;
+    borderSoda.rightVelocity = 0;
 
     double h = 1;
 
-    GodunovSolver solver(Ar,solParam, SystemOfEquationType::soda,RiemannSolverType::HLLESolver);
+    GodunovSolver solver(mixture,startParam,solParam, SystemOfEquationType::soda,RiemannSolverType::ExacRiemanSolver);
     solver.setDelta_h(h / solParam.NumCell);
     solver.setWriter(&writer);
     //solver.setObserver(&watcher);
-    solver.setBorderConditions(&borderSoda);
-    solver.setStartDistribution(&distributionSoda);
+    solver.setBorderConditions(borderSoda);
     solver.solve();
 }

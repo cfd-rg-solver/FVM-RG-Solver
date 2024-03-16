@@ -10,7 +10,8 @@ enum SystemOfEquationType
     couette2Alt,
     couette2AltBinary,
     soda,
-    shockwave1
+    shockwave1,
+    shockwave2
 };
 struct SystemOfEquation
 {
@@ -21,6 +22,8 @@ struct SystemOfEquation
     void setCoeffSolver(CoeffSolver* coeffSolver_);
     void setSolverParams(solverParams solParam_);
     void setEqSolver(NonLinearEqSolver* eqSolver_);
+    void setEnergyCalculator(EnergyCalc* energyCalculator_) { energyCalculator = energyCalculator_; };
+
 
     virtual double getPressure(size_t i) = 0;
     virtual double getDensity(size_t i) = 0;
@@ -30,6 +33,7 @@ struct SystemOfEquation
     virtual double getVelocityNormal(size_t i) = 0;
     virtual double getEnergy(size_t i) = 0;
     virtual double getTemp(size_t i) = 0;
+    virtual double getGamma(size_t i) = 0;
 
     double getMaxVelocity();
 
@@ -54,7 +58,8 @@ struct SystemOfEquation
     size_t systemOrder;
 
     Mixture mixture;
-    EnergyCalc* energyCalculator = new OneTempApprox();
+    EnergyCalc* energyCalculator;
+
     NonLinearEqSolver*  eqSolver;
     CoeffSolver* coeffSolver;
     BorderCondition* border;
@@ -78,6 +83,7 @@ struct Couette2 : public SystemOfEquation
     double getVelocityNormal(size_t i);
     double getEnergy(size_t i);
     double getTemp(size_t i);
+    double getGamma(size_t i);
 
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
@@ -108,6 +114,7 @@ struct Couette2AltBinary : public Couette2Alt
     double getDensity(size_t i);
     double getDensity(size_t i, size_t component);
     double getTemp(size_t i);
+    double getGamma(size_t i);
 
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
@@ -132,6 +139,7 @@ struct Soda : public SystemOfEquation
     double getSoundSpeed(size_t i);
     double getEnergy(size_t i);
     double getTemp(size_t i) { return 0; };
+    double getGamma(size_t i);
 
     double getMaxVelocity();
     void updateU(double dh, double dt);
@@ -154,10 +162,11 @@ struct Shockwave1 : public SystemOfEquation
     double getDensity(size_t i);
     double getVelocity(size_t i);
     double getTemp(size_t i);
+    double getGamma(size_t i);
     double getEnergy(size_t i);
     double getPressure(size_t i);
-    double getVelocityTau(size_t i);
-    double getVelocityNormal(size_t i){ return 0; };
+    double getVelocityTau(size_t i) { return 0; };
+    double getVelocityNormal(size_t i);
 
     void updateU(double dh, double dt);
     void updateBorderU(vector<macroParam> & points);
@@ -165,4 +174,32 @@ struct Shockwave1 : public SystemOfEquation
     void computeFv(vector<macroParam>& points, double dh);
 
     vector<Matrix> Fv;
+};
+
+struct Shockwave2 : public SystemOfEquation
+{
+    /* ONE - Temp SystemOfEquation for the MULTI - atomic gas */
+    Shockwave2() { systemType = SystemOfEquationType::shockwave2; };
+    void prepareIndex();
+    void prepareSolving(vector<macroParam>& points); // todo: check if energy ok?
+    void prepareVectorSizes();
+
+    double getDensity(size_t i);
+    double getVelocity(size_t i);
+    double getTemp(size_t i); // todo: check if is it ok to get temp like in Couette2AltBinary?
+    double getGamma(size_t i);
+    double getEnergy(size_t i); // todo: think about statsums of Methane???
+    double getPressure(size_t i);
+    double getVelocityTau(size_t i) { return 0; };
+    double getVelocityNormal(size_t i);
+
+    void updateU(double dh, double dt);
+    void updateBorderU(vector<macroParam>& points);
+    void computeF(vector<macroParam>& points, double dh);
+    void computeFv(vector<macroParam>& points, double dh); // todo check if ok?
+
+    vector<Matrix> Fv;
+
+private:
+    std::vector<double> temperature;
 };
