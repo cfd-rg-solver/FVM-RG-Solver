@@ -155,7 +155,7 @@ double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t componen
 
         double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
 
-        sum += s * e_0 / (Z)*exp(-e_0 / (kB * point.temp));
+        sum += s * e_0 / (Z) * exp(-e_0 / (kB * point.temp));
     }
 
     return sum;
