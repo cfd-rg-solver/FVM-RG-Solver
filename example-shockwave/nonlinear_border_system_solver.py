@@ -5,25 +5,29 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+# ARGON DATA
+# gamma = 1.667 # argon
+# argon_molarMass = 0.039948 # argon
+# argon_mass = 6.633521356992e-26 # argon
+# speed_of_sound_room = 323 # argon, m/s
+
+# METHANE DATA
+gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
+molarMass = 0.01604 # methane
+mass = 27e-26 # methane
+speed_of_sound_room = 450 # methane, m/s for ~27 C
+
 # consts
-
-gamma = 1.667 # argon
-argon_molarMass = 0.039948 # argon
-argon_mass = 6.633521356992e-26 # argon
-
 R = 8.3144598
 kB = 1.38064852e-23
 
-# set parameters
-speed_of_sound_ar_room = 323 # m/s
 Ma = 3.8
 T_left = 300 # K
 pressure = 6.66 # Pa
 
 # calculated parameters
-velocity_left = Ma * speed_of_sound_ar_room
-density_left = pressure*argon_molarMass / (R * T_left)
-
+velocity_left = Ma * speed_of_sound_room
+density_left = pressure*molarMass / (R * T_left)
 
 def solver(velocity_left, density_left, T_left):
     
@@ -40,9 +44,9 @@ def solver(velocity_left, density_left, T_left):
     def func(x):
         return [
             x[0] * x[1] - v_0 * rho_0, # x[0] - velocity, x[1] - density, x[2] - temperature
-            x[1] * np.power(x[0],2) + R*x[2]*x[1]/argon_molarMass - rho_0 * np.power(v_0,2) - R*T_0*rho_0/argon_molarMass,
-            x[1] * x[0] * (3*kB*x[2]/(2*argon_mass) + np.power(x[0],2)/2 + R*x[2]*x[1]/(argon_molarMass*x[1])) \
-                 - rho_0 * v_0 * (3*kB*T_0/(2*argon_mass) + np.power(v_0,2)/2 + R*T_0*rho_0/(argon_molarMass*rho_0))
+            x[1] * np.power(x[0],2) + R*x[2]*x[1]/molarMass - rho_0 * np.power(v_0,2) - R*T_0*rho_0/molarMass,
+            x[1] * x[0] * (3*kB*x[2]/(2*mass) + np.power(x[0],2)/2 + R*x[2]*x[1]/(molarMass*x[1])) \
+                 - rho_0 * v_0 * (3*kB*T_0/(2*mass) + np.power(v_0,2)/2 + R*T_0*rho_0/(molarMass*rho_0))
             ]
     
     vs, rhos, Ts = [], [], []
@@ -54,8 +58,7 @@ def solver(velocity_left, density_left, T_left):
             Ts.append(cur_ans[2])
     ans = [np.median(vs), np.median(rhos), np.median(Ts)]
     
-    print(func(ans)) # ����������� ���������� ������� � �������, �� ����� ������ ������� ������������ �����
-    
+    print("Must be near zero values =", func(ans))
     # plt.plot(vs)
     # plt.show()
     # plt.plot(rhos)
@@ -81,11 +84,11 @@ print("T_n = ", ans[2])
 def solver_approx(velocity_left, density_left, T_left):
 
     density_right = ((gamma + 1) * pow(Ma,2))/(2 + (gamma-1)*pow(Ma,2))*density_left
-    velocity_right = velocity_left*density_left/density_right # �� �������
+    velocity_right = velocity_left*density_left/density_right 
 
-    pressure_left = R * T_left * density_left / argon_molarMass # �� ��������� ���������
+    pressure_left = R * T_left * density_left / molarMass 
     pressure_right = (pow(Ma,2)*2*gamma - (gamma-1))/(gamma+1)*pressure_left
-    T_right = pressure_right/(density_right*R/argon_molarMass)
+    T_right = pressure_right/(density_right*R/molarMass)
 
     return velocity_right, density_right, T_right
 
