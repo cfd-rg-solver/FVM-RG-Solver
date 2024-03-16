@@ -1034,7 +1034,7 @@ double Shockwave2::getVelocity(size_t i)
     return v;
 }
 
-double Shockwave2::getVelocityNormal(size_t i)
+double Shockwave2::getVelocityTau(size_t i)
 {
     double v = U[v_tau][i] / getDensity(i);
     return v;
