@@ -108,13 +108,15 @@ void DataReader::getPoints(vector<macroParam> &points)
 
 bool DataReader::fillDataVector(vector<double> &data, string dataFileName)
 {
-    std::ifstream file(pathName + dataFileName); // окрываем файл для чтения
+    std::ifstream file(pathName + dataFileName, std::ios::in); // окрываем файл для чтения
     if (!file.is_open())
     {
         cout<<"WARNING: no" << dataFileName <<" file to read"<<endl;
         return 0;
     }
     double h, value;
+    string y,var;
+    file>>y>>var;
     while (file >> h >> value)
     {
         data.push_back(value);

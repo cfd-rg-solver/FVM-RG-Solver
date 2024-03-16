@@ -159,7 +159,7 @@ void AbstractSolver::setDt()
     if(max!=0)
         dt = solParam.CFL*delta_h/max;
     else
-        dt = 0.000001;
+        dt = 1e-8;
     timeSolvind.push_back(dt);
     return;
 }
@@ -167,7 +167,7 @@ void AbstractSolver::setDt()
 void AbstractSolver::updatePoints()
 {
     auto size = points.size()-1;
-#pragma omp parallel for schedule(static)
+//#pragma omp parallel for schedule(static)
     for(int i = 0; i < size + 1; i++)
     //    for(int i = 1; i < size; i++)
     {

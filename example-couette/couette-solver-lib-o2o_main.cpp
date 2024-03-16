@@ -4,7 +4,6 @@
 #include "observer.h"
 #include <filesystem>
 
-
 std::string GetCurrentWorkingDir( void ) {
     std::filesystem::path currentWorkingDir = std::filesystem::current_path();
     std::filesystem::path parentDir = currentWorkingDir.parent_path().parent_path();
@@ -27,10 +26,26 @@ int main()
     //////////////////////////////////////////////////////////////
     ///////////////////// Border Condition for Couette ///////////
     //////////////////////////////////////////////////////////////
-    double T_up_wall = 1000;
-    double T_down_wall = 1000;
-    double velocity_up = 300;
-    double velocity_down = 0;
+    int caseType = 0;
+
+    double T_up_wall;
+    double T_down_wall;
+    double velocity_up;
+    double velocity_down;
+    if(caseType == 0)
+    {
+        T_up_wall = 273;
+        T_down_wall = 273;
+        velocity_up = 300;
+        velocity_down = 0;
+    }
+    else if(caseType == 1)
+    {
+        T_up_wall = 273;
+        T_down_wall = 273;
+        velocity_up =  1888.84;
+        velocity_down = 0;
+    }
 
     BorderConditionCouette borderConditionCouette;
     borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
@@ -70,7 +85,7 @@ int main()
     startParamO2_O.fractionArray[1] = 0.01;
     startParamO2_O.densityArray[1] =  startParamO2_O.fractionArray[1] * startParamO2_O.density;
 
-    startParamO2_O.temp = 1000; //140
+    startParamO2_O.temp = 140;
     startParamO2_O.velocity_tau = 0;
     startParamO2_O.velocity_normal = 0;
 

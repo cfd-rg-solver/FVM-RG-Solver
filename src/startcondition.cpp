@@ -22,6 +22,10 @@ void UniformDistribution::setStartDistribution(vector<macroParam> &points)
     else
     {
         points = exampleVec;
+        for(size_t i = 0; i < points.size(); i++)
+        {
+            points[i].mixture = mixture;
+        }
     }
     return;
 }
@@ -30,21 +34,32 @@ void UniformDistribution::setStartDistribution(vector<macroParam> &points)
 
 void UniformDistributionBorder::setStartDistribution(vector<macroParam> &points)
 {
-    points[0].mixture = example.mixture;
-    points[points.size()-1].mixture = example.mixture;
-    for(size_t i = 1; i < points.size()-1; i++)
+    if(newSolving)
     {
-        points[i].mixture = example.mixture;
-        points[i].temp = example.temp;
-        points[i].fractionArray = example.fractionArray;
-        points[i].density = example.density;
+        points[0].mixture = example.mixture;
+        points[points.size()-1].mixture = example.mixture;
+        for(size_t i = 1; i < points.size()-1; i++)
+        {
+            points[i].mixture = example.mixture;
+            points[i].temp = example.temp;
+            points[i].fractionArray = example.fractionArray;
+            points[i].density = example.density;
 
-        points[i].pressure = points[i].density * UniversalGasConstant * example.temp/example.mixture.molarMass(example.fractionArray);
-        //points[i].density = startParam.pressure * mixture.molarMass()/(UniversalGasConstant * startParam.temp);
-        points[i].densityArray =  example.densityArray;
-        points[i].velocity_tau = example.velocity_tau;
-        points[i].velocity_normal = example.velocity_normal;
-        points[i].velocity = fabs(points[i].velocity_tau);
+            points[i].pressure = points[i].density * UniversalGasConstant * example.temp/example.mixture.molarMass(example.fractionArray);
+            //points[i].density = startParam.pressure * mixture.molarMass()/(UniversalGasConstant * startParam.temp);
+            points[i].densityArray =  example.densityArray;
+            points[i].velocity_tau = example.velocity_tau;
+            points[i].velocity_normal = example.velocity_normal;
+            points[i].velocity = fabs(points[i].velocity_tau);
+        }
+    }
+    else
+    {
+        points = exampleVec;
+        for(size_t i = 0; i < points.size(); i++)
+        {
+            points[i].mixture = mixture;
+        }
     }
     // для points[0] и points[solParam.NumCell-1] (!важно что идёт после цикла!)
     borderCondition->updatePointsStart(points); // usingBorderCondition

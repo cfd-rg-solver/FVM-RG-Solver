@@ -27,10 +27,26 @@ int main()
     //////////////////////////////////////////////////////////////
     ///////////////////// Border Condition for Couette ///////////
     //////////////////////////////////////////////////////////////
-    double T_up_wall = 1000;
-    double T_down_wall = 1000;
-    double velocity_up = 300;
-    double velocity_down = 0;
+    int caseType = 1;
+
+    double T_up_wall;
+    double T_down_wall;
+    double velocity_up;
+    double velocity_down;
+    if(caseType == 0)
+    {
+        T_up_wall = 1000;
+        T_down_wall = 1000;
+        velocity_up = 300;
+        velocity_down = 0;
+    }
+    else if(caseType == 1)
+    {
+        T_up_wall = 273;
+        T_down_wall = 273;
+        velocity_up = 1888.84; //1888.84;
+        velocity_down = 0;
+    }
 
     BorderConditionCouette borderConditionCouette;
     borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
@@ -63,27 +79,48 @@ int main()
 
     UniformDistributionBorder startParamCouetteAr;
     UniformDistributionBorder startParamCouetteArSlip; // Slip Border
+    startParamCouetteAr.setMixture(Ar); // TODO temp
+    startParamCouetteArSlip.setMixture(Ar); // TODO temp
     macroParam startParamAr(Ar);
-    startParamAr.density = 0.00012786; // 0.03168;
-    startParamAr.fractionArray[0] = 1;
-    startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
+    bool newSolving = false;
+    if(newSolving)
+    {
+        startParamAr.density = 0.00012786; //0.00012786; // 0.03168;
+        startParamAr.fractionArray[0] = 1;
+        startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
 
-    startParamAr.temp = 900; //140
-    startParamAr.velocity_tau = 0;
-    startParamAr.velocity_normal = 0;
+        startParamAr.temp = 270; //140
+        startParamAr.velocity_tau = 0;
+        startParamAr.velocity_normal = 0;
 
-    startParamCouetteAr.setBorderCondition(&borderConditionCouette);
-    startParamCouetteAr.setDistributionParameter(startParamAr);
+        startParamCouetteAr.setBorderCondition(&borderConditionCouette);
+        startParamCouetteAr.setDistributionParameter(startParamAr);
 
-    startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
-    startParamCouetteArSlip.setDistributionParameter(startParamAr);
+        startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
+        startParamCouetteArSlip.setDistributionParameter(startParamAr);
+    }
+    else
+    {
+        DataWriter writer(outputData);
+        DataReader reader(outputData + "/prev_data");
+
+        reader.read();
+        vector<macroParam> startParameters;
+        reader.getPoints(startParameters);
+
+        startParamCouetteAr.setBorderCondition(&borderConditionCouette);
+        startParamCouetteAr.setDistributionParameter(startParameters);
+
+        startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
+        startParamCouetteArSlip.setDistributionParameter(startParameters);
+    }
 
     //////////////////////////////////////////////////////////////
 
     solverParams solParam;
     solParam.NumCell     = 102;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.67;   // Ar
-    solParam.CFL      = 0.9;    // Число Куранта
+    solParam.CFL      = 0.9;    // Число Куранта 0.9
     solParam.MaxIter     = 10000000; // максимальное кол-во итареций
     solParam.Ma       = 0.1;    // Число маха
 
@@ -107,11 +144,16 @@ int main()
     solver.setDelta_h(h / (solParam.NumCell - 2));
 
 
-    //solver.setBorderConditions(&borderConditionCouette);
-    solver.setBorderConditions(&borderConditionCouetteSlip); // Slip border
-
-    //solver.setStartDistribution(&startParamCouetteAr);
-    solver.setStartDistribution(&startParamCouetteArSlip); // Slip border
-
+    bool BCSlip = 1;
+    if(BCSlip)
+    {
+        solver.setBorderConditions(&borderConditionCouetteSlip); // Slip border
+        solver.setStartDistribution(&startParamCouetteArSlip); // Slip border
+    }
+    else
+    {
+        solver.setBorderConditions(&borderConditionCouette);
+        solver.setStartDistribution(&startParamCouetteAr);
+    }
     solver.solve();
 }

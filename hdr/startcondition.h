@@ -15,10 +15,12 @@ struct UniformDistribution : public StartCondition
         {exampleVec = example_; newSolving = 0;};
     void setDistributionParameter(macroParam example_)
         {example = example_; newSolving = 1;};
+    void setMixture(Mixture mixture_){ mixture = mixture_;};
 protected:
     bool newSolving;
     macroParam example;
     vector<macroParam> exampleVec;
+    Mixture mixture;
 };
 
 struct UniformDistributionBorder : public UniformDistribution
