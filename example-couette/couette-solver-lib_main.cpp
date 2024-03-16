@@ -131,6 +131,22 @@ int main()
     startParamCouetteArPersonal.setDistributionParameter(startParamAr);
     startParamCouetteArPersonal.setNormalVelocity(start_velocity_normal);
 
+    //////////////////////////////////////////////////////////////
+    ///////////////////// Start param for Soda ///////////////////
+    //////////////////////////////////////////////////////////////
+
+    GapDistribution startParamSoda;
+    macroParam leftStartParam(Ar);
+    macroParam rightStartParam(Ar);
+
+    leftStartParam.density = 1;
+    leftStartParam.pressure = 1;
+    leftStartParam.velocity = 0;
+    rightStartParam.density = 0.125;
+    rightStartParam.pressure = 0.1;
+    rightStartParam.velocity = 0;
+
+    startParamSoda.setDistributionParameter(leftStartParam, rightStartParam);
 
     //////////////////////////////////////////////////////////////
 
@@ -163,9 +179,9 @@ int main()
     solver.setDelta_h(h / (solParam.NumCell - 2));
 
 
-    solver.setBorderConditions(&borderConditionCouette);  // for couette
+    solver.setBorderConditions(&borderConditionPersonal);  // for couette
 
-    solver.setStartDistribution(&startParamCouetteO2_O); // for couette Ar
+    solver.setStartDistribution(&startParamCouetteO2_OPersonal); // for couette Ar
 
     solver.solve();
 }

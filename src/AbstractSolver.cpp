@@ -6,7 +6,7 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
 {
     isContinue = 0;
     mixture = mixture_;
-    solParam =solParam_;
+    solParam = solParam_;
     delta_h = 0;
 
     if(mixture.NumberOfComponents == 1)
@@ -109,6 +109,11 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
         auto* tmp = new Shockwave1();
         return tmp;
     }
+    case SystemOfEquationType::shockwave2:
+    {
+        auto* tmp = new Shockwave2();
+        return tmp;
+    }
     }
     return nullptr;
 }
@@ -138,6 +143,12 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
     return nullptr;
 }
 
+void AbstractSolver::setEnergyCalculator(EnergyCalc* energyCalculator_)
+{ 
+    energyCalculator = energyCalculator_; 
+    system->setEnergyCalculator(energyCalculator);
+};
+
 void AbstractSolver::prepareVectorSizes()
 {
     points.resize(solParam.NumCell);
@@ -157,7 +168,7 @@ void AbstractSolver::setDt()
     if(max!=0)
         dt = solParam.CFL*delta_h/max;
     else
-        dt = 0.000001;
+        dt = 0.00001;
     timeSolvind.push_back(dt);
     return;
 }
@@ -182,6 +193,7 @@ void AbstractSolver::updatePoints()
         }
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].temp = system->getTemp(i);
+        points[i].gamma = energyCalculator->getGamma(points[i]);
     }
     border->updatePoints(points);
 }

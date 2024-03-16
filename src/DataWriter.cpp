@@ -10,7 +10,7 @@ DataWriter::DataWriter(std::string pathName_)
 
 fs::path DataWriter::createTimeDirectory(double time)
 {
-    fs::path localDir = directory / "data" / std::to_string((int)time);
+    fs::path localDir = directory / "data" / std::to_string(time);
     fs::create_directories(localDir);
     return localDir;
 }

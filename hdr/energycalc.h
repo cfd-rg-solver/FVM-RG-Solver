@@ -12,7 +12,9 @@ struct EnergyCalc
     }
     virtual double getEntalpTotal(macroParam & point){return getEntalp(point,0) + getEntalp(point,1);};
     virtual double getEntalp(macroParam & point, size_t component) = 0;
+    virtual double getGamma(macroParam& point) { return 0; };
 };
+
 struct OneTempApprox : public EnergyCalc
 {
     OneTempApprox(){};
@@ -28,4 +30,23 @@ private:
     double vibrEnergyLvl(int lvl, macroParam &point, size_t component);
     double ZvibrDiff(macroParam &point, size_t component);
     double Zvibr(macroParam &point, size_t component);
+};
+
+struct OneTempApproxMultiModes : public EnergyCalc
+{
+    /* Energy Calculation for One-Temp Approx molecula with Multiple Modes (Methane CH4) */
+
+    OneTempApproxMultiModes() {};
+
+    double calcEnergy(macroParam& point);
+    double getGamma(macroParam& point);
+
+private:
+
+    double getTrRotEnegry(macroParam& point, size_t component);
+    double getVibrEnergy(macroParam& point, size_t component);
+    double avgVibrEnergy(macroParam& point, size_t component);
+    double vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
+    double Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
+    double getEntalp(macroParam& point, size_t component);
 };

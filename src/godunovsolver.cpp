@@ -19,7 +19,8 @@ void GodunovSolver::solve()
 
         if(system->systemType == SystemOfEquationType::couette2Alt ||
             system->systemType == SystemOfEquationType::couette2AltBinary ||
-            system->systemType == SystemOfEquationType::shockwave1)
+            system->systemType == SystemOfEquationType::shockwave1 ||
+            system->systemType == SystemOfEquationType::shockwave2)
             system->computeFv(points, delta_h);
 
         riemannSolver->computeFlux(system);
@@ -42,13 +43,11 @@ void GodunovSolver::solve()
         //записать данные, если это требуется
         //writePoints(T*1000000); // микросек
 
-        // std::cout << "visc " << coeffSolver->shareViscositySimple(points[(int)(solParam.NumCell/2)]) << std::endl;
-
         double max;
         if(i%1000 == 0)
         {
             std::cout<<i<<" iteration"<<std::endl;
-            writePoints(i); // микросек
+            writePoints(T*1000000); // микросек
 
             max = riemannSolver->maxSignalVelocity;
             std::cout << "max wave speed " << max << std::endl;
