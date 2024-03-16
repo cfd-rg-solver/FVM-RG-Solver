@@ -24,83 +24,6 @@ int main()
 
     std::string outputData = GetCurrentWorkingDir();
     std::cout << "Current directory is: " << outputData << std::endl;
-    /*
-    ///////////////////////////////////////////////////////////////
-    ///////////////////// Molecula data //////////////////////////
-    ///////////////////////////  Ar  ////////////////////////////
-    ///
-    // swtting Ar mixture
-    MixtureComponent argon;
-    argon.name = "Ar";
-    //argon.density = 0.03168*0.99; // initial concentration - 0.99, pressure 133 000 Pa
-    //argon.density = 0.800773;
-    argon.molarMass = 0.039948;
-    argon.mass = 6.633521356992E-26;
-    argon.epsilonDevK = 1.8845852298E-21/kB; //! Mistake
-    argon.sigma = 3.33E-10;
-    argon.numberAtoms = 1;
-    argon.omega_e = 0;
-
-    double viscocity_argon = 22.7e-5; // approximate argon viscocity at low pressure
-
-    std::vector<MixtureComponent> tmp2 = {argon};
-    Mixture Ar(tmp2);
-
-    //////////////////////////////////////////////////////////////
-    ///////////////////// Border Condition for Couette ///////////
-    //////////////////////////////////////////////////////////////
-    double T_up_wall = 1000;
-    double T_down_wall = 1000;
-    double velocity_up = 300;
-    double velocity_down = 0;
-
-    BorderConditionCouette borderConditionCouette;
-    borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
-
-
-    ///////////////////////////////////////////////////////////////
-    ///////////////// Border Condition for Shock Wave ////////////
-    ////////////////////////// Ar ///////////////////////////////
-    ///
-    // рассматриваем уравнения граничных условий, пусть left = 0, right = n:
-    double velocity_left = 1227.4; // shock wave, so the velocity is supersonic, let's set it to 1615 m/s ~ 5 Ma for argon at room temperature
-    double density_left = 0.00010666; // kg/m^3, calculated for atmospheric pressure
-    double T_left = 300; // Kelvin
-    double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass;
-
-    double velocity_right = 370.7071;
-    double density_right = 0.000353;
-    double T_right = 1612.93;
-    double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass;
-
-    BorderConditionShockwave borderConditionShockwave;
-    borderConditionShockwave.setBorderParameters(
-       velocity_left, density_left, T_left,
-       velocity_right, density_right, T_right
-       );
-
-
-    //////////////////////////////////////////////////////////////
-    ////////////////// Start param for Shockwave /////////////////
-    ////////////////////////////  Ar  ///////////////////////////
-    GapDistribution startParamShockwaveAr;
-    macroParam leftStartParam(Ar);
-    macroParam rightStartParam(Ar);
-
-    leftStartParam.density = density_left;
-    leftStartParam.pressure = pressure_left;
-    leftStartParam.velocity = velocity_left;
-    leftStartParam.fractionArray[0] = 1;
-    leftStartParam.densityArray[0] =  leftStartParam.fractionArray[0] * leftStartParam.density;
-
-    rightStartParam.density = density_right;
-    rightStartParam.pressure = pressure_right;
-    rightStartParam.velocity = velocity_right;
-    rightStartParam.fractionArray[0] = 1;
-    rightStartParam.densityArray[0] = rightStartParam.fractionArray[0] * rightStartParam.density;
-
-    startParamShockwaveAr.setDistributionParameter(leftStartParam, rightStartParam);
-    */
 
     ///////////////////////////////////////////////////////////////
     ///////////////////// Molecula data //////////////////////////
@@ -149,6 +72,11 @@ int main()
     std::vector<MixtureComponent> tmp3 = { methane };
     Mixture CH4(tmp3);
 
+    //////////////////////////////////////////////////////////////
+    //////////////////// MODEL ///////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    OneTempApproxMultiModes oneTempApproxMultiModes;
+
     ///////////////////////////////////////////////////////////////
     ///////////////// Border Condition for Shock Wave ////////////
     ////////////////////////// CH4 ///////////////////////////////
@@ -170,13 +98,12 @@ int main()
         velocity_right, density_right, T_right
     );
 
-    OneTempApproxMultiModes oneTempApproxMultiModes;
-   
+    borderConditionShockwave.setEnergyCalculator(&oneTempApproxMultiModes);
     //////////////////////////////////////////////////////////////
     ////////////////// Start param for Shockwave /////////////////
     ////////////////////////////  CH4  ///////////////////////////
 
-    GapDistribution startParamShockwaveCH4;
+    ShockwaveGapDistribution startParamShockwaveCH4;
     macroParam leftStartParam(CH4);
     macroParam rightStartParam(CH4);
 
@@ -197,7 +124,7 @@ int main()
     rightStartParam.densityArray[0] = rightStartParam.fractionArray[0] * rightStartParam.density;
 
     startParamShockwaveCH4.setDistributionParameter(leftStartParam, rightStartParam);
-
+    startParamShockwaveCH4.setEnergyCalculator(&oneTempApproxMultiModes);
     //////////////////////////////////////////////////////////////
     ///////////////// Solver param for Shockwave ////////////////
     ////////////////////////////////////////////////////////////
