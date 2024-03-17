@@ -63,6 +63,55 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     velocity_tau.close();
 }
 
+void DataWriter::writeData(vector<macroParam> data, macroParam dataDown, macroParam dataUp, double time)
+{
+    fs::path localDir = createTimeDirectory(time);
+
+    ofstream pressure(localDir/"pressure.txt",std::ios::out);
+    ofstream velocity(localDir/"velocity.txt",std::ios::out);
+    ofstream velocity_tau(localDir/"velocity_tau.txt",std::ios::out);
+    ofstream velocity_normal(localDir/"velocity_normal.txt",std::ios::out);
+    ofstream temp(localDir/"temp.txt",std::ios::out);
+    ofstream density(localDir/"density.txt",std::ios::out);
+
+    pressure<<"y"<<" "<<"p"<<endl;
+    velocity<<"y"<<" "<<"v"<<endl;
+    velocity_tau<<"y"<<" "<<"v_t"<<endl;
+    velocity_normal<<"y"<<" "<<"v_n"<<endl;
+    temp<<"y"<<" "<<"T"<<endl;
+    density<<"y"<<" "<<"rho"<<endl;
+
+    pressure<<0<<" "<<dataDown.pressure<<endl;
+    velocity<<0<<" "<<dataDown.velocity<<endl;
+    velocity_tau<<0<<" "<<dataDown.velocity_tau<<endl;
+    velocity_normal<<0<<" "<<dataDown.velocity_normal<<endl;
+    temp<<0<<" "<<dataDown.temp<<endl;
+    density<<0<<" "<<dataDown.density<<endl;
+
+    for(size_t i = 1; i < data.size()-1; i++)
+    {
+        pressure<<dh*i<<" "<<data[i].pressure<<endl;
+        velocity<<dh*i<<" "<<data[i].velocity<<endl;
+        velocity_tau<<dh*i<<" "<<data[i].velocity_tau<<endl;
+        velocity_normal<<dh*i<<" "<<data[i].velocity_normal<<endl;
+        temp<<dh*i<<" "<<data[i].temp<<endl;
+        density<<dh*i<<" "<<data[i].density<<endl;
+    }
+    double dh_last = dh * (data.size()-1);
+    pressure<<dh_last<<" "<<dataUp.pressure<<endl;
+    velocity<<dh_last<<" "<<dataUp.velocity<<endl;
+    velocity_tau<<dh_last<<" "<<dataUp.velocity_tau<<endl;
+    velocity_normal<<dh_last<<" "<<dataUp.velocity_normal<<endl;
+    temp<<dh_last<<" "<<dataUp.temp<<endl;
+    density<<dh_last<<" "<<dataUp.density<<endl;
+
+    pressure.close();
+    velocity.close();
+    temp.close();
+    velocity_normal.close();
+    velocity_tau.close();
+}
+
 void DataWriter::setDelta_h(double dh_)
 {
     dh = dh_;

@@ -52,6 +52,7 @@ void UniformDistributionBorder::setStartDistribution(vector<macroParam> &points)
             points[i].velocity_normal = example.velocity_normal;
             points[i].velocity = fabs(points[i].velocity_tau);
         }
+        borderCondition->updatePointsStart(points); // usingBorderCondition
     }
     else
     {
@@ -60,9 +61,9 @@ void UniformDistributionBorder::setStartDistribution(vector<macroParam> &points)
         {
             points[i].mixture = mixture;
         }
+        borderCondition->updatePointsStart(points); // usingBorderCondition
     }
     // для points[0] и points[solParam.NumCell-1] (!важно что идёт после цикла!)
-    borderCondition->updatePointsStart(points); // usingBorderCondition
     return;
 }
 

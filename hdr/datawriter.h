@@ -20,11 +20,13 @@ public:
     DataWriter(string pathName_);
     fs::path createTimeDirectory(double time);
     void writeData(vector<macroParam> data, double time);
+    void writeData(vector<macroParam> data, macroParam dataDown, macroParam dataUp, double time);
     void setDelta_h(double dh_);
 private:
     double dh = 1;
     fs::path directory;
 };
+
 
 struct DataReader
 {

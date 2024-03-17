@@ -9,6 +9,8 @@ struct BorderCondition
     virtual void updatePointsStart(vector<macroParam> &points){updatePoints(points);};
     void setCoeffSolver(CoeffSolver* coeffSolver_){coeffSolver = coeffSolver_;};
     void setDeltaH(double delta_h_){delta_h = delta_h_;};
+    virtual macroParam getWallParam(string side){return macroParam();}; // !!! TODO bad architecture
+
     virtual double get_dyc_dy(){return 0;}; //затычка для более серьёзных условий
 protected:
     CoeffSolver* coeffSolver;
@@ -29,13 +31,17 @@ struct BorderConditionCouetteSlip : public BorderConditionCouette
 {
     void updatePointsStart(vector<macroParam> &points);
     void updatePoints(vector<macroParam> &points);
+    macroParam getWallParam(string side);
+
     double get_dyc_dy(){return 0;};
 protected:
     double calcVelocityHalf(macroParam p1, size_t component, string side);
     double calcTempHalf(macroParam p1, size_t component, double velocityHalf, string side);
     double interp1(double value1, double value2);
-    double down_temp_last, up_temp_last;
-    vector<double> fraction_array_down_last, fraction_array_up_last;
+    macroParam downLast, upLast;
+    double sigma = 1; // [0 1]
+    bool presEq = true;
+
 };
 
 

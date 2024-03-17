@@ -327,7 +327,7 @@ void Couette2Alt::updateU(double dh, double dt)
     {
         for (int j = 0; j < systemOrder; j++)
         {
-            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1])/(/*2.**/dh)) * dt;
+            U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i+1] - Fv[j][i - 1])/(2.*dh)) * dt;
         }
     }
 }

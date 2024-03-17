@@ -55,8 +55,21 @@ void AbstractSolver::setStartDistribution(StartCondition *startDist)
 
 void AbstractSolver::writePoints(double i)
 {
+    bool slipBC = 0;
     if(isWriteData)
-        writer->writeData(points,i);
+    {
+        if(slipBC)
+        {
+            macroParam up = border->getWallParam("up");
+            macroParam down = border->getWallParam("down"); // TODO
+
+            writer->writeData(points,down,up,i);
+        }
+        else
+        {
+            writer->writeData(points,i);
+        }
+    }
 }
 
 void AbstractSolver::setDelta_h(double dh)
@@ -167,7 +180,7 @@ void AbstractSolver::setDt()
 void AbstractSolver::updatePoints()
 {
     auto size = points.size()-1;
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for(int i = 0; i < size + 1; i++)
     //    for(int i = 1; i < size; i++)
     {
