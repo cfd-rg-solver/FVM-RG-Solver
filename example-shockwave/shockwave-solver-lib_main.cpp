@@ -32,14 +32,14 @@ int main()
     // swtting CH4 mixture
     MixtureComponent methane;
     methane.name = "CH4";
-    methane.molarMass = 0.01604;
-    methane.mass = 27e-26; // TODO find smth better
-    // methane.epsilonDevK = / kB; TODO ???
-    // methane.sigma = ; TODO ???
+    methane.molarMass = 0.016043;
+    methane.mass = 2.663732314e-26;
+    methane.epsilonDevK = 151.4; // have written in .doc file on drive // epsilon/kB
+    methane.sigma = 3.737e-10; // m
     methane.D_diss = 36685.823189; // cm^-1, converted from 438.86 kJ/mol
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
-    methane.omega_eByMode = { 3025.5, 1582.7, 3156.8, 1367.4 };
+    methane.omega_eByMode = { 3025.5, 1582.7, 3156.8, 1367.4 }; // sm^-1, all other data, related with length, is in m!
     methane.numberVibrLvlByMode = { 10, 18, 9, 21 };
     methane.dByMode = { 1, 2, 3, 3 };
 
@@ -66,7 +66,7 @@ int main()
         }
     }
 
-    double viscocity_methane = 1.145e-5; // TODO find approximate methane viscocity at low pressure
+    double viscocity_methane = 1.1123e-05; // for below set sonditions
 
 
     std::vector<MixtureComponent> tmp3 = { methane };
@@ -82,6 +82,15 @@ int main()
     ////////////////////////// CH4 ///////////////////////////////
     ///
     // рассматриваем уравнения граничных условий, пусть left = 0, right = n:
+
+    // add calculation based on Mach number
+
+    // Data for simulation:
+    // Ma = 3
+    // T = 300 K
+    // p = 100 Pa
+    // (speed of sound 450.06 m/s)
+    //
     double velocity_left = 1710.0; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
     double density_left = 4.2827556878680195e-05; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
@@ -133,10 +142,10 @@ int main()
     solParam.NumCell     = 0.5e2/2 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
     // solParam.Gamma    = 1.67;        // Ar
     // solParam.Gamma    = 1.32;        // O2_O
-    // solParam.Gamma    = 1.304;       // CH4, but its implemented changable in macroparam
+    solParam.Gamma    = 1.304;       // CH4, but its implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
     solParam.MaxIter     = 5000;        // максимальное кол-во итераций
-    solParam.Ma          = 3.8;         // Число Маха
+    solParam.Ma          = 3;         // Число Маха
 
     double precision = 1E-7; // точность
     Observer watcher(precision);
