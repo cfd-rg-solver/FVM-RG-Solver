@@ -138,7 +138,8 @@ double OneTempApproxMultiModes::getVibrEnergy(macroParam& point, size_t componen
 
 double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t component)
 {
-    double m = point.mixture.components[component].mass; // todo: do we need this?
+    // fixed formulad from problem statement need to be added
+    double m = point.mixture.components[component].mass; // todo: do we need this? not here, since in getVibrEnergy the 'energy' is divided by mass
 
     double e_1000 = vibrEnergyLvl(1, 0, 0, 0, point, component);
     double e_0100 = vibrEnergyLvl(0, 1, 0, 0, point, component);
