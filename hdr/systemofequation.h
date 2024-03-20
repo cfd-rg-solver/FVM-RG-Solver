@@ -122,7 +122,7 @@ struct Couette2AltBinary : public Couette2Alt
     void computeFv(vector<macroParam> & points, double dh);
 private:
     std::vector<double> temperature;
-    void calcAndRemeberTemp();
+    void calcAndRememberTemp();
 };
 
 struct Soda : public SystemOfEquation
@@ -202,4 +202,5 @@ struct Shockwave2 : public SystemOfEquation
 
 private:
     std::vector<double> temperature;
+    void calcAndRememberTemp();
 };

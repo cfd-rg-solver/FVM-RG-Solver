@@ -543,7 +543,7 @@ void Couette2AltBinary::updateU(double dh, double dt)
             U[j][i] += (/*R[j][i]*/0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i] - Fv[j][i - 1]) / (/*2.**/dh)) * dt;
         }
     }
-    calcAndRemeberTemp();
+    calcAndRememberTemp();
 }
 
 void Couette2AltBinary::updateBorderU(vector<macroParam>& points) // ! change calculation of conservative varibles vector in the fictious cells on the basis on BC type
@@ -697,7 +697,7 @@ void Couette2AltBinary::computeFv(vector<macroParam>& points, double dh)
         Fv[energy][i] = -lambda * dT_dy - etta * p1.velocity_tau * dv_tau_dy - (bulk + 4. / 3. * etta) * dv_normal_dy * p1.velocity_normal;
     }
 }
-void Couette2AltBinary::calcAndRemeberTemp()
+void Couette2AltBinary::calcAndRememberTemp()
 {
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
@@ -1056,7 +1056,6 @@ double Shockwave2::getGamma(size_t i)
     p0.velocity = getVelocity(i);
     p0.density = getDensity(i);
     double gamma = energyCalculator->getGamma(p0); 
-
     return gamma;
 }
 
@@ -1075,6 +1074,7 @@ void Shockwave2::updateU(double dh, double dt)
             U[j][i] += (0 - (Flux[j][i] - Flux[j][i - 1]) / dh - (Fv[j][i + 1] - Fv[j][i - 1]) / (2 * dh)) * dt;
         }
     }
+    calcAndRememberTemp();
 }
 
 void Shockwave2::updateBorderU(vector<macroParam>& points) {
@@ -1158,4 +1158,22 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
         Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_tau_dy * p1.velocity_tau;
 
     }
+}
+
+void Shockwave2::calcAndRememberTemp()
+{
+// #pragma omp parallel for schedule(static)
+    for (int i = 0; i < numberOfCells; i++)
+    {
+        macroParam p0(mixture);
+        p0.temp = temperature[i];
+        p0.densityArray.resize(1);
+        p0.fractionArray.resize(1);
+        p0.densityArray[0] = getDensity(i);
+        p0.fractionArray[0] = p0.densityArray[0] / getDensity(i);
+        p0.velocity = getVelocity(i);
+        p0.density = getDensity(i);
+        temperature[i] = eqSolver->solveEq(energyCalculator, p0, U[energy][i]);
+    }
+    return;
 }

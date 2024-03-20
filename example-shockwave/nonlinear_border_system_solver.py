@@ -13,15 +13,15 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # METHANE DATA
 gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
-molarMass = 0.01604 # methane
-mass = 27e-26 # methane
+molarMass = 0.016043 # methane
+mass = 2.663732314e-26 # methane
 speed_of_sound_room = 450 # methane, m/s for ~27 C
 
 # consts
 R = 8.3144598
 kB = 1.38064852e-23
 
-Ma = 3.8
+Ma = 3
 T_left = 300 # K
 pressure = 6.66 # Pa
 

@@ -40,7 +40,7 @@ int main()
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
     methane.omega_eByMode = { 3025.5, 1582.7, 3156.8, 1367.4 }; // sm^-1, all other data, related with length, is in m!
-    methane.numberVibrLvlByMode = { 10, 18, 9, 21 };
+    methane.numberVibrLvlByMode = { 4, 4, 4, 4 }; // { 10, 18, 9, 21 }; 
     methane.dByMode = { 1, 2, 3, 3 };
 
     for (int i1 = 0; i1 < methane.numberVibrLvlByMode[0]; i1++)
@@ -91,14 +91,14 @@ int main()
     // p = 100 Pa
     // (speed of sound 450.06 m/s)
     //
-    double velocity_left = 1710.0; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
-    double density_left = 4.2827556878680195e-05; // kg/m^3, calculated for atmospheric pressure
+    double velocity_left = 1350; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
+    double density_left = 4.283556702e-05; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 328.4210526;
-    double density_right = 0.0002229;
-    double T_right = 934.175438;
+    double velocity_right = 308.3333;
+    double density_right = 0.0001875;
+    double T_right = 688.99176;
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
@@ -140,9 +140,9 @@ int main()
 
     solverParams solParam;
     solParam.NumCell     = 0.5e2/2 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
-    // solParam.Gamma    = 1.67;        // Ar
-    // solParam.Gamma    = 1.32;        // O2_O
-    solParam.Gamma    = 1.304;       // CH4, but its implemented changable in macroparam
+    // solParam.Gamma       = 1.67;        // Ar
+    // solParam.Gamma       = 1.32;        // O2_O
+    solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
     solParam.MaxIter     = 5000;        // максимальное кол-во итераций
     solParam.Ma          = 3;         // Число Маха
