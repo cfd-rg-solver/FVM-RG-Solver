@@ -165,10 +165,10 @@ void AbstractSolver::setDt()
 {
     double max = riemannSolver->maxSignalVelocity;  // это нужно чтобы правильно подобрать временной шаг, чтобы соблюдался критерий КФЛ
     double dt;
-    if(max!=0)
-        dt = solParam.CFL*delta_h/max;
+    if (max != 0)
+        dt = solParam.CFL * delta_h / max;
     else
-        dt = 0.00001;
+        dt = 1e-8;// 0.00001;
     timeSolvind.push_back(dt);
     return;
 }

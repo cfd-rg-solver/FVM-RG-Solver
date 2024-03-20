@@ -117,7 +117,7 @@ double OneTempApprox::Zvibr(macroParam &point, size_t component)
 double OneTempApproxMultiModes::calcEnergy(macroParam& point)
 {
     double UTrRot = getTrRotEnegry(point, 0);
-    double UVibr = getVibrEnergy(point, 0); // TODO FIX gigantic
+    double UVibr = getVibrEnergy(point, 0);
     double E = point.density * (UTrRot + UVibr) + 0.5 * pow(point.velocity, 2) * point.density;
     return E;
 }
@@ -139,12 +139,12 @@ double OneTempApproxMultiModes::getVibrEnergy(macroParam& point, size_t componen
 double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t component)
 {
     // fixed formulad from problem statement need to be added
-    double m = point.mixture.components[component].mass; // todo: do we need this? not here, since in getVibrEnergy the 'energy' is divided by mass
-
-    double e_1000 = vibrEnergyLvl(1, 0, 0, 0, point, component);
-    double e_0100 = vibrEnergyLvl(0, 1, 0, 0, point, component);
-    double e_0010 = vibrEnergyLvl(0, 0, 1, 0, point, component);
-    double e_0001 = vibrEnergyLvl(0, 0, 0, 1, point, component);
+    
+    MixtureComponent molecula = point.mixture.components[component];
+    double e_1000 = hc * molecula.omega_eByMode[0];// vibrEnergyLvl(1, 0, 0, 0, point, component);
+    double e_0100 = hc * molecula.omega_eByMode[1];// vibrEnergyLvl(0, 1, 0, 0, point, component);
+    double e_0010 = hc * molecula.omega_eByMode[2];// vibrEnergyLvl(0, 0, 1, 0, point, component);
+    double e_0001 = hc * molecula.omega_eByMode[3];// vibrEnergyLvl(0, 0, 0, 1, point, component);
 
     double sum = 0;
 
@@ -179,11 +179,11 @@ double OneTempApproxMultiModes::vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int 
 
 double OneTempApproxMultiModes::Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
 {
-
-    double e_1000 = vibrEnergyLvl(1, 0, 0, 0, point, component);
-    double e_0100 = vibrEnergyLvl(0, 1, 0, 0, point, component);
-    double e_0010 = vibrEnergyLvl(0, 0, 1, 0, point, component);
-    double e_0001 = vibrEnergyLvl(0, 0, 0, 1, point, component);
+    MixtureComponent molecula = point.mixture.components[component];
+    double e_1000 = hc * molecula.omega_eByMode[0];// vibrEnergyLvl(1, 0, 0, 0, point, component);
+    double e_0100 = hc * molecula.omega_eByMode[1];// vibrEnergyLvl(0, 1, 0, 0, point, component);
+    double e_0010 = hc * molecula.omega_eByMode[2];// vibrEnergyLvl(0, 0, 1, 0, point, component);
+    double e_0001 = hc * molecula.omega_eByMode[3];// vibrEnergyLvl(0, 0, 0, 1, point, component);
 
     double sum = 0;
 
@@ -217,7 +217,7 @@ double OneTempApproxMultiModes::getGamma(macroParam& point)
 
     double h = getEntalp(point, component);
     double nu_c = clight * point.mixture.components[component].omega_e;
-    double Cv_vibr = (kB / point.mixture.mass(component)) * pow(h * nu_c / (kB * point.temp), 2) * exp(h * nu_c / (kB * point.temp)) / pow(exp(h * nu_c / (kB * point.temp)) - 1, 2);
+    double Cv_vibr = (kB / point.mixture.mass(component)) * pow(h * nu_c / (kB * point.temp), 2) * exp(-h * nu_c / (kB * point.temp)); // (kB / point.mixture.mass(component)) * pow(h * nu_c / (kB * point.temp), 2) * exp(h * nu_c / (kB * point.temp)) / pow(exp(h * nu_c / (kB * point.temp)) - 1, 2);
 
     double Cv = Cv_tr + Cv_rot + Cv_vibr;
 
@@ -230,6 +230,6 @@ double OneTempApproxMultiModes::getEntalp(macroParam& point, size_t component)
     /* function to calculate specific entalpy h = p/rho + U */
     double UTrRot = getTrRotEnegry(point, 0);
     double UVibr = getVibrEnergy(point, 0);
-    double res = point.pressure / point.density + (UTrRot + UVibr);
+    double res = 5. * kB * point.temp / (2. * point.mixture.mass(component)) + (UTrRot + UVibr);
     return res;
 }
