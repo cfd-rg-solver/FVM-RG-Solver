@@ -91,14 +91,14 @@ int main()
     // p = 100 Pa
     // (speed of sound 450.06 m/s)
     //
-    double velocity_left = 1350; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
-    double density_left = 4.283556702e-05; // kg/m^3, calculated for atmospheric pressure
+    double velocity_left = 900; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
+    double density_left = 4.2835567e-05; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 308.3333;
-    double density_right = 0.0001875;
-    double T_right = 688.99176;
+    double velocity_right = 314.0625;
+    double density_right = 0.00012275;
+    double T_right = 460.1888;
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
@@ -145,7 +145,7 @@ int main()
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
     solParam.MaxIter     = 5000;        // максимальное кол-во итераций
-    solParam.Ma          = 3;         // Число Маха
+    solParam.Ma          = 2;         // Число Маха
 
     double precision = 1E-7; // точность
     Observer watcher(precision);
@@ -167,7 +167,8 @@ int main()
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 30 * MFP; // m
+    double h = 100 * MFP; // m
+    std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
