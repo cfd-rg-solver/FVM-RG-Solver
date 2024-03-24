@@ -18,6 +18,8 @@ std::string GetCurrentWorkingDir( void ) {
     //    return currentWorkingDir.string();
 }
 
+// double M_PI = 3.14159265358979323846;
+
 namespace fs = std::filesystem;
 int main()
 {
@@ -36,10 +38,10 @@ int main()
     methane.mass = 2.663732314e-26;
     methane.epsilonDevK = 151.4; // have written in .doc file on drive // epsilon/kB
     methane.sigma = 3.737e-10; // m
-    methane.D_diss = 36685.823189; // cm^-1, converted from 438.86 kJ/mol
+    methane.D_diss = 3668582.3189; // m^-1!, converted from 438.86 kJ/mol
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
-    methane.omega_eByMode = { 3025.5, 1582.7, 3156.8, 1367.4 }; // sm^-1, all other data, related with length, is in m!
+    methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1! all other data, related with length, is in m!
     methane.numberVibrLvlByMode = { 4, 4, 4, 4 }; // { 10, 18, 9, 21 }; 
     methane.dByMode = { 1, 2, 3, 3 };
 
@@ -67,6 +69,7 @@ int main()
     }
 
     double viscocity_methane = 1.1123e-05; // for below set sonditions
+    // double viscocity_argon = 2.2724e-05; // for below set sonditions
 
 
     std::vector<MixtureComponent> tmp3 = { methane };
@@ -90,16 +93,27 @@ int main()
     // T = 300 K
     // p = 100 Pa
     // (speed of sound 450.06 m/s)
-    //
-    double velocity_left = 900; // shock wave, so the velocity is supersonic, let's set it to ??? m/s ~ 5 Ma for methane at room temperature
-    double density_left = 4.2835567e-05; // kg/m^3, calculated for atmospheric pressure
+    // METHANE SET:
+    double velocity_left = 1350.18;
+    double density_left = 0.00064318; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 314.0625;
-    double density_right = 0.00012275;
-    double T_right = 460.1888;
+    double velocity_right = 308.37444;
+    double density_right = 0.002816;
+    double T_right = 688.99176; // ! from approx solver, but both of the solvers need to be fixed for the methane case
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
+
+    // ARGON SET:
+    // double velocity_left = 1350.18;
+    // double density_left = 0.0016015; // kg/m^3, calculated for atmospheric pressure
+    // double T_left = 300; // Kelvin
+    // double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
+
+    // double velocity_right = 395.4701;
+    // double density_right = 0.0054678;
+    // double T_right = 1902.300; // ! from approx solver, other one is not fixed for methane case
+    // double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
@@ -139,13 +153,13 @@ int main()
     ////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 0.5e2/2 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 1e2/2 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
     // solParam.Gamma       = 1.67;        // Ar
     // solParam.Gamma       = 1.32;        // O2_O
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
-    solParam.MaxIter     = 5000;        // максимальное кол-во итераций
-    solParam.Ma          = 2;         // Число Маха
+    solParam.MaxIter     = 1000000;        // максимальное кол-во итераций
+    solParam.Ma          = 3;         // Число Маха, сейчас не влияет на решатель, просто формальность
 
     double precision = 1E-7; // точность
     Observer watcher(precision);
@@ -163,11 +177,10 @@ int main()
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
     GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
-    double M_PI = 3.14159265358979323846;
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 100 * MFP; // m
+    double h = 80 * MFP; // m
     std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);

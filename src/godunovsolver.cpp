@@ -41,7 +41,7 @@ void GodunovSolver::solve()
         system->updateBorderU(points); // this one should be calculated on the basis of boundary conditions type
 
         //записать данные, если это требуется
-        writePoints(T*1000000); // микросек
+        // writePoints(T*1000000); // микросек
 
         double max;
         if(i%10 == 0)
