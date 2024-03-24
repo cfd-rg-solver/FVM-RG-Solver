@@ -6,27 +6,28 @@ import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 # ARGON DATA
-# gamma = 1.667 # argon
-# argon_molarMass = 0.039948 # argon
-# argon_mass = 6.633521356992e-26 # argon
-# speed_of_sound_room = 323 # argon, m/s
+gamma = 1.667 # argon
+molarMass = 0.039948 # argon
+mass = 6.633521356992e-26 # argon
+speed_of_sound_room = 322.59 # argon, m/s t T = 300 K and p = 100 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C7440371&Action=Page)
 
 # METHANE DATA
-gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
-molarMass = 0.016043 # methane
-mass = 2.663732314e-26 # methane
-speed_of_sound_room = 450 # methane, m/s for ~27 C
+# gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
+# molarMass = 0.016043 # methane
+# mass = 2.663732314e-26 # methane
+# speed_of_sound_room = 450.06 # methane, m/s at T = 300 K and p = 100 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C74828&Action=Page)
 
 # consts
 R = 8.3144598
 kB = 1.38064852e-23
 
-Ma = 3
+# Ma = 3
 T_left = 300 # K
-pressure = 6.66 # Pa
+pressure = 100 # Pa
 
 # calculated parameters
-velocity_left = Ma * speed_of_sound_room
+velocity_left = 1350.18 # Ma * speed_of_sound_room
+Ma = velocity_left / speed_of_sound_room
 density_left = pressure*molarMass / (R * T_left)
 
 def solver(velocity_left, density_left, T_left):
@@ -41,6 +42,8 @@ def solver(velocity_left, density_left, T_left):
     # argon_mass = 6.633521356992e-26
     # E_0 = 3*kB*T_0/(2*argon_mass)
 
+
+    # this functions of course need to be corrected for a polytomic gas 
     def func(x):
         return [
             x[0] * x[1] - v_0 * rho_0, # x[0] - velocity, x[1] - density, x[2] - temperature

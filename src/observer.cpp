@@ -30,7 +30,7 @@ bool Observer::checkDifference(vector<macroParam> param)
 {
     double maxDifference = 0;
     auto size = param.size();
-    #pragma omp parallel for schedule (static)
+    // #pragma omp parallel for schedule (static)
     for(int i = 0; i < size; i++)
     {
         double d_temp = std::fabs(previousParam[i].temp - param[i].temp);

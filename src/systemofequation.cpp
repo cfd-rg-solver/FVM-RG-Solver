@@ -891,7 +891,7 @@ double Shockwave1::getPressure(size_t i) {
 
 void Shockwave1::updateU(double dh, double dt)
 {
-    //#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -920,7 +920,7 @@ void Shockwave1::computeF(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
     macroParam p1;
-    // #pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
@@ -1004,7 +1004,7 @@ void Shockwave2::prepareIndex()
 void Shockwave2::prepareSolving(vector<macroParam>& points)
 {
     temperature.resize(numberOfCells);
-// #pragma omp parallel for schedule(static)
+    // #pragma omp parallel for schedule(static)
     for (auto i = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
@@ -1066,7 +1066,7 @@ double Shockwave2::getPressure(size_t i)
 
 void Shockwave2::updateU(double dh, double dt)
 {
-//#pragma omp parallel for schedule(static)
+    // #pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -1090,7 +1090,8 @@ void Shockwave2::computeF(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
     macroParam p1;
-//#pragma omp parallel for schedule(static)
+    // promlem with omp here
+    // #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         p1 = points[i];
@@ -1103,7 +1104,7 @@ void Shockwave2::computeF(vector<macroParam>& points, double dh)
 void Shockwave2::computeFv(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
-#pragma omp parallel for schedule(static)
+    #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
@@ -1162,7 +1163,7 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
 
 void Shockwave2::calcAndRememberTemp()
 {
-// #pragma omp parallel for schedule(static)
+    // #pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         macroParam p0(mixture);

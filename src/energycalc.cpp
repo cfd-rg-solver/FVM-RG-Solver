@@ -141,10 +141,12 @@ double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t componen
     // fixed formulad from problem statement need to be added
     
     MixtureComponent molecula = point.mixture.components[component];
-    double e_1000 = hc * molecula.omega_eByMode[0];// vibrEnergyLvl(1, 0, 0, 0, point, component);
+    double e_1000 = hc * molecula.omega_eByMode[0];// vibrEnergyLvl(1, 0, 0, 0, point, component); dimensions of omega were wrong!!
     double e_0100 = hc * molecula.omega_eByMode[1];// vibrEnergyLvl(0, 1, 0, 0, point, component);
     double e_0010 = hc * molecula.omega_eByMode[2];// vibrEnergyLvl(0, 0, 1, 0, point, component);
     double e_0001 = hc * molecula.omega_eByMode[3];// vibrEnergyLvl(0, 0, 0, 1, point, component);
+    double e_0000 = hc * (molecula.omega_eByMode[0] * molecula.dByMode[0] / 2. + molecula.omega_eByMode[1] * molecula.dByMode[1] / 2.
+                          + molecula.omega_eByMode[2] * molecula.dByMode[2] / 2. + molecula.omega_eByMode[3] * molecula.dByMode[3] / 2.);
 
     double sum = 0;
 
@@ -154,12 +156,12 @@ double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t componen
 
         double Z = Zvibr(inds[0], inds[1], inds[2], inds[3], point, component);
 
-        double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
+        double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001; // where is the e_0000?
 
         sum += s * e_0 / (Z) * exp(-e_0 / (kB * point.temp));
     }
 
-    return sum;
+    return sum + e_0000; // e_0000 could be added here: sum + e_0000
 }
 
 double OneTempApproxMultiModes::vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
