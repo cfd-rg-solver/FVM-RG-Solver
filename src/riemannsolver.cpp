@@ -271,7 +271,7 @@ void HLLESolver::computeFlux(SystemOfEquation* system)
         // H1 = system->getEnergy(i+1) - pow(u1,2) / 2 + system->getPressure(i+1)/system->getDensity(i+1);
 
         H0 = system->getEnergy(i) + system->getPressure(i) / system->getDensity(i); // according to Toro's paper notation
-        H1 = system->getEnergy(i + 1) + system->getPressure(i + 1) / system->getDensity(i + 1);
+        H1 = system->getEnergy(i + 1) + system->getPressure(i + 1) / system->getDensity(i + 1); // check energy
 
         // gamma0 = system->getGamma(i); // for now I recommend to test CH4 case with fixed gamma
         // gamma1 = system->getGamma(i + 1);
@@ -286,7 +286,7 @@ void HLLESolver::computeFlux(SystemOfEquation* system)
 
         v_avg = (rho0 * v0 + rho1 * v1) / (rho0 + rho1);
         H_avg = (rho0 * H0 + rho1 * H1) / (rho0 + rho1);
-        gamma_avg = (rho0 * gamma0 + rho1 * gamma1) / (rho0 + rho1);
+        gamma_avg = solParam.Gamma; // (rho0 * gamma0 + rho1 * gamma1) / (rho0 + rho1);
 
         // c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
         c_avg = sqrt((gamma_avg - 1) * (fabs(H_avg - 0.5 * pow(v_avg, 2))));
