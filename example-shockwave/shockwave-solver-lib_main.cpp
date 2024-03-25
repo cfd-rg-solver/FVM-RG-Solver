@@ -42,7 +42,7 @@ int main()
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
     methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1! all other data, related with length, is in m!
-    methane.numberVibrLvlByMode = { 4, 4, 4, 4 }; // { 10, 18, 9, 21 }; 
+    methane.numberVibrLvlByMode = { 1, 1, 1, 1 }; // { 10, 18, 9, 21 };
     methane.dByMode = { 1, 2, 3, 3 };
 
     for (int i1 = 0; i1 < methane.numberVibrLvlByMode[0]; i1++)
@@ -153,12 +153,12 @@ int main()
     ////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 1e2/2 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 30 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
     // solParam.Gamma       = 1.67;        // Ar
     // solParam.Gamma       = 1.32;        // O2_O
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
-    solParam.MaxIter     = 1000000;        // максимальное кол-во итераций
+    solParam.MaxIter     = 2000;        // максимальное кол-во итераций
     solParam.Ma          = 3;         // Число Маха, сейчас не влияет на решатель, просто формальность
 
     double precision = 1E-7; // точность
@@ -181,7 +181,7 @@ int main()
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 80 * MFP; // m
+    double h = 40 * MFP; // m
     std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);

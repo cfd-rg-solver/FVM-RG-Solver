@@ -29,8 +29,8 @@ T_left = 300 # K
 pressure = 100 # Pa
 
 # calculated parameters
-velocity_left = 1350.18 # Ma * speed_of_sound_room
-Ma = velocity_left / speed_of_sound_room
+velocity_left = Ma * speed_of_sound_room
+# Ma = velocity_left / speed_of_sound_room
 density_left = pressure*molarMass / (R * T_left)
 om_e = np.array([302550, 158270, 315680, 136740])
 ds = np.array([1, 2, 3, 3])
