@@ -99,9 +99,9 @@ int main()
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 308.37444;
-    double density_right = 0.002816;
-    double T_right = 688.99176; // ! from approx solver, but both of the solvers need to be fixed for the methane case
+    double velocity_right = 359.36775;
+    double density_right = 0.002416;
+    double T_right = 766.889; // ! from solver (methane case)
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     // ARGON SET:
@@ -177,6 +177,7 @@ int main()
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
     GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
+    //double M_PI = 3.14159265358979323846;
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
