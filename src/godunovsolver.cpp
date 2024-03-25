@@ -44,7 +44,7 @@ void GodunovSolver::solve()
         // writePoints(T*1000000); // микросек
 
         double max;
-        if(i%10 == 0)
+        if(i%100 == 0)
         {
             std::cout<<i<<" iteration"<<std::endl;
             writePoints(T*1000000); // микросек
