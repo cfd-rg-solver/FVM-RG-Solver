@@ -29,8 +29,8 @@ T_left = 300 # K
 pressure = 100 # Pa
 
 # calculated parameters
-velocity_left = Ma * speed_of_sound_room
-# Ma = velocity_left / speed_of_sound_room
+velocity_left = 1350.18 # Ma * speed_of_sound_room
+Ma = velocity_left / speed_of_sound_room
 density_left = pressure*molarMass / (R * T_left)
 om_e = np.array([302550, 158270, 315680, 136740])
 ds = np.array([1, 2, 3, 3])
@@ -97,22 +97,17 @@ def solver(velocity_left, density_left, T_left):
         # U_rot = kB * temp / mass
         # U_vibr = sum((e_0 + e_0000) / (Z) * exp(-e_0 / (kB * temp)))
         
+        Zvibr_0, Zvibr_1 = 0, 0
+        for inds in possible_inds:
+            s = ((inds[1]+1)*(inds[2]+1)*(inds[2]+2)*(inds[3]+1)*(inds[3]+2)/4)
+            e_0 = sum(es*inds)
+            Zvibr_0 += s*np.exp(-e_0/(kB*T_0))
+            Zvibr_1 += s*np.exp(-e_0/(kB*x[2]))
         
         Uvibr_0, Uvibr_1 = 0, 0
         for inds in possible_inds:
             s = ((inds[1]+1)*(inds[2]+1)*(inds[2]+2)*(inds[3]+1)*(inds[3]+2)/4)
             e_0 = sum(es*inds)
-
-            Zvibr_0, Zvibr_1 = 0, 0
-            for i1 in range(inds[0]+1):
-                for i2 in range(inds[1]+1):
-                    for i3 in range(inds[2]+1):
-                        for i4 in range(inds[3]+1):
-                            s = ((i2+1)*(i3+1)*(i3+2)*(i4+1)*(i4+2)/4)
-                            e_0 = sum(es*np.array([i1,i2,i3,i4]))
-                            Zvibr_0 += s*np.exp(-e_0/(kB*T_0))
-                            Zvibr_1 += s*np.exp(-e_0/(kB*x[2]))
-            
             Uvibr_0 += s*(e_0+e_0000)*np.exp(-e_0/(kB*T_0))/Zvibr_0
             Uvibr_1 += s*(e_0+e_0000)*np.exp(-e_0/(kB*x[2]))/Zvibr_1
         

@@ -47,6 +47,6 @@ private:
     double getVibrEnergy(macroParam& point, size_t component);
     double avgVibrEnergy(macroParam& point, size_t component);
     double vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
-    double Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
+    double Zvibr(macroParam& point, size_t component);
     double getEntalp(macroParam& point, size_t component);
 };

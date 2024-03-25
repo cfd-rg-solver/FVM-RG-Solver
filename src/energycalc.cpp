@@ -1,5 +1,5 @@
 #include "energycalc.h"
-//#include <iostream>
+#include <iostream>
 
 double OneTempApprox::calcEnergy(macroParam &point)
 {
@@ -149,21 +149,22 @@ double OneTempApproxMultiModes::avgVibrEnergy(macroParam& point, size_t componen
     double e_0000 = hc * (molecula.omega_eByMode[0] * molecula.dByMode[0] / 2. + molecula.omega_eByMode[1] * molecula.dByMode[1] / 2.
                           + molecula.omega_eByMode[2] * molecula.dByMode[2] / 2. + molecula.omega_eByMode[3] * molecula.dByMode[3] / 2.);
 
+    double Z = Zvibr(point, component);
+
     double sum = 0;
 
     for (const auto& inds : point.mixture.components[component].possibleVibrInds) {
      
         double s = (inds[1] + 1) * (inds[2] + 1) * (inds[2] + 2) * (inds[3] + 1) * (inds[3] + 2) / 4.;
 
-        double Z = Zvibr(inds[0], inds[1], inds[2], inds[3], point, component);
-
         double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
 
         sum += s * (e_0 + e_0000) / (Z) * exp(-e_0 / (kB * point.temp));
     }
-    return sum/20.;
+    return sum;
 }
 
+/* // don't use yet
 double OneTempApproxMultiModes::vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
 {
     MixtureComponent molecula = point.mixture.components[component];
@@ -176,10 +177,10 @@ double OneTempApproxMultiModes::vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int 
         );
 
     return result;
-}
+}*/
 
 
-double OneTempApproxMultiModes::Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component)
+double OneTempApproxMultiModes::Zvibr(macroParam& point, size_t component)
 {
     MixtureComponent molecula = point.mixture.components[component];
     double e_1000 = hc * molecula.omega_eByMode[0];
@@ -188,23 +189,10 @@ double OneTempApproxMultiModes::Zvibr(int lvl1, int lvl2, int lvl3, int lvl4, ma
     double e_0001 = hc * molecula.omega_eByMode[3];
 
     double sum = 0;
-
-    for (int i1 = 0; i1 <= lvl1; i1++)
-    {
-        for (int i2 = 0; i2 <= lvl2; i2++)
-        {
-            for (int i3 = 0; i3 <= lvl3; i3++)
-            {
-                for (int i4 = 0; i4 <= lvl4; i4++)
-                {
-                    double s = (i2 + 1) * (i3 + 1) * (i3 + 2) * (i4 + 1) * (i4 + 2) / 4.;
-
-                    double e_0 = i1 * e_1000 + i2 * e_0100 + i3 * e_0010 + i4 * e_0001;
-
-                    sum += s * exp(-e_0 / (kB * point.temp));
-                }
-            }
-        }
+    for (const auto& inds : point.mixture.components[component].possibleVibrInds) {
+        double s = (inds[1] + 1) * (inds[2] + 1) * (inds[2] + 2) * (inds[3] + 1) * (inds[3] + 2) / 4.;
+        double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
+        sum += s * exp(-e_0 / (kB * point.temp));
     }
     return sum;
 }
