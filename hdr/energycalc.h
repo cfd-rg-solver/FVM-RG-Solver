@@ -46,7 +46,13 @@ private:
     double getTrRotEnegry(macroParam& point, size_t component);
     double getVibrEnergy(macroParam& point, size_t component);
     double avgVibrEnergy(macroParam& point, size_t component);
-    double vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
     double Zvibr(macroParam& point, size_t component);
     double getEntalp(macroParam& point, size_t component);
+
+    double ZvibrDiff(macroParam& point, size_t component);
+    double getVibrEnergyDiff(macroParam& point, size_t component);
+    double getCvibr(macroParam& point, size_t component);
+    double getBulkViscosity(macroParam& point, size_t component);
+
+    //double vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
 };

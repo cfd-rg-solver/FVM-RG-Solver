@@ -42,7 +42,7 @@ int main()
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
     methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1! all other data, related with length, is in m!
-    methane.numberVibrLvlByMode = { 1, 1, 1, 1 }; // { 10, 18, 9, 21 };
+    methane.numberVibrLvlByMode = { 1,1,1,1 };//{ 10, 18, 9, 21 }; //{ 4, 4, 4, 4 };
     methane.dByMode = { 1, 2, 3, 3 };
 
     for (int i1 = 0; i1 < methane.numberVibrLvlByMode[0]; i1++)
