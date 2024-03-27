@@ -6,7 +6,7 @@ AbstractSolver::AbstractSolver(Mixture mixture_, solverParams solParam_, SystemO
 {
     isContinue = 0;
     mixture = mixture_;
-    solParam =solParam_;
+    solParam = solParam_;
     delta_h = 0;
 
     if(mixture.NumberOfComponents == 1)
@@ -109,6 +109,11 @@ SystemOfEquation *AbstractSolver::getSystemOfEquation(SystemOfEquationType type)
         auto* tmp = new Shockwave1();
         return tmp;
     }
+    case SystemOfEquationType::shockwave2:
+    {
+        auto* tmp = new Shockwave2();
+        return tmp;
+    }
     }
     return nullptr;
 }
@@ -138,6 +143,12 @@ RiemannSolver *AbstractSolver::getRiemannSolver(RiemannSolverType type)
     return nullptr;
 }
 
+void AbstractSolver::setEnergyCalculator(EnergyCalc* energyCalculator_)
+{ 
+    energyCalculator = energyCalculator_; 
+    system->setEnergyCalculator(energyCalculator);
+};
+
 void AbstractSolver::prepareVectorSizes()
 {
     points.resize(solParam.NumCell);
@@ -154,10 +165,10 @@ void AbstractSolver::setDt()
 {
     double max = riemannSolver->maxSignalVelocity;  // это нужно чтобы правильно подобрать временной шаг, чтобы соблюдался критерий КФЛ
     double dt;
-    if(max!=0)
-        dt = solParam.CFL*delta_h/max;
+    if (max != 0)
+        dt = solParam.CFL * delta_h / max;
     else
-        dt = 0.000001;
+        dt = 1e-7;// 0.00001;
     timeSolvind.push_back(dt);
     return;
 }
@@ -165,7 +176,7 @@ void AbstractSolver::setDt()
 void AbstractSolver::updatePoints()
 {
     auto size = points.size()-1;
-#pragma omp parallel for schedule(static)
+// #pragma omp parallel for schedule(static)
     for(int i = 0; i < size + 1; i++)
     //    for(int i = 1; i < size; i++)
     {
@@ -182,6 +193,7 @@ void AbstractSolver::updatePoints()
         }
         points[i].soundSpeed = sqrt(solParam.Gamma*points[i].pressure/points[i].density);
         points[i].temp = system->getTemp(i);
+        points[i].gamma = energyCalculator->getGamma(points[i]);
     }
     border->updatePoints(points);
 }
