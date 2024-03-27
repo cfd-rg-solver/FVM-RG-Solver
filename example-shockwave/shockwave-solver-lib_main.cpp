@@ -44,7 +44,7 @@ int main()
     std::vector<MixtureComponent> tmp2 = { argon };
     Mixture Ar(tmp2);
 
-    double viscocity_argon = 2.2725e-05; // for below set sonditions
+    double viscocity_argon = 2.2724e-05; // for below set sonditions
 
     ///////////////////////////////////////////////////////////////
     ///////////////////// Molecula data //////////////////////////
@@ -126,12 +126,12 @@ int main()
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
     */
     // ARGON SET:
-    double velocity_left = 1225.88;
-    double density_left = 0.000106663; // kg/m^3 ??? calculated as pressure*molarMass / (R * T_left), but its has different dimention in NIST
+    double velocity_left = 1225.842;
+    double density_left = 0.000106663; // kg/m^3
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / argon.molarMass;
 
-    double velocity_right = 370.2480;
+    double velocity_right = 370.2365;
     double density_right = 0.000353158;
     double T_right = 1612.9346; // ! from approx solver, other one is not fixed for methane case
     double pressure_right = UniversalGasConstant * T_right * density_right / argon.molarMass;
