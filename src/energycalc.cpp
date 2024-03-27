@@ -119,8 +119,7 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
 {
     double UTrRot = getTrRotEnegry(point, 0);
     double UVibr = getVibrEnergy(point, 0);
-    double E = point.density * (UTrRot + UVibr) + 0.5 * pow(point.velocity, 2) * point.density;
-    
+    double E = point.density * (UTrRot + UVibr + 0.5 * pow(point.velocity, 2));
     /*
     if (point.temp == 300.) {
         std::cout << "-------------------------" << std::endl;
@@ -128,12 +127,12 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
         std::cout << "p=" << point.pressure << std::endl;
         std::cout << "rho=" << point.density << std::endl;
         std::cout << "v=" << point.velocity << std::endl;
-        double Ctr = 3.0 / 2 * kB / point.mixture.mass(0);
-        double Crot = kB / point.mixture.mass(0);
+        double Ctr = 3. / 2. * kB / point.mixture.mass(0);
+        double Crot = 3. / 2. * kB / point.mixture.mass(0);
         double Cvibr = getCvibr(point, 0);
         double Cv = Ctr + Crot + Cvibr;
         std::cout << "Cv=" << Cv << std::endl;
-        //std::cout << "UTrRot + UVibr=" << UTrRot + UVibr << std::endl;
+        std::cout << "zeta=" << getBulkViscosity(point,0) << std::endl;
         std::cout << "-------------------------" << std::endl;
     }*/
     return E;
@@ -143,7 +142,7 @@ double OneTempApproxMultiModes::getTrRotEnegry(macroParam& point, size_t compone
 {
     double n = Nav * point.density / point.mixture.components[component].molarMass;
     double Utr = 3. / 2. * kB * point.temp * n / point.density;
-    double Urot = kB * point.temp / point.mixture.components[component].mass;
+    double Urot = 3. / 2. * kB * point.temp / point.mixture.components[component].mass; // because methane has 3 degrees of freedom
     return Utr + Urot;
 }
 
@@ -292,8 +291,8 @@ double OneTempApproxMultiModes::getBulkViscosity(macroParam& point, size_t compo
 {
     /* function to calculate bulk viscosity zeta = kB*T/beta_int * (c_int/c_V)^2 */
 
-    double Ctr = 3.0 / 2 * kB / point.mixture.mass(component);
-    double Crot = kB / point.mixture.mass(component);
+    double Ctr = 3. / 2. * kB / point.mixture.mass(component);
+    double Crot = 3. / 2. * kB / point.mixture.mass(component); // because methane has 3 degrees of freedom
     double Cvibr = getCvibr(point, component);
     double Cv = Ctr + Crot + Cvibr;
     double Cint = Cv - Ctr;

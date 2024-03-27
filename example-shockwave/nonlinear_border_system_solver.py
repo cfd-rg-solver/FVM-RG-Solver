@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 # gamma = 1.667 # argon
 # molarMass = 0.039948 # argon
 # mass = 6.633521356992e-26 # argon
-# speed_of_sound_room = 322.59 # argon, m/s t T = 300 K and p = 100 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C7440371&Action=Page)
+# speed_of_sound_room = 322.6 # argon, m/s t T = 300 K and p = 6.66 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C7440371&Action=Page)
 
 # METHANE DATA
 gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
@@ -24,20 +24,19 @@ kB = 1.38064852e-23
 Nav = 6.02214129e23
 hc = 6.62559e-34 * 2.99792458e8
 
-Ma = 3
+Ma = 3.8
 T_left = 300 # K
 pressure = 100 # Pa
 
 # calculated parameters
-velocity_left = 1350.18 # Ma * speed_of_sound_room
-Ma = velocity_left / speed_of_sound_room
+velocity_left = Ma * speed_of_sound_room
 density_left = pressure*molarMass / (R * T_left)
 om_e = np.array([302550, 158270, 315680, 136740])
 ds = np.array([1, 2, 3, 3])
 es = hc*om_e # e_0
 e_0000 = sum(hc * (om_e*ds)/2)
 D_diss = 3668582.3189 # m^-1, converted from 438.86 kJ/mol https://www.weizmann.ac.il/oc/martin/tools/hartree.html
-max_vibr_lvls = [2, 2, 2, 2] # [9, 17, 9, 20]
+max_vibr_lvls = [1,1,1,1] #[4, 4, 4, 4] # [9, 17, 9, 20]
 
 possible_inds = []
 for i1 in range(max_vibr_lvls[0]):
@@ -115,8 +114,8 @@ def solver(velocity_left, density_left, T_left):
         return [
             x[0] * x[1] - v_0 * rho_0, # x[0] - velocity, x[1] - density, x[2] - temperature
             x[1] * np.power(x[0],2) + R*x[2]*x[1]/molarMass - rho_0 * np.power(v_0,2) - R*T_0*rho_0/molarMass,
-            x[1] * x[0] * ( 3/2*kB*x[2]*Nav/molarMass +  kB*x[2]/mass + Uvibr_1 + np.power(x[0],2)/2 + R*x[2]*x[1]/(molarMass*x[1]))
-            - rho_0 * v_0 * ( 3/2*kB*T_0*Nav/molarMass + kB*T_0/mass + Uvibr_0 + np.power(v_0,2)/2 + R*T_0*rho_0/(molarMass*rho_0))
+            x[1] * x[0] * ( 3/2*kB*x[2]*Nav/molarMass +  3/2*kB*x[2]/mass + Uvibr_1 + np.power(x[0],2)/2 + R*x[2]*x[1]/(molarMass*x[1]))
+            - rho_0 * v_0 * ( 3/2*kB*T_0*Nav/molarMass + 3/2*kB*T_0/mass + Uvibr_0 + np.power(v_0,2)/2 + R*T_0*rho_0/(molarMass*rho_0))
             ]
     
     vs, rhos, Ts = [], [], []

@@ -42,7 +42,7 @@ int main()
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
     methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1! all other data, related with length, is in m!
-    methane.numberVibrLvlByMode = { 1,1,1,1 };//{ 10, 18, 9, 21 }; //{ 4, 4, 4, 4 };
+    methane.numberVibrLvlByMode = { 10, 18, 9, 21 };// { 1,1,1,1 }; //{ 4, 4, 4, 4 };
     methane.dByMode = { 1, 2, 3, 3 };
 
     for (int i1 = 0; i1 < methane.numberVibrLvlByMode[0]; i1++)
@@ -93,27 +93,17 @@ int main()
     // T = 300 K
     // p = 100 Pa
     // (speed of sound 450.06 m/s)
+   
     // METHANE SET:
-    double velocity_left = 1350.18;
-    double density_left = 0.00064318; // kg/m^3, calculated for atmospheric pressure
+    double velocity_left = 1710.2279;
+    double density_left = 0.00064317; // kg/m^3, calculated for atmospheric pressure
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 359.36775;
-    double density_right = 0.002416;
-    double T_right = 766.889; // ! from solver (methane case)
+    double velocity_right = 348.20518;
+    double density_right = 0.0031589;
+    double T_right = 976.1859; // ! from python solver (methane case)
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
-
-    // ARGON SET:
-    // double velocity_left = 1350.18;
-    // double density_left = 0.0016015; // kg/m^3, calculated for atmospheric pressure
-    // double T_left = 300; // Kelvin
-    // double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
-
-    // double velocity_right = 395.4701;
-    // double density_right = 0.0054678;
-    // double T_right = 1902.300; // ! from approx solver, other one is not fixed for methane case
-    // double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
     borderConditionShockwave.setBorderParameters(
