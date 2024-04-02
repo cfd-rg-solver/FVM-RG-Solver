@@ -36,8 +36,8 @@ int main()
     methane.name = "CH4";
     methane.molarMass = 0.016043;
     methane.mass = 2.663732314e-26;
-    methane.epsilonDevK = 151.4; // have written in .doc file on drive // epsilon/kB
-    methane.sigma = 3.737e-10; // m
+    methane.epsilonDevK = 151.4; // have written in .doc file on drive // epsilon/kB // another data from the paper rot. relaxation: 176.8
+    methane.sigma = 3.737e-10; // m // another data from the paper rot. relaxation: 3.65e-10
     methane.D_diss = 3668582.3189; // m^-1!, converted from 438.86 kJ/mol
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;

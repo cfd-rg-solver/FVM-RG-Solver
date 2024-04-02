@@ -220,7 +220,7 @@ double OneTempApproxMultiModes::getEntalp(macroParam& point, size_t component)
 
     double UTrRot = getTrRotEnegry(point, 0);
     double UVibr = getVibrEnergy(point, 0);
-    double res = 5. * kB * point.temp / (2. * point.mixture.mass(component)) + (UTrRot + UVibr);
+    double res = kB * point.temp / (point.mixture.mass(component)) + (UTrRot + UVibr); // since h = 5/2 kT / m + E_rot + E_vibr (1-component gas)
     return res;
 }
 
@@ -239,10 +239,10 @@ double OneTempApproxMultiModes::ZvibrDiff(macroParam& point, size_t component)
     for (const auto& inds : point.mixture.components[component].possibleVibrInds) {
         double s = (inds[1] + 1) * (inds[2] + 1) * (inds[2] + 2) * (inds[3] + 1) * (inds[3] + 2) / 4.;
         double e_0 = inds[0] * e_1000 + inds[1] * e_0100 + inds[2] * e_0010 + inds[3] * e_0001;
-        sum += s * (e_0 / (kB * pow(point.temp, 2))) * exp(-e_0 / (kB * point.temp));
+        sum += s * e_0 * exp(-e_0 / (kB * point.temp));
     }
 
-    return sum;
+    return sum / (kB * pow(point.temp, 2));
 }
 
 double OneTempApproxMultiModes::getVibrEnergyDiff(macroParam& point, size_t component)
@@ -297,8 +297,8 @@ double OneTempApproxMultiModes::getBulkViscosity(macroParam& point, size_t compo
     double Cv = Ctr + Crot + Cvibr;
     double Cint = Cv - Ctr;
 
-    double tau_rot = 1.1 * 10e-9; // atm.s ??? TODO
-    double tau_vibr = 1.9 * 10e-6; // atm.s ??? TODO ok for 300K => 300^(-1/3)~0.149 ???
+    double tau_vibr = exp(-5.4 + 40 * pow(point.temp, -1 / 3)); // approx formula from http://dx.doi.org/10.1063/1.1696769
+    double tau_rot = tau_vibr / 1e3; // temporary crutch
     double beta_int = point.pressure * UniversalGasConstant * pow(Cint/Cv,2) / (Crot/tau_rot + Cvibr/tau_vibr);
 
     double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
