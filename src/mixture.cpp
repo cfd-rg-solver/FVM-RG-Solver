@@ -47,3 +47,8 @@ double Mixture::epsilonDevK(size_t i)
 {
     return components[i].epsilonDevK;
 }
+
+double Mixture::Zinf(size_t i)
+{
+    return components[i].Zinf;
+}

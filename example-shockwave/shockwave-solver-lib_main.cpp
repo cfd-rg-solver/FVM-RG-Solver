@@ -37,6 +37,7 @@ int main()
     methane.molarMass = 0.016043;
     methane.mass = 2.663732314e-26;
     methane.epsilonDevK = 151.4; // have written in .doc file on drive // epsilon/kB
+    methane.Zinf = 89.15;
     methane.sigma = 3.737e-10; // m
     methane.D_diss = 3668582.3189; // m^-1!, converted from 438.86 kJ/mol
     methane.numberAtoms = 5;
@@ -149,7 +150,7 @@ int main()
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
     solParam.MaxIter     = 2000;        // максимальное кол-во итераций
-    solParam.Ma          = 3;         // Число Маха, сейчас не влияет на решатель, просто формальность
+    solParam.Ma          = 3.8;         // Число Маха, сейчас не влияет на решатель, просто формальность
 
     double precision = 1E-7; // точность
     Observer watcher(precision);

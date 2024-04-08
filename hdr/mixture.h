@@ -8,6 +8,7 @@ struct MixtureComponent
 {
     double molarMass; // молярная масса
     double epsilonDevK; // параметр в потенциале (для рассчёта вязкости)
+    double Zinf; // параметр для модели Парка
     double mass;
     double sigma; // диаметр в метрах
     double omega_e; // спектроскопическая постоянная
@@ -41,5 +42,6 @@ struct Mixture
     double mass(size_t i);
     double sigma(size_t i);
     double epsilonDevK(size_t i);
+    double Zinf(size_t i);
 };
 #endif

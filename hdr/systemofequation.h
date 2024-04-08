@@ -24,7 +24,6 @@ struct SystemOfEquation
     void setEqSolver(NonLinearEqSolver* eqSolver_);
     void setEnergyCalculator(EnergyCalc* energyCalculator_) { energyCalculator = energyCalculator_; };
 
-
     virtual double getPressure(size_t i) = 0;
     virtual double getDensity(size_t i) = 0;
     virtual double getDensity(size_t i, size_t component);

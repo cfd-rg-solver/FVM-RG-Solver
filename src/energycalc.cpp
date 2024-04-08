@@ -287,23 +287,33 @@ double OneTempApproxMultiModes::getCvibr(macroParam& point, size_t component)
     return Cvibr;
 }
 
+/* this function realized in coeffSolver
 double OneTempApproxMultiModes::getBulkViscosity(macroParam& point, size_t component)
 {
-    /* function to calculate bulk viscosity zeta = kB*T/beta_int * (c_int/c_V)^2 */
-
+    // function to calculate bulk viscosity zeta = kB*T/beta_int * (c_int/c_V)^2 
+   
     double Ctr = 3. / 2. * kB / point.mixture.mass(component);
     double Crot = 3. / 2. * kB / point.mixture.mass(component); // because methane has 3 degrees of freedom
     double Cvibr = getCvibr(point, component);
     double Cv = Ctr + Crot + Cvibr;
     double Cint = Cv - Ctr;
 
-    double tau_rot = 1.1 * 10e-9; // atm.s ??? TODO
-    double tau_vibr = 1.9 * 10e-6; // atm.s ??? TODO ok for 300K => 300^(-1/3)~0.149 ???
+
+    double Zinf = point.mixture.components[component].Zinf;
+    double eps = point.mixture.components[component].epsilonDevK;
+    double F = 1 + pow(M_PI, 3. / 2.) / 2. * pow(kB * point.temp / eps, -1. / 2.) + (pow(M_PI, 2) / 4. + 2.) * pow(kB * point.temp / eps, -1) + pow(M_PI, 3. / 2.) * pow(kB * point.temp / eps, -3. / 2.);
+    double Zrot = Zinf / F;
+    double Omega22 = 1.0; // TODO
+    double eta = 5. * kB * point.temp / (8. * Omega22); 
+    double tau_rot = M_PI * eta * Zrot / (4. * point.pressure); // Parker model
+
+    double tau_vibr = exp(-5.4 + 40.*pow(point.temp, -1./3.)) * 10e-6; // Vibrational Relaxation of Methane L.Willard Richards and David H.Sigafoos
+
     double beta_int = point.pressure * UniversalGasConstant * pow(Cint/Cv,2) / (Crot/tau_rot + Cvibr/tau_vibr);
 
     double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
     return zeta;
-}
+}*/
 
 double OneTempApproxMultiModes::getGamma(macroParam& point)
 {

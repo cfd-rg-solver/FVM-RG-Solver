@@ -1145,9 +1145,9 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
         }
 
         // Расчет потоковых членов:
-        double lambda = coeffSolver->lambda(p1);
+        double lambda = coeffSolver->lambdaMultiAtom(p1);
         double etta = coeffSolver->shareViscositySimple(p1);
-        double bulk = coeffSolver->bulcViscositySimple(p1);
+        double bulk = coeffSolver->bulkViscosityMultiAtom(p1);
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с вязкими составляющими:
         for (size_t j = 0; j < mixture.NumberOfComponents; j++)

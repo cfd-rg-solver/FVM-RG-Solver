@@ -38,6 +38,7 @@ struct OneTempApproxMultiModes : public EnergyCalc
 
     OneTempApproxMultiModes() {};
 
+    double getCvibr(macroParam& point, size_t component);
     double calcEnergy(macroParam& point);
     double getGamma(macroParam& point);
 
@@ -51,8 +52,8 @@ private:
 
     double ZvibrDiff(macroParam& point, size_t component);
     double getVibrEnergyDiff(macroParam& point, size_t component);
-    double getCvibr(macroParam& point, size_t component);
-    double getBulkViscosity(macroParam& point, size_t component);
-
+    
+    
+    //double getBulkViscosity(macroParam& point, size_t component);
     //double vibrEnergyLvl(int lvl1, int lvl2, int lvl3, int lvl4, macroParam& point, size_t component);
 };
