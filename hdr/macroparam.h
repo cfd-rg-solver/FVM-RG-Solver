@@ -16,7 +16,6 @@ struct macroParam
     double temp         = 0;
     double tempIntr     = 0;
     double soundSpeed   = 0;
-    double Zinf = 0;
     double gamma; // показатель адиабаты
     string gas         ="Ar";
 };

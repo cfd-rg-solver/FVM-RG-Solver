@@ -42,8 +42,8 @@ int main()
     methane.D_diss = 3668582.3189; // m^-1!, converted from 438.86 kJ/mol
     methane.numberAtoms = 5;
     methane.numberOfModes = 4;
-    methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1! all other data, related with length, is in m!
-    methane.numberVibrLvlByMode = { 10, 18, 9, 21 };// { 1,1,1,1 }; //{ 4, 4, 4, 4 };
+    methane.omega_eByMode = { 302550, 158270, 315680, 136740 }; // m^-1
+    methane.numberVibrLvlByMode = { 10, 18, 9, 21 }; // { 4,4,4,4 };
     methane.dByMode = { 1, 2, 3, 3 };
 
     for (int i1 = 0; i1 < methane.numberVibrLvlByMode[0]; i1++)
@@ -144,7 +144,7 @@ int main()
     ////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 30 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 40 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
     // solParam.Gamma       = 1.67;        // Ar
     // solParam.Gamma       = 1.32;        // O2_O
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
@@ -152,7 +152,7 @@ int main()
     solParam.MaxIter     = 2000;        // максимальное кол-во итераций
     solParam.Ma          = 3.8;         // Число Маха, сейчас не влияет на решатель, просто формальность
 
-    double precision = 1E-7; // точность
+    double precision = 1E-10; // точность
     Observer watcher(precision);
     watcher.setPeriodicity(10000);
 
@@ -168,16 +168,16 @@ int main()
     // GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
     GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
-    double M_PI = 3.14159265358979323846;
+    // double M_PI = 3.14159265358979323846;
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 40 * MFP; // m
+    double h = 70 * MFP; // m
     std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
     solver.setObserver(&watcher);
-    solver.setDelta_h(h / (solParam.NumCell - 2));
+    solver.setDelta_h(h / (solParam.NumCell - 2)); // only after setting writer or/and watcher?
 
     solver.setEnergyCalculator(&oneTempApproxMultiModes);
     solver.setBorderConditions(&borderConditionShockwave);

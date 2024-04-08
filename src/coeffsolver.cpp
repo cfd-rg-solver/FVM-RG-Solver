@@ -26,7 +26,7 @@ double CoeffSolver1Comp1Temp::lambdaMultiAtom(macroParam currentPoint)
     double lambda_tr = (75. * pow(kB, 2) * currentPoint.temp) / (32. * currentPoint.mixture.mass(component) * getOmega22(currentPoint.mixture, currentPoint.temp));
 
     double Crot = 3. / 2. * kB / currentPoint.mixture.mass(component); // because methane has 3 degrees of freedom
-    OneTempApproxMultiModes OneTempApprox;
+    // OneTempApproxMultiModes OneTempApprox;
     double Cvibr = OneTempApprox.getCvibr(currentPoint, component);
     double Cint = Crot + Cvibr;
     double Omega11 = getOmega11(currentPoint.mixture, currentPoint.temp);
@@ -43,8 +43,12 @@ double CoeffSolver1Comp1Temp::shareViscosityOmega(Mixture mix,double currentT)
 double CoeffSolver1Comp1Temp::getOmega11(Mixture mix, double T)
 {
     size_t component = 0; // consider 1 component gas
-    double omega11 = sqrt(kB * T / (M_PI * mix.mass(component))) * M_PI * pow(mix.sigma(component), 2);
-    return omega11;
+    double omegaRS = sqrt(kB * T / (M_PI * mix.mass(component))) * M_PI * pow(mix.sigma(component), 2);
+    vector<double> f = {-0.16845, -0.02258, 0.19779, 0.64373, -0.092679, 0.00711};
+    double a11= 1.4;
+    double x = (log(T/mix.epsilonDevK(component)))+a11;
+    double omegaLD = pow(f[0] + f[1]/pow(x,2) + f[2]/x + f[3]*x + f[4]*pow(x,2)+f[5]*pow(x,3),-1);
+    return omegaRS * omegaLD;
 }
 
 double CoeffSolver1Comp1Temp::getOmega22(Mixture mix, double T)
@@ -69,7 +73,7 @@ double CoeffSolver1Comp1Temp::bulcViscositySimple(macroParam currentPoint)
     double epsilon = currentPoint.mixture.epsilonDevK(0);
 
     double Crot = kB/m;
-    double Ctr = 3.0*Crot/2.0; //! Mistake
+    double Ctr = 3.0*Crot/2.0;
     double Cu = Crot + Ctr;
     double F = 1+ pow(M_PI,3./2.)/2.*pow(kB*T/2.,-1/2.) + (pow(M_PI,2)/4. +2.)*pow(T/epsilon,-1) + pow(M_PI,3./2.)*pow(T/epsilon,-3./2.);
     double ZettaRot = ZettaInf/F;
@@ -87,7 +91,7 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
 
     double Ctr = 3. / 2. * kB / point.mixture.mass(component);
     double Crot = 3. / 2. * kB / point.mixture.mass(component); // because methane has 3 degrees of freedom
-    OneTempApproxMultiModes OneTempApprox;
+    // OneTempApproxMultiModes OneTempApprox;
     double Cvibr = OneTempApprox.getCvibr(point, component);
     double Cv = Ctr + Crot + Cvibr;
     double Cint = Cv - Ctr;

@@ -1,6 +1,7 @@
 #pragma once
 #include "global.h"
 #include "macroparam.h"
+#include "energycalc.h"
 struct CoeffSolver
 {
 public:
@@ -25,6 +26,9 @@ struct CoeffSolver1Comp1Temp : public CoeffSolver
     double getOmega22(Mixture mix, double T);
     double bulcViscositySimple(macroParam currentPoint);
     double bulkViscosityMultiAtom(macroParam currentPoint);
+
+private:
+    OneTempApproxMultiModes OneTempApprox;
 };
 struct CoeffSolver2Comp1Temp : public CoeffSolver1Comp1Temp
 {
