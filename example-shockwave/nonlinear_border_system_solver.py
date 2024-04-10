@@ -36,7 +36,7 @@ ds = np.array([1, 2, 3, 3])
 es = hc*om_e # e_0
 e_0000 = sum(hc * (om_e*ds)/2)
 D_diss = 3668582.3189 # m^-1, converted from 438.86 kJ/mol https://www.weizmann.ac.il/oc/martin/tools/hartree.html
-max_vibr_lvls = [1,1,1,1] #[4, 4, 4, 4] # [9, 17, 9, 20]
+max_vibr_lvls =  [9, 17, 9, 20] # [4, 4, 4, 4]
 
 possible_inds = []
 for i1 in range(max_vibr_lvls[0]):
@@ -107,20 +107,22 @@ def solver(velocity_left, density_left, T_left):
         for inds in possible_inds:
             s = ((inds[1]+1)*(inds[2]+1)*(inds[2]+2)*(inds[3]+1)*(inds[3]+2)/4)
             e_0 = sum(es*inds)
-            Uvibr_0 += s*(e_0+e_0000)*np.exp(-e_0/(kB*T_0))/Zvibr_0
-            Uvibr_1 += s*(e_0+e_0000)*np.exp(-e_0/(kB*x[2]))/Zvibr_1
+            Uvibr_0 += s * e_0 * np.exp(-e_0/(kB*T_0))
+            Uvibr_1 += s * e_0 * np.exp(-e_0/(kB*x[2]))
         
+        Uvibr_0 = Uvibr_0/Zvibr_0 + e_0000
+        Uvibr_1 = Uvibr_1/Zvibr_1 + e_0000
             
         return [
             x[0] * x[1] - v_0 * rho_0, # x[0] - velocity, x[1] - density, x[2] - temperature
             x[1] * np.power(x[0],2) + R*x[2]*x[1]/molarMass - rho_0 * np.power(v_0,2) - R*T_0*rho_0/molarMass,
-            x[1] * x[0] * ( 3/2*kB*x[2]*Nav/molarMass +  3/2*kB*x[2]/mass + Uvibr_1 + np.power(x[0],2)/2 + R*x[2]*x[1]/(molarMass*x[1]))
-            - rho_0 * v_0 * ( 3/2*kB*T_0*Nav/molarMass + 3/2*kB*T_0/mass + Uvibr_0 + np.power(v_0,2)/2 + R*T_0*rho_0/(molarMass*rho_0))
+            x[1] * x[0] * ( 3/2*kB*x[2]*Nav/molarMass +  3/2*kB*x[2]/mass + Uvibr_1/mass + np.power(x[0],2)/2 + R*x[2]*x[1]/(molarMass*x[1]))
+            - rho_0 * v_0 * ( 3/2*kB*T_0*Nav/molarMass + 3/2*kB*T_0/mass + Uvibr_0/mass + np.power(v_0,2)/2 + R*T_0*rho_0/(molarMass*rho_0))
             ]
     
     vs, rhos, Ts = [], [], []
     
-    for x in tqdm(range(1, 800)):
+    for x in tqdm(range(1, 600)): # 200 already enough
         cur_ans = fsolve(func, [x, x/100, x])
         if any(np.isclose(func(cur_ans), [0.0,0.0,0.0])):
             vs.append(cur_ans[0])

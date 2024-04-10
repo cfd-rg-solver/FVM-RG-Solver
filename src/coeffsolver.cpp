@@ -97,8 +97,8 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
     double Cint = Cv - Ctr;
 
     double Zinf = point.mixture.Zinf(component);
-    double eps = point.mixture.epsilonDevK(component) * kB;
-    double F = 1 + pow(M_PI, 3. / 2.) / 2. * pow(kB * point.temp / eps, -1. / 2.) + (pow(M_PI, 2) / 4. + 2.) * pow(kB * point.temp / eps, -1) + pow(M_PI, 3. / 2.) * pow(kB * point.temp / eps, -3. / 2.);
+    double epsDevK = point.mixture.epsilonDevK(component);
+    double F = 1 + pow(M_PI, 3. / 2.) / 2. * pow(point.temp / epsDevK, -1. / 2.) + (pow(M_PI, 2) / 4. + 2.) * pow(point.temp / epsDevK, -1) + pow(M_PI, 3. / 2.) * pow(point.temp / epsDevK, -3. / 2.);
     double Zrot = Zinf / F;
     double eta = shareViscosityOmega(point.mixture, point.temp);
 
@@ -106,7 +106,9 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
 
     double tau_vibr = exp(-5.4 + 40. * pow(point.temp, -1. / 3.)) * 10e-6; // Vibrational Relaxation of METHANE L.Willard Richards and David H.Sigafoos
 
-    double beta_int = point.pressure * UniversalGasConstant * pow(Cint / Cv, 2) / (Crot / tau_rot + Cvibr / tau_vibr);
+    double n = point.pressure / kB / point.temp;
+
+    double beta_int = point.mixture.molarMass(component) / n / UniversalGasConstant * (Crot / tau_rot + Cvibr / tau_vibr);
 
     double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
     return zeta;

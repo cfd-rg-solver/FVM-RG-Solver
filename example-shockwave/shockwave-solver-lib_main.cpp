@@ -101,9 +101,9 @@ int main()
     double T_left = 300; // Kelvin
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-    double velocity_right = 348.20518;
-    double density_right = 0.0031589;
-    double T_right = 976.1859; // ! from python solver (methane case)
+    double velocity_right = 263.5241;
+    double density_right = 0.004174111;
+    double T_right = 781.843; // ! from python solver (methane case)
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
     BorderConditionShockwave borderConditionShockwave;
@@ -144,12 +144,12 @@ int main()
     ////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 40 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 60 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
     // solParam.Gamma       = 1.67;        // Ar
     // solParam.Gamma       = 1.32;        // O2_O
     solParam.Gamma       = 1.304;       // CH4, but its also implemented changable in macroparam
     solParam.CFL         = 0.9;         // Число Куранта
-    solParam.MaxIter     = 2000;        // максимальное кол-во итераций
+    solParam.MaxIter     = 100000;        // максимальное кол-во итераций
     solParam.Ma          = 3.8;         // Число Маха, сейчас не влияет на решатель, просто формальность
 
     double precision = 1E-10; // точность
@@ -172,7 +172,7 @@ int main()
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 70 * MFP; // m
+    double h = 120 * MFP; // m
     std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);
