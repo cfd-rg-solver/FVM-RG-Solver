@@ -278,8 +278,8 @@ void HLLESolver::computeFlux(SystemOfEquation* system)
         gamma0 = solParam.Gamma;
         gamma1 = solParam.Gamma;
 
-        c0 = sqrt((gamma0 - 1.) * (fabs(H0 - 0.5 * pow(v0, 2))));
-        c1 = sqrt((gamma1 - 1.) * (fabs(H1 - 0.5 * pow(v1, 2))));
+        c0 = sqrt(solParam.Gamma * system->getPressure(i) / system->getDensity(i)); // sqrt((gamma0 - 1.) * (fabs(H0 - 0.5 * pow(v0, 2))));
+        c1 = sqrt(solParam.Gamma * system->getPressure(i+1) / system->getDensity(i+1)); // sqrt((gamma1 - 1.) * (fabs(H1 - 0.5 * pow(v1, 2))));
 
         rho0 = sqrt(system->getDensity(i));
         rho1 = sqrt(system->getDensity(i + 1));
@@ -289,7 +289,7 @@ void HLLESolver::computeFlux(SystemOfEquation* system)
         gamma_avg = solParam.Gamma; // (rho0 * gamma0 + rho1 * gamma1) / (rho0 + rho1);
 
         // c_avg = sqrt((solParam.Gamma)*(H_avg - 0.5 * (pow(u_avg,2) + pow(v_avg,2))));
-        c_avg = sqrt((gamma_avg - 1) * (fabs(H_avg - 0.5 * pow(v_avg, 2))));
+        c_avg = (rho0 * c0 + rho1 * c1) / (rho0 + rho1); //sqrt((gamma_avg - 1) * (fabs(H_avg - 0.5 * pow(v_avg, 2))));
 
         b0 = (std::min)({ v_avg - c_avg, 0 - c0 });
         b1 = (std::max)({ v_avg + c_avg, 0 + c1 });
