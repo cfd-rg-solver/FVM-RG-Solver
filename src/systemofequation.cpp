@@ -1004,7 +1004,7 @@ void Shockwave2::prepareIndex()
 void Shockwave2::prepareSolving(vector<macroParam>& points)
 {
     temperature.resize(numberOfCells);
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (auto i = 0; i < numberOfCells; i++)
     {
         U[0][i] = points[i].density;
@@ -1066,7 +1066,7 @@ double Shockwave2::getPressure(size_t i)
 
 void Shockwave2::updateU(double dh, double dt)
 {
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (auto i = 1; i < numberOfCells - 1; i++)
     {
         for (int j = 0; j < systemOrder; j++)
@@ -1089,11 +1089,11 @@ void Shockwave2::updateBorderU(vector<macroParam>& points) {
 void Shockwave2::computeF(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
-    macroParam p1;
     // promlem with omp here
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
+        macroParam p1;
         p1 = points[i];
         F[0][i] = p1.density * p1.velocity_tau;
         F[v_tau][i] = p1.density * pow(p1.velocity_tau, 2) + p1.pressure;
@@ -1104,7 +1104,7 @@ void Shockwave2::computeF(vector<macroParam>& points, double dh)
 void Shockwave2::computeFv(vector<macroParam>& points, double dh)
 {
     Mixture mixture = points[0].mixture;
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         // Переобозначаем величины в ячейках (не в фиктивных):
@@ -1145,9 +1145,9 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
         }
 
         // Расчет потоковых членов:
-        double lambda = coeffSolver->lambdaMultiAtom(p1);
+        double lambda = coeffSolver->lambdaMultiAtom(p1); // lambda(p1);
         double etta = coeffSolver->shareViscositySimple(p1);
-        double bulk = coeffSolver->bulkViscosityMultiAtom(p1);
+        double bulk = coeffSolver->bulkViscosityMultiAtom(p1); // bulcViscositySimple(p1);
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с вязкими составляющими:
         for (size_t j = 0; j < mixture.NumberOfComponents; j++)
@@ -1163,7 +1163,7 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
 
 void Shockwave2::calcAndRememberTemp()
 {
-//#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
     for (int i = 0; i < numberOfCells; i++)
     {
         macroParam p0(mixture);
@@ -1171,6 +1171,7 @@ void Shockwave2::calcAndRememberTemp()
         p0.densityArray.resize(1);
         p0.fractionArray.resize(1);
         p0.densityArray[0] = getDensity(i);
+        p0.pressure = getPressure(i);
         p0.fractionArray[0] = p0.densityArray[0] / getDensity(i);
         p0.velocity = getVelocity(i);
         p0.density = getDensity(i);

@@ -185,5 +185,9 @@ int main()
     // solver.setStartDistribution(&startParamShockwaveAr);
     solver.setStartDistribution(&startParamShockwaveCH4);
 
+    clock_t start = clock();
     solver.solve();
+    clock_t end = clock();
+    double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Final time of solution: %f seconds\n", seconds);
 }

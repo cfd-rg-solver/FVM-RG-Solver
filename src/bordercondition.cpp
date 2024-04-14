@@ -97,7 +97,7 @@ void BorderConditionPersonal::updatePoints(vector<macroParam>& points)
 
 void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 {
-    int BCtype = 2;
+    int BCtype = 1;
     size_t N = points.size();
 
     points[0].velocity_normal = points[1].velocity_normal;

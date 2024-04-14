@@ -50,6 +50,7 @@ void GodunovSolver::solve()
             writePoints(T*1000000); // микросек
 
             max = riemannSolver->maxSignalVelocity;
+            std::cout << "energy " << system->getEnergy(30) << std::endl;
             std::cout << "max wave speed " << max << std::endl;
 
         }
