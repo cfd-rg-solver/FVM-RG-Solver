@@ -1,7 +1,7 @@
 #include "energycalc.h"
 #include <iostream>
 #include <nn.h>
-//#include <time.h> 
+#include <time.h> 
 
 double OneTempApprox::calcEnergy(macroParam &point)
 {
@@ -119,6 +119,7 @@ double OneTempApprox::Zvibr(macroParam &point, size_t component)
 
 double OneTempApproxMultiModes::calcEnergy(macroParam& point)
 {
+    //clock_t start = clock();
     
     double UTrRot = getTrRotEnegry(point, 0);
     double UVibr = getVibrEnergy(point, 0);
@@ -126,7 +127,7 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
     
     /*
     double E;
-    if (point.pressure < 5. || point.pressure > 500. || point.temp < 250. || point.temp > 2000.) {
+    if (point.pressure < P_MIN || point.pressure > P_MAX || point.temp < T_MIN || point.temp > T_MAX) {
         double UTrRot = getTrRotEnegry(point, 0);
         double UVibr = getVibrEnergy(point, 0);
         double teorE = point.density * (UTrRot + UVibr) + point.density * 0.5 * pow(point.velocity, 2);
@@ -162,39 +163,16 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
         E = nnE;
     }
     */
-    /*
-    if (point.temp == 300.) {
-        std::cout << "-------------------------" << std::endl;
-        std::cout << "p=" << point.pressure << std::endl;
-        std::cout << "T=" << point.temp << std::endl;
-        std::cout << "rho=" << point.density << std::endl;
-        std::cout << "v=" << point.velocity << std::endl;
-        std::cout << "scaled p =" << inputs[0][0] << std::endl;
-        std::cout << "scaled T =" << inputs[0][1] << std::endl;
-        std::cout << "teoretical E = " << teorE << std::endl;
-        std::cout << "nn E = " << nnE << std::endl;
-        double Ctr = 3. / 2. * kB / point.mixture.mass(0);
-        double Crot = 3. / 2. * kB / point.mixture.mass(0);
-        double Cvibr = getCvibr(point, 0);
-        double Cv = Ctr + Crot + Cvibr;
-        std::cout << "Cv=" << Cv << std::endl;
-        std::cout << "-------------------------" << std::endl;
-    }*/
 
-    /*
-    double inputs[1][2];
-    if (point.pressure >= P_MIN) {
-        inputs[0][0] = (point.pressure - P_MIN) / (P_MAX - P_MIN);
-        inputs[0][1] = (point.temp - T_MIN) / (T_MAX - T_MIN);
-    }
-    else {
-        inputs[0][0] = 0.;
-        inputs[0][1] = (point.temp - T_MIN) / (T_MAX - T_MIN);
-    }
+    
+    double inputs[1][2] = {
+        (point.pressure - P_MIN) / (P_MAX - P_MIN),
+        (point.temp - T_MIN) / (T_MAX - T_MIN)
+    };
 
-    double rslt1[1][50];
+    double layer1out[1][50];
     for (int i = 0; i < 50; i++) {
-        rslt1[0][i] =
+        layer1out[0][i] =
             tanh(
                 (inputs[0][0] * enlayers0weights[0][i])
                 + (inputs[0][1] * enlayers0weights[1][i])
@@ -202,13 +180,36 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
             );
     }
 
-    double rslt2 = 0.;
+    double layer2out = 0.;
     for (int i = 0; i < 50; i++) {
-        double tmp = rslt1[0][i];
-        rslt2 += tmp * enlayers1weights[i][0];
+        double tmp = layer1out[0][i];
+        layer2out += tmp * enlayers1weights[i][0];
     }
-    rslt2 += enlayers1bias;
-    double nnE = 1000 * rslt2 + point.density * 0.5 * pow(point.velocity, 2);
+    layer2out += enlayers1bias; // in kJ
+    double nnE = 1000 * layer2out + point.density * 0.5 * pow(point.velocity, 2);
+    
+    if (point.temp == 300.) {
+    std::cout << "-------------------------" << std::endl;
+    std::cout << "p=" << point.pressure << std::endl;
+    std::cout << "T=" << point.temp << std::endl;
+    std::cout << "rho=" << point.density << std::endl;
+    std::cout << "v=" << point.velocity << std::endl;
+    std::cout << "scaled p =" << inputs[0][0] << std::endl;
+    std::cout << "scaled T =" << inputs[0][1] << std::endl;
+    std::cout << "teoretical E = " << teorE << std::endl;
+    std::cout << "nn E = " << nnE << std::endl;
+    double Ctr = 3. / 2. * kB / point.mixture.mass(0);
+    double Crot = 3. / 2. * kB / point.mixture.mass(0);
+    double Cvibr = getCvibr(point, 0);
+    double Cv = Ctr + Crot + Cvibr;
+    std::cout << "Cv=" << Cv << std::endl;
+    std::cout << "-------------------------" << std::endl;
+}
+
+    /*
+    clock_t end = clock();
+    double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Final time of energyCalc: %f seconds\n", seconds);
     */
     return teorE;
 }
