@@ -2,6 +2,8 @@
 #include "global.h"
 #include "energycalc.h"
 #include <cmath>
+//#include "nn.h"
+#include <time.h>
 
 double CoeffSolver1Comp1Temp::shareViscositySimple(macroParam currentPoint)
 {
@@ -87,11 +89,13 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
 {
     /* function to calculate bulk viscosity zeta = kB*T/beta_int * (c_int/c_V)^2 */
 
+    //clock_t start = clock();
+    
     size_t component = 0; // consider 1 component gas
 
     double Ctr = 3. / 2. * kB / point.mixture.mass(component);
     double Crot = 3. / 2. * kB / point.mixture.mass(component); // because methane has 3 degrees of freedom
-    // OneTempApproxMultiModes OneTempApprox;
+
     double Cvibr = OneTempApprox.getCvibr(point, component);
     double Cv = Ctr + Crot + Cvibr;
     double Cint = Cv - Ctr;
@@ -111,6 +115,36 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
     double beta_int = point.mixture.molarMass(component) / n / UniversalGasConstant * (Crot / tau_rot + Cvibr / tau_vibr);
 
     double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
+    
+    /*
+    double inputs[1][2] = {
+        (point.pressure - zP_MIN) / (zP_MAX - zP_MIN),
+        (point.temp - zT_MIN) / (zT_MAX - zT_MIN)
+    };
+
+    double layer1out[1][50];
+    for (int i = 0; i < 50; i++) {
+        layer1out[0][i] =
+            tanh(
+                (inputs[0][0] * zetalayers0weights[0][i])
+                + (inputs[0][1] * zetalayers0weights[1][i])
+                + zetalayers0bias[0][i]
+            );
+    }
+
+    double layer2out = 0.;
+    for (int i = 0; i < 50; i++) {
+        double tmp = layer1out[0][i];
+        layer2out += tmp * zetalayers1weights[i][0];
+    }
+    layer2out += zetalayers1bias; // here we have -log10(zeta)
+    double zeta = pow(10, -layer2out);
+    */
+
+    //clock_t end = clock();
+    //double seconds = (double)(end - start) / CLOCKS_PER_SEC;
+    //printf("Time of zeta calculation: %.20f seconds\n", seconds);
+
     return zeta;
 }
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <omp.h>
 #include <functional>
-
+#include "nn.h"
 #include "systemofequation.h"
 #include "numeric.h"
 
@@ -1175,6 +1175,7 @@ void Shockwave2::calcAndRememberTemp()
         p0.fractionArray[0] = p0.densityArray[0] / getDensity(i);
         p0.velocity = getVelocity(i);
         p0.density = getDensity(i);
+        // todo add temp nn regression
         temperature[i] = eqSolver->solveEq(energyCalculator, p0, U[energy][i]);
     }
     return;

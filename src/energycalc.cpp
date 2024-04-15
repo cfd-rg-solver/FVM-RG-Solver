@@ -1,6 +1,6 @@
 #include "energycalc.h"
 #include <iostream>
-#include <nn.h>
+//#include "nn.h"
 #include <time.h> 
 
 double OneTempApprox::calcEnergy(macroParam &point)
@@ -162,8 +162,6 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
         double nnE = 1000 * layer2out + point.density * 0.5 * pow(point.velocity, 2);
         E = nnE;
     }
-    */
-
     
     double inputs[1][2] = {
         (point.pressure - P_MIN) / (P_MAX - P_MIN),
@@ -206,7 +204,6 @@ double OneTempApproxMultiModes::calcEnergy(macroParam& point)
     std::cout << "-------------------------" << std::endl;
 }
 
-    /*
     clock_t end = clock();
     double seconds = (double)(end - start) / CLOCKS_PER_SEC;
     printf("Final time of energyCalc: %f seconds\n", seconds);
