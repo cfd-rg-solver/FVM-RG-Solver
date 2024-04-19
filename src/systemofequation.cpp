@@ -1143,11 +1143,31 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
         else {
             dy_dy[0] = (p2.fractionArray[0] - p0.fractionArray[0]) / denominator;
         }
+        
+        /*
+        double inputs[1][2] = {
+            (p1.pressure - zlP_MIN) / (zlP_MAX - zlP_MIN),
+            (p1.temp - zlT_MIN) / (zlT_MAX - zlT_MIN)
+        };
+
+        double layersout[2][1] = { 0., 0. };
+        for (int i = 0; i < 50; i++) {
+            layersout[0][0] +=
+                tanh(
+                    (inputs[0][0] * zllayers0weight[0][i])
+                    + zllayers0bias[0][i]
+                ) * zllayers2weight[0][i];
+            layersout[1][0] =
+                tanh(
+                    (inputs[0][1] * zllayers0weight[1][i])
+                    + zllayers0bias[0][i]
+                ) * zllayers2weight[1][i];
+        }
 
         // Расчет потоковых членов:
-        double lambda = coeffSolver->lambdaMultiAtom(p1); // lambda(p1);
+        double lambda = pow(10, -(layersout[1][0] + zllayers2bias[1][0])); //coeffSolver->lambdaMultiAtom(p1); // lambda(p1);
         double etta = coeffSolver->shareViscositySimple(p1);
-        double bulk = coeffSolver->bulkViscosityMultiAtom(p1); // bulcViscositySimple(p1);
+        double bulk = pow(10, -(layersout[0][0]) + zllayers2bias[0][0]); //coeffSolver->bulkViscosityMultiAtom(p1);  // bulcViscositySimple(p1);
 
         // 1-е уравнение (однокомпонентная постановка) в векторе F с вязкими составляющими:
         for (size_t j = 0; j < mixture.NumberOfComponents; j++)
@@ -1155,9 +1175,17 @@ void Shockwave2::computeFv(vector<macroParam>& points, double dh)
             Fv[j][i] = 0;
         }
         // Последние 2 уравнения в векторе F с вязкими составляющими:
-        Fv[v_tau][i] = -(bulk + 4. / 3. * etta) * dv_tau_dy;
-        Fv[energy][i] = -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_tau_dy * p1.velocity_tau;
 
+        double Fv_v_tau = -(bulk + 4. / 3. * etta) * dv_tau_dy;
+        */
+        double bulk_teor = coeffSolver->bulkViscosityMultiAtom(p1);
+        double etta = coeffSolver->shareViscositySimple(p1);
+        double lambda_teor = coeffSolver->lambdaMultiAtom(p1);
+
+        double Fv_v_tau_teor = -(bulk_teor + 4. / 3. * etta) * dv_tau_dy;
+        double Fv_v_energy_teor = -lambda_teor * dT_dy - (bulk_teor + 4. / 3. * etta) * dv_tau_dy * p1.velocity_tau;
+        Fv[v_tau][i] = Fv_v_tau_teor;// -(bulk + 4. / 3. * etta) * dv_tau_dy;
+        Fv[energy][i] = Fv_v_energy_teor; // -lambda * dT_dy - (bulk + 4. / 3. * etta) * dv_tau_dy * p1.velocity_tau;
     }
 }
 
@@ -1168,6 +1196,7 @@ void Shockwave2::calcAndRememberTemp()
     {
         macroParam p0(mixture);
         p0.temp = temperature[i];
+        p0.temp_vibr = temperature[i]; // one-temp model
         p0.densityArray.resize(1);
         p0.fractionArray.resize(1);
         p0.densityArray[0] = getDensity(i);
@@ -1175,7 +1204,37 @@ void Shockwave2::calcAndRememberTemp()
         p0.fractionArray[0] = p0.densityArray[0] / getDensity(i);
         p0.velocity = getVelocity(i);
         p0.density = getDensity(i);
-        // todo add temp nn regression
+        p0.gamma = getGamma(i);
+
+        // NN temp regression, doesn't work
+        /*
+        double input = U[energy][i]/1000.; // because nn model takes kJ*kg/m3 as input
+
+        double layer1out[1][50];
+        for (int i = 0; i < 50; i++) {
+            layer1out[0][i] =
+                tanh(
+                    (input * tlayers0weights[0][i]) + tlayers0bias[0][i]
+                );
+        }
+
+        double layer2out[1][2] = { 0.,0. };
+        for (int i = 0; i < 50; i++) {
+            layer2out[0][0] += layer1out[0][i] * tlayers1weights[0][i];
+            layer2out[0][1] += layer1out[1][i] * tlayers1weights[1][i];
+        }
+        layer2out[0][0] += tlayers1biases[0][0]; // pressure
+        layer2out[0][1] += tlayers1biases[0][1]; // temp
+
+        double actual_temp = layer2out[0][1] * (T_MAX - T_MIN) + T_MIN;
+
+        std::cout << "-------------------------" << std::endl;
+        std::cout << "teor T " << eqSolver->solveEq(energyCalculator, p0, U[energy][i]) << std::endl;
+        std::cout << "nn T " << actual_temp << std::endl;
+        std::cout << "-------------------------" << std::endl;
+
+        temperature[i] = actual_temp; // eqSolver->solveEq(energyCalculator, p0, U[energy][i]);
+        */
         temperature[i] = eqSolver->solveEq(energyCalculator, p0, U[energy][i]);
     }
     return;

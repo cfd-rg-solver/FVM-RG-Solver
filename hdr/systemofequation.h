@@ -65,7 +65,7 @@ struct SystemOfEquation
     solverParams solParam;
     SystemOfEquationType systemType;
 
-    vector<Matrix> U, R, F, Flux;
+    vector<vector<double>> U, R, F, Fv, Flux;
 };
 
 

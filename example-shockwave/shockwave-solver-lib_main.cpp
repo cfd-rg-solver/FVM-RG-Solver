@@ -102,7 +102,7 @@ int main()
     double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
     double velocity_right = 263.5241;
-    double density_right = 0.004174111;
+    double density_right = 0.004174111; 
     double T_right = 781.843; // ! from python solver (methane case)
     double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
@@ -172,7 +172,7 @@ int main()
     // double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
     double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
     std::cout << "mean free path: " << MFP << std::endl;
-    double h = 120 * MFP; // m
+    double h = 60 * MFP; // m
     std::cout << "considering h = MFP * " << h/MFP << std::endl;
     writer.setDelta_h(h / (solParam.NumCell - 2));
     solver.setWriter(&writer);

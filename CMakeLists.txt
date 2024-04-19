@@ -12,11 +12,12 @@ set(HDR_FOLDER "${PROJECT_SOURCE_DIR}/hdr")
 set(${PROJECT_NAME}_SRC  ${SRC_FOLDER}/abstractsolver.cpp
                          ${SRC_FOLDER}/macroparam.cpp
                          ${SRC_FOLDER}/godunovsolver.cpp
-			 ${SRC_FOLDER}/coeffsolver.cpp
+			             ${SRC_FOLDER}/coeffsolver.cpp
                          ${SRC_FOLDER}/mixture.cpp
                          ${SRC_FOLDER}/bordercondition.cpp
                          ${SRC_FOLDER}/startcondition.cpp
                          ${SRC_FOLDER}/datawriter.cpp
+                         ${SRC_FOLDER}/lawchecker.cpp
                          ${SRC_FOLDER}/observer.cpp
                          ${SRC_FOLDER}/systemofequation.cpp
                          ${SRC_FOLDER}/riemannsolver.cpp
@@ -33,6 +34,8 @@ set(${PROJECT_NAME}_HDR  ${HDR_FOLDER}/abstractsolver.h
                          ${HDR_FOLDER}/bordercondition.h
                          ${HDR_FOLDER}/startcondition.h
                          ${HDR_FOLDER}/datawriter.h
+                         ${HDR_FOLDER}/nn.h  
+                         ${HDR_FOLDER}/lawchecker.h  
                          ${HDR_FOLDER}/observer.h
                          ${HDR_FOLDER}/systemofequation.h
                          ${HDR_FOLDER}/riemannsolver.h
@@ -55,7 +58,7 @@ ELSE()
     message("Missed OpenMP! x_x")
 ENDIF()
 
-# add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SRC} ${${PROJECT_NAME}_HDR} "hdr/nn.h")
+#add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SRC} ${${PROJECT_NAME}_HDR} "hdr/nn.h")
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}  ${OpenMP_CXX_LIBRARIES} ${PROJECT_LINK_LIBS})
 

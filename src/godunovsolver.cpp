@@ -4,6 +4,7 @@
 #include <omp.h>
 void GodunovSolver::solve()
 {
+    lawChecker.setDh(delta_h);
     writePoints(-1);
     double T = 0;
     clock_t start = clock();
@@ -46,7 +47,6 @@ void GodunovSolver::solve()
         // writePoints(T*1000000); // микросек
 
 
-
         double max;
         if(i%100 == 0)
         {
@@ -67,6 +67,7 @@ void GodunovSolver::solve()
             if(!observerCheck(i))
                 break;
         }
+        lawCheck(i);
     }
     writePoints(T*1000000);
 }

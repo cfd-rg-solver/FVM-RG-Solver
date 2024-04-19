@@ -21,20 +21,47 @@ double CoeffSolver1Comp1Temp::lambda(macroParam currentPoint)
     return (75.*pow(kB,2)*currentPoint.temp) /(32. * currentPoint.mixture.components[0].mass * omega2 ) ;
 }
 
-double CoeffSolver1Comp1Temp::lambdaMultiAtom(macroParam currentPoint)
+double CoeffSolver1Comp1Temp::lambdaMultiAtom(macroParam point)
 {
     size_t component = 0;  // consider 1 component gas
 
-    double lambda_tr = (75. * pow(kB, 2) * currentPoint.temp) / (32. * currentPoint.mixture.mass(component) * getOmega22(currentPoint.mixture, currentPoint.temp));
+    double lambda_tr = (75. * pow(kB, 2) * point.temp) / (32. * point.mixture.mass(component) * getOmega22(point.mixture, point.temp));
 
-    double Crot = 3. / 2. * kB / currentPoint.mixture.mass(component); // because methane has 3 degrees of freedom
+    double Crot = 3. / 2. * kB / point.mixture.mass(component); // because methane has 3 degrees of freedom
     // OneTempApproxMultiModes OneTempApprox;
-    double Cvibr = OneTempApprox.getCvibr(currentPoint, component);
+    double Cvibr = OneTempApprox.getCvibr(point, component);
     double Cint = Crot + Cvibr;
-    double Omega11 = getOmega11(currentPoint.mixture, currentPoint.temp);
-    double lambda_int = (3. * kB * currentPoint.temp) / (8. * Omega11) * Cint;
+    double Omega11 = getOmega11(point.mixture, point.temp);
+    double lambda_int = (3. * kB * point.temp) / (8. * Omega11) * Cint;
 
-    return lambda_tr + lambda_int;
+    double lambda = lambda_tr + lambda_int;;
+    return lambda;
+    /*
+    double inputs[1][2] = {
+    (point.pressure - zP_MIN) / (zP_MAX - zP_MIN),
+    (point.temp - zT_MIN) / (zT_MAX - zT_MIN)
+    };
+    
+    double layer1out[1][50];
+    for (int i = 0; i < 50; i++) {
+        layer1out[0][i] =
+        tanh(
+            (inputs[0][0] * llayers0weights[0][i])
+            + (inputs[0][1] * llayers0weights[1][i])
+            + llayers0bias[0][i]
+        );}
+    
+    double layer2out = 0.;
+    
+    for (int i = 0; i < 50; i++) {
+    double tmp = layer1out[0][i];
+    layer2out += tmp * llayers2weights[0][i];
+    }
+   
+    layer2out += llayers2bias; // here we have -log10(lambda)
+    double lambda = pow(10, -layer2out);
+    return lambda;
+    */
 }
 
 double CoeffSolver1Comp1Temp::shareViscosityOmega(Mixture mix,double currentT)
@@ -139,12 +166,11 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
     }
     layer2out += zetalayers1bias; // here we have -log10(zeta)
     double zeta = pow(10, -layer2out);
-    */
-
+    
     //clock_t end = clock();
     //double seconds = (double)(end - start) / CLOCKS_PER_SEC;
     //printf("Time of zeta calculation: %.20f seconds\n", seconds);
-
+    */
     return zeta;
 }
 

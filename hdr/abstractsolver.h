@@ -14,6 +14,8 @@
 #include "systemofequation.h"
 #include "riemannsolver.h"
 #include "numeric.h"
+#include "lawchecker.h"
+
 struct AbstractSolver
 {
 public:
@@ -50,6 +52,8 @@ public:
 
     CoeffSolver* coeffSolver;
 
+    LawChecker lawChecker;
+
     NonLinearEqSolver* eqSolver = new Newton();
 
     BorderCondition* border;
@@ -78,6 +82,8 @@ protected:
     void setDt();
 
     void updatePoints();
+
+    bool lawCheck(size_t currentIteration);
 
     void UpdateBorderU();
 

@@ -393,7 +393,7 @@ double OneTempApproxMultiModes::getGamma(macroParam& point)
     /* function to calculate adiabatic index gamma = Cp/Cv */
 
     size_t component = 0; // we consider one-component methane gas, its fixed in order to use getGamma in systemOfEquation
-    double Cv_tr = 3.0 / 2 * kB / point.mixture.mass(component);
+    double Cv_tr = (3.0 / 2) * kB / point.mixture.mass(component);
     double Cv_rot = kB / point.mixture.mass(component);
     double Cv_vibr = getCvibr(point, component);
     double Cv = Cv_tr + Cv_rot + Cv_vibr;

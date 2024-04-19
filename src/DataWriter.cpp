@@ -24,7 +24,9 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     ofstream velocity_tau(localDir/"velocity_tau.txt",std::ios::out);
     ofstream velocity_normal(localDir/"velocity_normal.txt",std::ios::out);
     ofstream temp(localDir/"temp.txt",std::ios::out);
+    ofstream temp_vibr(localDir / "temp_vibr.txt", std::ios::out);
     ofstream density(localDir/"density.txt",std::ios::out);
+    ofstream gamma(localDir / "gamma.txt", std::ios::out);
 //    ofstream densityO2(localDir/"densityO2.txt",std::ios::out);
 //    ofstream densityO(localDir/"densityO.txt",std::ios::out);
 
@@ -35,7 +37,9 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     velocity_tau<<"y"<<" "<<"v_t"<<endl;
     velocity_normal<<"y"<<" "<<"v_n"<<endl;
     temp<<"y"<<" "<<"T"<<endl;
+    temp_vibr << "y" << " " << "Tvibr" << endl;
     density<<"y"<<" "<<"rho"<<endl;
+    gamma << "y" << " " << "gamma" << endl;
 //    densityO2<<"y"<<" "<<"rho_O2"<<endl;
 //    densityO<<"y"<<" "<<"rho_O"<<endl;
 
@@ -46,7 +50,9 @@ void DataWriter::writeData(vector<macroParam> data, double time)
         velocity_tau<<dh*i<<" "<<data[i].velocity_tau<<endl;
         velocity_normal<<dh*i<<" "<<data[i].velocity_normal<<endl;
         temp<<dh*i<<" "<<data[i].temp<<endl;
+        temp_vibr << dh * i << " " << data[i].temp_vibr << endl;
         density<<dh*i<<" "<<data[i].density<<endl;
+        gamma << dh * i << " " << data[i].gamma << endl;
 //        if(data[i].mixture.NumberOfComponents == 2)
 //        {
 //            densityO2<<dh*i<<" "<<data[i].densityArray[0]<<endl;
@@ -59,8 +65,11 @@ void DataWriter::writeData(vector<macroParam> data, double time)
     pressure.close();
     velocity.close();
     temp.close();
+    temp_vibr.close();
     velocity_normal.close();
     velocity_tau.close();
+    density.close();
+    gamma.close();
 }
 
 void DataWriter::setDelta_h(double dh_)
@@ -77,11 +86,15 @@ bool DataReader::read()
         return 0;
     if(!fillDataVector(temp,"/temp.txt"))
         return 0;
+    if (!fillDataVector(temp_vibr, "/temp_vibr.txt"))
+        return 0;
     if(!fillDataVector(density,"/density.txt"))
         return 0;
     if(!fillDataVector(vel_tau,"/velocity_tau.txt"))
         return 0;
     if(!fillDataVector(vel_normal,"/velocity_normal.txt"))
+        return 0;
+    if (!fillDataVector(gamma, "/gamma.txt"))
         return 0;
     return 1;
 }
@@ -100,6 +113,8 @@ void DataReader::getPoints(vector<macroParam> &points)
         tmp.velocity_normal  = vel_normal[i];
         tmp.velocity = vel[i];
         tmp.temp         = temp[i];
+        tmp.temp_vibr = temp_vibr[i];
+        tmp.gamma = gamma[i];
         tmp.gas         ="Ar";
         points.push_back(tmp);
     }

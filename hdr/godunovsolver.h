@@ -1,6 +1,7 @@
 #pragma once
-
+#include "lawchecker.h"
 #include "abstractsolver.h"
+
 struct GodunovSolver: public AbstractSolver
 {
     GodunovSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType):

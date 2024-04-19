@@ -14,6 +14,7 @@ struct macroParam
     double velocity_normal  = 0;
     double velocity = 0;
     double temp         = 0;
+    double temp_vibr    = 0;
     double tempIntr     = 0;
     double soundSpeed   = 0;
     double gamma; // показатель адиабаты

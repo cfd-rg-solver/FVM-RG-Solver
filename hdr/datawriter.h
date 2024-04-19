@@ -34,7 +34,7 @@ public:
     void getPoints(vector<macroParam> &points);
 private:
     bool fillDataVector(vector<double> &data, string dataFileName);
-    vector<double> pres,vel,temp,density,vel_tau,vel_normal;
+    vector<double> pres,vel,temp, temp_vibr,density,vel_tau,vel_normal, gamma;
     vector<macroParam> points;
     string pathName;
     double dh = 1;
