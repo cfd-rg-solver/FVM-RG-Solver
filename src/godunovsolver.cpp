@@ -1,13 +1,12 @@
 #include "godunovsolver.h"
 #include <iostream>
-#include <time.h>
 #include <omp.h>
 void GodunovSolver::solve()
 {
     lawChecker.setDh(delta_h);
     writePoints(-1);
     double T = 0;
-    clock_t start = clock();
+
     for(size_t i  = 0; i < solParam.MaxIter; i++)
     {
         // Устанавливаем текущий временной шаг
@@ -56,9 +55,6 @@ void GodunovSolver::solve()
             max = riemannSolver->maxSignalVelocity;
             std::cout << "energy " << system->getEnergy(30) << std::endl;
             std::cout << "max wave speed " << max << std::endl;
-            clock_t end = clock();
-            double seconds = (double)(end - start) / CLOCKS_PER_SEC;
-            printf("Time of solution till current iter: %f seconds\n", seconds);
         }
         //проверка точности
         if(isObserverWatching)

@@ -19,99 +19,99 @@
 struct AbstractSolver
 {
 public:
-    AbstractSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
-    // запускает процесс решения задачи
-    virtual void solve() = 0;
-    //устанавливает размер ячейки
-    void setDelta_h(double dh);
+	AbstractSolver(Mixture mixture_, solverParams solParam_, SystemOfEquationType type, RiemannSolverType riemannType);
+	// запускает процесс решения задачи
+	virtual void solve() = 0;
+	//устанавливает размер ячейки
+	void setDelta_h(double dh);
 
-    // устанавливает некоторые граничные условия (TODO сделать более общую структуру)
-    void setBorderConditions(BorderCondition* border_);
+	// устанавливает некоторые граничные условия (TODO сделать более общую структуру)
+	void setBorderConditions(BorderCondition* border_);
 
-    // устанавливает записыватель и поднимает флаг записи
-    void setWriter(DataWriter *writer_);
+	// устанавливает записыватель и поднимает флаг записи
+	void setWriter(DataWriter* writer_);
 
-    // устанавливает наблюдателя, который будет следить за тем, чтобы рассчёт остановился, когда будет достигнута новая точность
-    void setObserver(Observer* obs);
+	// устанавливает наблюдателя, который будет следить за тем, чтобы рассчёт остановился, когда будет достигнута новая точность
+	void setObserver(Observer* obs);
 
-    // устанавливает начальное распределение
-    void setStartDistribution(StartCondition* startDist);
+	// устанавливает начальное распределение
+	void setStartDistribution(StartCondition* startDist);
 
-    // устанавливает энергетические расчеты
-    void setEnergyCalculator(EnergyCalc* energyCalculator_);
+	// устанавливает энергетические расчеты
+	void setEnergyCalculator(EnergyCalc* energyCalculator_);
 
-    SystemOfEquation* system;
+	SystemOfEquation* system;
 
-    RiemannSolver* riemannSolver;
+	RiemannSolver* riemannSolver;
 
-    Observer* observer;
+	Observer* observer;
 
-    Mixture mixture;
+	Mixture mixture;
 
-    solverParams solParam;
+	solverParams solParam;
 
-    CoeffSolver* coeffSolver;
+	CoeffSolver* coeffSolver;
 
-    LawChecker lawChecker;
+	LawChecker lawChecker;
 
-    NonLinearEqSolver* eqSolver = new Newton();
+	NonLinearEqSolver* eqSolver = new Newton();
 
-    BorderCondition* border;
+	BorderCondition* border;
 
-    DataWriter* writer;
+	DataWriter* writer;
 
-    EnergyCalc* energyCalculator;
+	EnergyCalc* energyCalculator;
 
 protected:
 
-    //записывает текущие макропараметры points[] в папку с названием i
-    void writePoints(double i);
+	//записывает текущие макропараметры points[] в папку с названием i
+	void writePoints(double i);
 
-    // функция для дозаполнения полей вектора points значениями скорости звука и параметрами смеси, которые не вытаскиваются из файлов расчёта
-    virtual void correctData();
+	// функция для дозаполнения полей вектора points значениями скорости звука и параметрами смеси, которые не вытаскиваются из файлов расчёта
+	virtual void correctData();
 
-    SystemOfEquation *getSystemOfEquation(SystemOfEquationType type);
-    RiemannSolver *getRiemannSolver(RiemannSolverType type);
+	SystemOfEquation* getSystemOfEquation(SystemOfEquationType type);
+	RiemannSolver* getRiemannSolver(RiemannSolverType type);
 
-    //подготавливает размеры всех векторов
-    virtual void prepareVectorSizes();
-    //    //подготавливает размеры всех векторов по заданным параметрам
-    //    virtual void prepareVectorSizes();
+	//подготавливает размеры всех векторов
+	virtual void prepareVectorSizes();
+	//    //подготавливает размеры всех векторов по заданным параметрам
+	//    virtual void prepareVectorSizes();
 
-    // устанавливает временной шаг
-    void setDt();
+	// устанавливает временной шаг
+	void setDt();
 
-    void updatePoints();
+	void updatePoints();
 
-    bool lawCheck(size_t currentIteration);
+	bool lawCheck(size_t currentIteration);
 
-    void UpdateBorderU();
+	void UpdateBorderU();
 
-    //функция для работы с наблюдателем, выдаёт true если нужно продолжать рассчёт
-    bool observerCheck(size_t currentIteration);
+	//функция для работы с наблюдателем, выдаёт true если нужно продолжать рассчёт
+	bool observerCheck(size_t currentIteration);
 
-    // хранит значение макропараметров в каждой ячейке
-    vector<macroParam> points;
+	// хранит значение макропараметров в каждой ячейке
+	vector<macroParam> points;
 
-    //    //скорость звука в каждой ячейке
-    //    Matrix sound_speed;
+	//    //скорость звука в каждой ячейке
+	//    Matrix sound_speed;
 
-    // шаг сетки
-    double delta_h = 0;
+	// шаг сетки
+	double delta_h = 0;
 
-    // вектор в котором хранятся временные шаги
-    Matrix timeSolvind;
+	// вектор в котором хранятся временные шаги
+	Matrix timeSolvind;
 
-    //записывать ли данные в файл ?
-    bool isWriteData = false;
+	//записывать ли данные в файл ?
+	bool isWriteData = false;
 
-    //смотрит ли наблюдатель за установлением равновесия?
-    bool isObserverWatching = false;
+	//смотрит ли наблюдатель за установлением равновесия?
+	bool isObserverWatching = false;
 
-    // через какое количество итераций наблюдатель должен проверять соотвествие
-    //(берутся две соседних итерации, а не те, что разделены watcherIteration итерациями)
-    int watcherIteration = 1;
+	// через какое количество итераций наблюдатель должен проверять соотвествие
+	//(берутся две соседних итерации, а не те, что разделены watcherIteration итерациями)
+	int watcherIteration = 1;
 
-    // продолжается ли рассчёт? 0 - расчёт начинается с нуля, 1 - расчёт продолжается согласно данным из считанного файла
-    bool isContinue = 0;
+	// продолжается ли рассчёт? 0 - расчёт начинается с нуля, 1 - расчёт продолжается согласно данным из считанного файла
+	bool isContinue = 0;
 };
