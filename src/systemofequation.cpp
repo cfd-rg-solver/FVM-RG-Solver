@@ -865,7 +865,7 @@ double Shockwave1::getTemp(size_t i)
 	// double U_energy = E_energy - 0.5 * pow(getVelocity(i), 2); // внутренняя энергия U
 
 	// однокомпонентная - U_energy = 3*n*k*T/(2*density) + k*T/mass + <e_i>_vibr/mass + e_c/mass
-	// todo многокомпонентная - U_energy = 3*n*k*T/(2*density) +
+	// многокомпонентная - U_energy = 3*n*k*T/(2*density) +
 	// + sum([k*T/mass[i])*fractionArray[i] for i in range(numberOfComponents)]) +
 	// + sum([fractionArray[i]*<e_i>_vibr/mass[i] for i in range(numberOfComponents)]) +
 	// + sum([fractionArray[i]*e_c/mass[i] for i in range(numberOfComponents)])

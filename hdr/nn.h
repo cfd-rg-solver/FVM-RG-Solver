@@ -204,7 +204,7 @@ double llayers2bias = 0.10583660751581192017;
 /// ----------------------------------------------------------------------------- ///
 /// --------------- NN for zeta&lambda calculation at once----------------------- ///
 /// --------------- (p,T) -> (-log10(zeta), -log10(lambda))  ------------------- ///
-/// TODO: fix that solution doesn't converges here
+/// TODO: fix that solution doesn't converge here
 
 double zllayers0weight[2][50] = { {
 		-1.92654657e+00,	-2.77099043e-01,	-8.79129171e-02,

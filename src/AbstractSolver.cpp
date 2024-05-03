@@ -188,7 +188,7 @@ void AbstractSolver::updatePoints()
 
 		for (size_t j = 0; j < mixture.NumberOfComponents; j++)
 		{
-			points[i].densityArray[j] = system->getDensity(i, j); // тут косяк TODO
+			points[i].densityArray[j] = system->getDensity(i, j);
 			points[i].fractionArray[j] = points[i].densityArray[j] / points[i].density;
 		}
 		points[i].soundSpeed = sqrt(solParam.Gamma * points[i].pressure / points[i].density);

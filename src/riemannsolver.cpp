@@ -323,11 +323,9 @@ void HLLSimple::computeFlux(SystemOfEquation* system)
 
 		c0 = sqrt((gamma0 - 1.) * (fabs(H0 - 0.5 * pow(u0, 2))));
 		c1 = sqrt((gamma1 - 1.) * (fabs(H1 - 0.5 * pow(u1, 2))));
-		// c0 = sqrt(solParam.Gamma *  system->getPressure(i) / system->getDensity(i));
-		// c1 = sqrt(solParam.Gamma *  system->getPressure(i + 1) / system->getDensity(i + 1));
 
-		uStar = 0.5 * (u0 - u1) + (c0 - c1) / (solParam.Gamma - 1.); // TODO which gamma to use?? gamma0-gamma1?
-		cStar = 0.5 * (c0 + c1) + 0.25 * (u0 - u1) * (solParam.Gamma - 1.); // TODO which gamma to use??
+		uStar = 0.5 * (u0 - u1) + (c0 - c1) / (solParam.Gamma - 1.);
+		cStar = 0.5 * (c0 + c1) + 0.25 * (u0 - u1) * (solParam.Gamma - 1.); 
 
 		SR = (std::max)({ u0 + c0, uStar + cStar });
 		SL = (std::min)({ u1 - c1, uStar - cStar });

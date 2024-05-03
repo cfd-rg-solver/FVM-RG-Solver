@@ -180,14 +180,14 @@ struct Shockwave2 : public SystemOfEquation
 	/* ONE - Temp SystemOfEquation for the MULTI - atomic gas */
 	Shockwave2() { systemType = SystemOfEquationType::shockwave2; };
 	void prepareIndex();
-	void prepareSolving(vector<macroParam>& points); // todo: check if energy ok?
+	void prepareSolving(vector<macroParam>& points);
 	void prepareVectorSizes();
 
 	double getDensity(size_t i);
 	double getVelocity(size_t i);
-	double getTemp(size_t i); // todo: check if is it ok to get temp like in Couette2AltBinary?
+	double getTemp(size_t i);
 	double getGamma(size_t i);
-	double getEnergy(size_t i); // todo: think about statsums of Methane???
+	double getEnergy(size_t i);
 	double getPressure(size_t i);
 	double getVelocityTau(size_t i);
 	double getVelocityNormal(size_t i) { return 0; };
@@ -195,7 +195,7 @@ struct Shockwave2 : public SystemOfEquation
 	void updateU(double dh, double dt);
 	void updateBorderU(vector<macroParam>& points);
 	void computeF(vector<macroParam>& points, double dh);
-	void computeFv(vector<macroParam>& points, double dh); // todo check if ok?
+	void computeFv(vector<macroParam>& points, double dh);
 
 	vector<Matrix> Fv;
 
