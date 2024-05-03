@@ -3,7 +3,7 @@
 void BorderConditionCouette::updatePoints(vector<macroParam>& points)
 {
 	bool presEq = 1;
-	bool slipBC = 1; // TODO
+	// bool slipBC = 1;
 	size_t N = points.size();
 	Mixture mixture = points[1].mixture;
 
@@ -27,7 +27,6 @@ void BorderConditionCouette::updatePoints(vector<macroParam>& points)
 		points[0].pressure = points[0].density / mixture.molarMass(points[0].fractionArray) * UniversalGasConstant * points[0].temp;
 	else
 		points[0].density = points[0].pressure * mixture.molarMass(points[0].fractionArray) / (UniversalGasConstant * points[0].temp);
-
 
 	//solParam.NumCell-1
 	points[N - 1].mixture = mixture;

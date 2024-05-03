@@ -44,12 +44,3 @@ private:
 	double phi(macroParam currentPoint, size_t component1, size_t component2);
 	double getOmega11(macroParam currentPoint, size_t comp1, size_t comp2);
 };
-struct CoeffSolver1Comp2Temp : public CoeffSolver
-{
-	double lambda(macroParam currentPoint); // todo
-	double getOmega22(Mixture mix, double T); // todo
-	double shareViscositySimple(macroParam currentPoint); // todo
-	double shareViscosityOmega(Mixture mix, double currentT); // todo
-	double bulkViscositySimple(macroParam currentPoint); // todo
-	double bulkViscosityMultiAtom(macroParam currentPoint); // todo
-};

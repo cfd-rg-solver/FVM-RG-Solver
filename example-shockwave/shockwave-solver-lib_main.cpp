@@ -10,15 +10,9 @@ std::string GetCurrentWorkingDir(void) {
 	std::filesystem::path currentWorkingDir = std::filesystem::current_path();
 	std::filesystem::path parentDir = currentWorkingDir.parent_path().parent_path();
 
-	std::string res = parentDir.string() + "/FVM-RG-Solver/example-shockwave"; // ! win case
-
-	// std::string res = parentDir.string() + "/main/example-couette"; // !normal case using qt
+	std::string res = parentDir.string() + "/FVM-RG-Solver/example-shockwave";
 	return res;
-	//    return currentWorkingDir; // without qt
-	//    return currentWorkingDir.string();
 }
-
-// double M_PI = 3.14159265358979323846;
 
 namespace fs = std::filesystem;
 int main()
@@ -31,7 +25,6 @@ int main()
 	///////////////////// Molecula data //////////////////////////
 	///////////////////////////  CH4  ////////////////////////////
 	///
-	// swtting CH4 mixture
 	MixtureComponent methane;
 	methane.name = "CH4";
 	methane.molarMass = 0.016043;
@@ -85,15 +78,7 @@ int main()
 	///////////////// Border Condition for Shock Wave ////////////
 	////////////////////////// CH4 ///////////////////////////////
 	///
-	// рассматриваем уравнения граничных условий, пусть left = 0, right = n:
-
-	// add calculation based on Mach number
-
-	// Data for simulation:
-	// Ma = 3
-	// T = 300 K
-	// p = 100 Pa
-	// (speed of sound 450.06 m/s)
+	// рассматриваем уравнения граничных условий, 0 = left,	n = right.
 
 	// METHANE SET:
 	double velocity_left = 1710.2279;
@@ -144,15 +129,15 @@ int main()
 	////////////////////////////////////////////////////////////
 
 	solverParams solParam;
-	solParam.NumCell = 60 + 2; // Число расчтеных ячеек с учетом двух фиктивных ячеек
+	solParam.NumCell = 60 + 2;  // Число расчетных ячеек с учетом двух фиктивных ячеек
 	// solParam.Gamma       = 1.67;        // Ar
 	// solParam.Gamma       = 1.32;        // O2_O
-	solParam.Gamma = 1.304;       // CH4, but its also implemented changable in macroparam
+	solParam.Gamma = 1.304;     // CH4, but its also implemented changable in macroparam
 	solParam.CFL = 0.9;         // Число Куранта
-	solParam.MaxIter = 100000;        // максимальное кол-во итераций
-	solParam.Ma = 3.8;         // Число Маха, сейчас не влияет на решатель, просто формальность
+	solParam.MaxIter = 100000;  // максимальное кол-во итераций
+	solParam.Ma = 3.8;			// Число Маха, сейчас не влияет на решатель, просто формальность
 
-	double precision = 1E-10; // точность
+	double precision = 1E-10;   // точность
 	Observer watcher(precision);
 	watcher.setPeriodicity(10000);
 
@@ -168,7 +153,6 @@ int main()
 	// GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
 	GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
-	double M_PI = 3.14159265358979323846;
 	// double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
 	double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
 	std::cout << "mean free path: " << MFP << std::endl;
@@ -177,7 +161,7 @@ int main()
 	writer.setDelta_h(h / (solParam.NumCell - 2));
 	solver.setWriter(&writer);
 	solver.setObserver(&watcher);
-	solver.setDelta_h(h / (solParam.NumCell - 2)); // only after setting writer or/and watcher?
+	solver.setDelta_h(h / (solParam.NumCell - 2));
 
 	solver.setEnergyCalculator(&oneTempApproxMultiModes);
 	solver.setBorderConditions(&borderConditionShockwave);

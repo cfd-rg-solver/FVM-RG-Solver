@@ -122,7 +122,7 @@ def solver(velocity_left, density_left, T_left):
     
     vs, rhos, Ts = [], [], []
     
-    for x in tqdm(range(1, 600)): # 200 already enough
+    for x in tqdm(range(1, 200)):
         cur_ans = fsolve(func, [x, x/100, x])
         if any(np.isclose(func(cur_ans), [0.0,0.0,0.0])):
             vs.append(cur_ans[0])
@@ -131,13 +131,7 @@ def solver(velocity_left, density_left, T_left):
     ans = [np.median(vs), np.median(rhos), np.median(Ts)]
     
     print("Must be near zero values =", func(ans))
-    # plt.plot(vs)
-    # plt.show()
-    # plt.plot(rhos)
-    # plt.show()
-    # plt.plot(Ts)
-    # plt.show()
-    
+
     return ans
 
 
