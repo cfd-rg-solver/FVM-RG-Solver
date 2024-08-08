@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore")
 # speed_of_sound_room = 322.6 # argon, m/s t T = 300 K and p = 6.66 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C7440371&Action=Page)
 
 # METHANE DATA
-gamma = 1.304 # approx for methane https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
+gamma = 1.3084 # calculated, approx for methane from NIST: 1.302, other data: https://www.mem50212.com/MDME/iTester/get-info/thermodynamics.html 
 molarMass = 0.016043 # methane
 mass = 2.663732314e-26 # methane
 speed_of_sound_room = 450.06 # methane, m/s at T = 300 K and p = 100 Pa conditions (https://webbook.nist.gov/cgi/fluid.cgi?ID=C74828&Action=Page)
@@ -24,7 +24,7 @@ kB = 1.38064852e-23
 Nav = 6.02214129e23
 hc = 6.62559e-34 * 2.99792458e8
 
-Ma = 3.8
+Ma = 5
 T_left = 300 # K
 pressure = 100 # Pa
 
@@ -35,6 +35,7 @@ om_e = np.array([302550, 158270, 315680, 136740])
 ds = np.array([1, 2, 3, 3])
 es = hc*om_e # e_0
 e_0000 = sum(hc * (om_e*ds)/2)
+# print("e_0000 = ", e_0000)
 D_diss = 3668582.3189 # m^-1, converted from 438.86 kJ/mol https://www.weizmann.ac.il/oc/martin/tools/hartree.html
 max_vibr_lvls =  [9, 17, 9, 20] # [4, 4, 4, 4]
 
@@ -54,6 +55,7 @@ for i1 in range(max_vibr_lvls[0]):
                 if e <= D_diss:
                     possible_inds.append([i1, i2, i3, i4])
 
+# possible_inds = [[0,0,0,0]] # ground state case
 ################################################################################################
 
 print("Initial conditions:")
@@ -65,7 +67,7 @@ print("______________________________________")
 ################################################################################################
 
 def solver_approx(velocity_left, density_left, T_left):
-
+    # Rankine-Hugoniot boundary conditions
     density_right = ((gamma + 1) * pow(Ma,2))/(2 + (gamma-1)*pow(Ma,2))*density_left
     velocity_right = velocity_left*density_left/density_right 
 
@@ -111,7 +113,9 @@ def solver(velocity_left, density_left, T_left):
             Uvibr_1 += s * e_0 * np.exp(-e_0/(kB*x[2]))
         
         Uvibr_0 = Uvibr_0/Zvibr_0 + e_0000
+        # Uvibr_0 = 0 # only ground state case
         Uvibr_1 = Uvibr_1/Zvibr_1 + e_0000
+        # Uvibr_1 = 0 # only ground state case
             
         return [
             x[0] * x[1] - v_0 * rho_0, # x[0] - velocity, x[1] - density, x[2] - temperature
@@ -141,3 +145,40 @@ print("v_n = ", ans[0])
 print("rho_n = ", ans[1])
 print("T_n = ", ans[2])
 print("______________________________________")
+
+
+# Mach 3.8
+
+# Initial conditions:
+# v_0 =  1710.2279999999998
+# rho_0 =  0.0006431766819856015
+# T_0 =  300
+
+# Post-shock conditions:
+# v_n =  263.5241
+# rho_n =  0.004174111
+# T_n =  781.843
+
+# Mach 3
+
+# Initial conditions:
+# v_0 =  1350.18
+# rho_0 =  0.0006431766819856015
+# T_0 =  300
+
+# Post-shock conditions:
+# v_n =  271.0525325102617
+# rho_n =  0.0032038228325672277
+# T_n =  624.6138539532955
+
+# Mach 5
+
+# Initial conditions:
+# v_0 =  2250.3
+# rho_0 =  0.0006431766819856015
+# T_0 =  300
+
+# Post-shock conditions:
+# v_n =  262.1277941014496
+# rho_n =  0.0055215071429467605
+# T_n =  1040.5303197231733

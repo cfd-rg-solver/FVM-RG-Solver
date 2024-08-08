@@ -27,6 +27,7 @@ void DataWriter::writeData(vector<macroParam> data, double time)
 	ofstream temp_vibr(localDir / "temp_vibr.txt", std::ios::out);
 	ofstream density(localDir / "density.txt", std::ios::out);
 	ofstream gamma(localDir / "gamma.txt", std::ios::out);
+
 	//    ofstream densityO2(localDir/"densityO2.txt",std::ios::out);
 	//    ofstream densityO(localDir/"densityO.txt",std::ios::out);
 
@@ -40,6 +41,7 @@ void DataWriter::writeData(vector<macroParam> data, double time)
 	temp_vibr << "y" << " " << "Tvibr" << endl;
 	density << "y" << " " << "rho" << endl;
 	gamma << "y" << " " << "gamma" << endl;
+
 	//    densityO2<<"y"<<" "<<"rho_O2"<<endl;
 	//    densityO<<"y"<<" "<<"rho_O"<<endl;
 

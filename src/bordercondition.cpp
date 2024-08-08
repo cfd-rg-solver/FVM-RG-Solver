@@ -128,7 +128,6 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 		points[N - 1].temp = right_temp;
 		points[N - 1].pressure = points[N - 1].density * UniversalGasConstant * points[N - 1].temp / mixture.molarMass(points[N - 1].fractionArray);
 	}
-	// works strange
 	else if (BCtype == 1)
 	{
 		points[0].velocity_normal = 0;
@@ -153,7 +152,7 @@ void BorderConditionShockwave::updatePoints(vector<macroParam>& points)
 		points[N - 1].temp = points[N - 2].temp; // из уравнения состояния ид газа
 		points[N - 1].density = points[N - 1].pressure * mixture.molarMass(points[N - 1].fractionArray) / (points[N - 1].temp * UniversalGasConstant);
 	}
-	else if (BCtype == 2) // not correct version, but good profiles of pressure and less good density profile
+	else if (BCtype == 2) 
 	{
 		points[0].velocity_normal = 0;
 		points[0].velocity_tau = left_velocity;

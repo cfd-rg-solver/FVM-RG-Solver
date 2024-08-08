@@ -10,6 +10,8 @@ struct GodunovSolver : public AbstractSolver
 
 	// запускает процесс решения задачи
 	void solve();
+
+	void setOutputDirectory(const std::string& outputDir);
 protected:
 
 	// Расчет релаксационных членов
@@ -18,5 +20,8 @@ protected:
 	// обновляет вектор U
 	void updateU();
 
-	//    vector<macroParam>rezultAfterPStart;
+	void printViscousFluxComponents(SystemOfEquation* system, int N);
+		//    vector<macroParam>rezultAfterPStart;
+
+	std::string outputDirectory;
 };

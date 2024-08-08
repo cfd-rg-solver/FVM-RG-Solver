@@ -58,7 +58,7 @@ if __name__ == "__main__":
     files = os.listdir(path_data) 
 
     # legend_names = []
-    plot_names = ['Density, kg/m^3',  'Pressure, Pa', 'Temperature, K', 'Velocity, m/s', 'Velocity normal, m/s', 'Velocity tangent, m/s']
+    plot_names = ['Density, kg/m^3', 'Sp. heat ratio', 'Pressure, Pa', 'Temperature, K', 'Temperature-vibr, K', 'Velocity, m/s', 'Velocity normal, m/s', 'Velocity tangent, m/s']
 
     for i in range(len(files)):
         

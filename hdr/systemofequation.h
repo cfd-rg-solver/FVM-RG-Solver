@@ -33,6 +33,8 @@ struct SystemOfEquation
 	virtual double getEnergy(size_t i) = 0;
 	virtual double getTemp(size_t i) = 0;
 	virtual double getGamma(size_t i) = 0;
+	virtual double getNormalStress(size_t i) = 0;
+    virtual double getHeatFlux(size_t i) = 0;
 
 	double getMaxVelocity();
 
@@ -83,6 +85,8 @@ struct Couette2 : public SystemOfEquation
 	double getEnergy(size_t i);
 	double getTemp(size_t i);
 	double getGamma(size_t i);
+	double getNormalStress(size_t i) { return 0; };
+	double getHeatFlux(size_t i) { return 0; };
 
 	void updateU(double dh, double dt);
 	void updateBorderU(vector<macroParam>& points);
@@ -139,6 +143,8 @@ struct Soda : public SystemOfEquation
 	double getEnergy(size_t i);
 	double getTemp(size_t i) { return 0; };
 	double getGamma(size_t i);
+	double getNormalStress(size_t i) { return 0; };
+	double getHeatFlux(size_t i) { return 0; };
 
 	double getMaxVelocity();
 	void updateU(double dh, double dt);
@@ -166,6 +172,8 @@ struct Shockwave1 : public SystemOfEquation
 	double getPressure(size_t i);
 	double getVelocityTau(size_t i);
 	double getVelocityNormal(size_t i) { return 0; };
+	double getNormalStress(size_t i) { return 0; };
+	double getHeatFlux(size_t i) { return 0; };
 
 	void updateU(double dh, double dt);
 	void updateBorderU(vector<macroParam>& points);
@@ -191,6 +199,8 @@ struct Shockwave2 : public SystemOfEquation
 	double getPressure(size_t i);
 	double getVelocityTau(size_t i);
 	double getVelocityNormal(size_t i) { return 0; };
+	double getNormalStress(size_t i);
+    double getHeatFlux(size_t i);
 
 	void updateU(double dh, double dt);
 	void updateBorderU(vector<macroParam>& points);

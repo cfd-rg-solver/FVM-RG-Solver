@@ -126,6 +126,8 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
 
 	double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
 	return zeta;
+
+	// return 0.;
 	/*
 	double inputs[1][2] = {
 		(point.pressure - P_MIN) / (P_MAX - P_MIN),

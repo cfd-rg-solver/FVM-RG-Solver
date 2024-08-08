@@ -62,6 +62,8 @@ int main()
 		}
 	}
 
+	// methane.possibleVibrInds = {{0, 0, 0, 0}}; // only ground state
+
 	double viscocity_methane = 1.1123e-05; // for below set sonditions
 	// double viscocity_argon = 2.2724e-05; // for below set sonditions
 
@@ -81,14 +83,25 @@ int main()
 	// рассматриваем уравнения граничных условий, 0 = left,	n = right.
 
 	// METHANE SET:
-	double velocity_left = 1710.2279;
-	double density_left = 0.00064317; // kg/m^3, calculated for atmospheric pressure
+	double velocity_left = 1710.228; // Mach 3.8
+	double density_left =  0.0006431; // kg/m^3, calculated for atmospheric pressure
 	double T_left = 300; // Kelvin
 	double pressure_left = UniversalGasConstant * T_left * density_left / methane.molarMass;
 
-	double velocity_right = 263.5241;
+	// from python solver (general relations)
+	double velocity_right = 263.5241; //Mach 3.8 
 	double density_right = 0.004174111;
-	double T_right = 781.843; // ! from python solver (methane case)
+	double T_right =  781.843; 
+
+	// from python solver (Rankine-Hugoniot boundary conditions)
+	// double velocity_right = 363.894;
+	// double density_right = 0.0030228;
+	// double T_right = 1054.0323; 
+
+	// from python solver (general relations, only ground state)
+	// double velocity_right = 348.20518;
+	// double density_right = 0.0031589;
+	// double T_right = 976.186; 
 	double pressure_right = UniversalGasConstant * T_right * density_right / methane.molarMass;
 
 	BorderConditionShockwave borderConditionShockwave;
@@ -129,21 +142,21 @@ int main()
 	////////////////////////////////////////////////////////////
 
 	solverParams solParam;
-	solParam.NumCell = 60 + 2;  // Число расчетных ячеек с учетом двух фиктивных ячеек
+	solParam.NumCell = 40 + 2;  // Число расчетных ячеек с учетом двух фиктивных ячеек
 	// solParam.Gamma       = 1.67;        // Ar
 	// solParam.Gamma       = 1.32;        // O2_O
-	solParam.Gamma = 1.304;     // CH4, but its also implemented changable in macroparam
+	solParam.Gamma = 1.30842;     // CH4, but its also implemented changable in macroparam
 	solParam.CFL = 0.9;         // Число Куранта
-	solParam.MaxIter = 100000;  // максимальное кол-во итераций
+	solParam.MaxIter = 2000;  // максимальное кол-во итераций
 	solParam.Ma = 3.8;			// Число Маха, сейчас не влияет на решатель, просто формальность
 
-	double precision = 1E-10;   // точность
+	double precision = 1E-6;   // точность
 	Observer watcher(precision);
 	watcher.setPeriodicity(10000);
 
 
 	DataWriter writer(outputData);
-	DataReader reader(outputData + "\prev_data");
+	DataReader reader(outputData + "/prev_data");
 
 	reader.read();
 	vector<macroParam> startParameters;
@@ -153,10 +166,12 @@ int main()
 	// GodunovSolver solver(Ar ,solParam, SystemOfEquationType::shockwave1, RiemannSolverType::HLLESolver);
 	GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
+	solver.setOutputDirectory(outputData);
+
 	// double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
 	double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
 	std::cout << "mean free path: " << MFP << std::endl;
-	double h = 60 * MFP; // m
+	double h = 30 * MFP; // m
 	std::cout << "considering h = MFP * " << h / MFP << std::endl;
 	writer.setDelta_h(h / (solParam.NumCell - 2));
 	solver.setWriter(&writer);
@@ -169,6 +184,7 @@ int main()
 	// solver.setStartDistribution(&startParamShockwaveAr);
 	solver.setStartDistribution(&startParamShockwaveCH4);
 
+	std::cout << "Start solving\n";
 	clock_t start = clock();
 	solver.solve();
 	clock_t end = clock();

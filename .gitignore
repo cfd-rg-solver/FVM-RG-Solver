@@ -14,3 +14,11 @@ data/
 CMakeSettings.json
 out/
 /build*
+plot/fig/*
+!plot/fig/
+plot/toPlot/*
+!plot/toPlot/
+example-shockwave/data/*
+!example-shockwave/data/
+example-couette/data/*
+!example-couette/data/

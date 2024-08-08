@@ -1065,6 +1065,18 @@ double Shockwave2::getPressure(size_t i)
 	return getDensity(i) * UniversalGasConstant * getTemp(i) / mixture.molarMass();
 }
 
+double Shockwave2::getNormalStress(size_t i)
+{ 
+	// Normal stress - P = p - 4/3*eta*div(v) - zeta*div(v)
+    return Fv[v_tau][i] + getPressure(i);
+}
+
+double Shockwave2::getHeatFlux(size_t i)
+{
+	// Heat flux - q = -lambda*grad(T)
+    return Fv[energy][i] - Fv[v_tau][i] * getVelocity(i);
+}
+
 void Shockwave2::updateU(double dh, double dt)
 {
 #pragma omp parallel for schedule(static)
