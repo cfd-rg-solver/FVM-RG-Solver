@@ -1,6 +1,6 @@
 #include "energycalc.h"
 #include <iostream>
-//#include "nn.h"
+#include "nn.h"
 #include <time.h> 
 
 double OneTempApprox::calcEnergy(macroParam& point)
@@ -117,104 +117,34 @@ double OneTempApprox::Zvibr(macroParam& point, size_t component)
 *   3. degrees of degeneraticy for each mode (dByMode).
 */
 
+
 double OneTempApproxMultiModes::calcEnergy(macroParam& point)
 {
-	//clock_t start = clock();
-
-	double UTrRot = getTrRotEnegry(point, 0);
-	double UVibr = getVibrEnergy(point, 0);
-	double teorE = point.density * (UTrRot + UVibr) + point.density * 0.5 * pow(point.velocity, 2);
-
-	/*
 	double E;
-	if (point.pressure < P_MIN || point.pressure > P_MAX || point.temp < T_MIN || point.temp > T_MAX) {
-		double UTrRot = getTrRotEnegry(point, 0);
-		double UVibr = getVibrEnergy(point, 0);
-		double teorE = point.density * (UTrRot + UVibr) + point.density * 0.5 * pow(point.velocity, 2);
-		E = teorE;
-	} else {
-		double inputs[1][2];
-		if (point.pressure >= P_MIN) {
-			inputs[0][0] = (point.pressure - P_MIN) / (P_MAX - P_MIN);
-			inputs[0][1] = (point.temp - T_MIN) / (T_MAX - T_MIN);
-		}
-		else {
-			inputs[0][0] = 0.;
-			inputs[0][1] = (point.temp - T_MIN) / (T_MAX - T_MIN);
-		}
 
-		double layer1out[1][50];
-		for (int i = 0; i < 50; i++) {
-			layer1out[0][i] =
-				tanh(
-					(inputs[0][0] * enlayers0weights[0][i])
-					+ (inputs[0][1] * enlayers0weights[1][i])
-					+ enlayers0bias[0][i]
-				);
-		}
-
-		double layer2out = 0.;
-		for (int i = 0; i < 50; i++) {
-			double tmp = layer1out[0][i];
-			layer2out += tmp * enlayers1weights[i][0];
-		}
-		layer2out += enlayers1bias;
-		double nnE = 1000 * layer2out + point.density * 0.5 * pow(point.velocity, 2);
-		E = nnE;
+	// Uncomment to calculate teoretically:
+	// double UTrRot = getTrRotEnegry(point, 0);
+	// double UVibr = getVibrEnergy(point, 0);
+	// E = point.density * (UTrRot + UVibr) + point.density * 0.5 * pow(point.velocity, 2);
+	
+	double input_T = (point.temp - T_MIN) / (T_MAX - T_MIN);
+	double U = 0.0;
+	for (int i = 0; i < 50; ++i) {
+		U += tanh((input_T * U_layers0weight[i]) + U_layers0bias[i]) * U_layers2weight[i];
 	}
+	U += U_layers2bias;
+	U *= 10000;
 
-	double inputs[1][2] = {
-		(point.pressure - P_MIN) / (P_MAX - P_MIN),
-		(point.temp - T_MIN) / (T_MAX - T_MIN)
-	};
+	double nnE = point.density * U + point.density * 0.5 * pow(point.velocity, 2);
+	E = nnE;
 
-	double layer1out[1][50];
-	for (int i = 0; i < 50; i++) {
-		layer1out[0][i] =
-			tanh(
-				(inputs[0][0] * enlayers0weights[0][i])
-				+ (inputs[0][1] * enlayers0weights[1][i])
-				+ enlayers0bias[0][i]
-			);
-	}
-
-	double layer2out = 0.;
-	for (int i = 0; i < 50; i++) {
-		double tmp = layer1out[0][i];
-		layer2out += tmp * enlayers1weights[i][0];
-	}
-	layer2out += enlayers1bias; // in kJ
-	double nnE = 1000 * layer2out + point.density * 0.5 * pow(point.velocity, 2);
-
-	if (point.temp == 300.) {
-	std::cout << "-------------------------" << std::endl;
-	std::cout << "p=" << point.pressure << std::endl;
-	std::cout << "T=" << point.temp << std::endl;
-	std::cout << "rho=" << point.density << std::endl;
-	std::cout << "v=" << point.velocity << std::endl;
-	std::cout << "scaled p =" << inputs[0][0] << std::endl;
-	std::cout << "scaled T =" << inputs[0][1] << std::endl;
-	std::cout << "teoretical E = " << teorE << std::endl;
-	std::cout << "nn E = " << nnE << std::endl;
-	double Ctr = 3. / 2. * kB / point.mixture.mass(0);
-	double Crot = 3. / 2. * kB / point.mixture.mass(0);
-	double Cvibr = getCvibr(point, 0);
-	double Cv = Ctr + Crot + Cvibr;
-	std::cout << "Cv=" << Cv << std::endl;
-	std::cout << "-------------------------" << std::endl;
-}
-
-	clock_t end = clock();
-	double seconds = (double)(end - start) / CLOCKS_PER_SEC;
-	printf("Final time of energyCalc: %f seconds\n", seconds);
-	*/
-	return teorE;
+	return E;
 }
 
 double OneTempApproxMultiModes::getTrRotEnegry(macroParam& point, size_t component)
 {
-	double n = Nav * point.density / point.mixture.components[component].molarMass;
-	double Utr = 3. / 2. * kB * point.temp * n / point.density;
+	// double n = Nav * point.density / point.mixture.components[component].molarMass;
+	double Utr = 3. / 2. * kB * point.temp / point.mixture.components[component].mass;
 	double Urot = 3. / 2. * kB * point.temp / point.mixture.components[component].mass; // because methane has 3 degrees of freedom
 	return Utr + Urot;
 }
@@ -356,7 +286,19 @@ double OneTempApproxMultiModes::getCvibr(macroParam& point, size_t component)
 {
 	/* function to calculate Cv_vibr = (dU_vibr/dT)_V */
 
-	double Cvibr = getVibrEnergyDiff(point, component) / point.mixture.mass(component); // partial derivative of Uvibr by T
+	double Cvibr;
+	
+	// Uncomment to calculate teoretically:
+	// Cvibr = getVibrEnergyDiff(point, component) / point.mixture.mass(component); // partial derivative of Uvibr by T
+
+	double input_T = (point.temp - T_MINc) / (T_MAXc - T_MINc);
+	double nnC = 0.0;
+	for (int i = 0; i < 50; ++i) {
+		nnC += tanh((input_T * C_layers0weight[i]) + C_layers0bias[i]) * C_layers2weight[i];
+	}
+	nnC += C_layers2bias;
+	Cvibr = nnC;
+
 	return Cvibr;
 }
 
@@ -366,7 +308,7 @@ double OneTempApproxMultiModes::getGamma(macroParam& point)
 
 	size_t component = 0; // we consider one-component methane gas, its fixed in order to use getGamma in systemOfEquation
 	double Cv_tr = (3.0 / 2) * kB / point.mixture.mass(component);
-	double Cv_rot = (3.0 / 2) * kB / point.mixture.mass(component);
+	double Cv_rot = kB / point.mixture.mass(component);
 	double Cv_vibr = getCvibr(point, component);
 	double Cv = Cv_tr + Cv_rot + Cv_vibr;
 
