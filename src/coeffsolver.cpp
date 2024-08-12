@@ -2,7 +2,6 @@
 #include "global.h"
 #include "energycalc.h"
 #include <cmath>
-// #include "nn.h"
 #include <time.h>
 
 double CoeffSolver1Comp1Temp::shareViscositySimple(macroParam currentPoint)
@@ -37,34 +36,6 @@ double CoeffSolver1Comp1Temp::lambdaMultiAtom(macroParam point)
 
 	double lambda = lambda_tr + lambda_int;
 	return lambda;
-	
-	/*
-	double inputs[1][2] = {
-	(point.pressure - P_MIN) / (P_MAX - P_MIN),
-	(point.temp - T_MIN) / (T_MAX - T_MIN)
-	};
-
-	double layer1out[1][50];
-	for (int i = 0; i < 50; i++) {
-		layer1out[0][i] =
-			tanh(
-				(inputs[0][0] * lmbdlayers0weights[0][i])
-				+ (inputs[0][1] * lmbdlayers0weights[1][i])
-				+ lmbdlayers0bias[0][i]
-			);
-	}
-
-	double layer2out = 0.;
-
-	for (int i = 0; i < 50; i++) {
-		double tmp = layer1out[0][i];
-		layer2out += tmp * lmbdlayers2weights[0][i];
-	}
-
-	layer2out += llayers2bias; // here we have -log10(lambda)
-	double lambda = pow(10, -layer2out);
-	return lambda;
-	*/
 }
 
 double CoeffSolver1Comp1Temp::shareViscosityOmega(Mixture mix, double currentT)
@@ -126,33 +97,6 @@ double CoeffSolver1Comp1Temp::bulkViscosityMultiAtom(macroParam point)
 
 	double zeta = kB * point.temp * pow(Cint / Cv, 2) / (beta_int);
 	return zeta;
-
-	// return 0.;
-	/*
-	double inputs[1][2] = {
-		(point.pressure - P_MIN) / (P_MAX - P_MIN),
-		(point.temp - T_MIN) / (T_MAX - T_MIN)
-	};
-
-	double layer1out[1][50];
-	for (int i = 0; i < 50; i++) {
-		layer1out[0][i] =
-			tanh(
-				(inputs[0][0] * zetalayers0weights[0][i])
-				+ (inputs[0][1] * zetalayers0weights[1][i])
-				+ zetalayers0bias[0][i]
-			);
-	}
-
-	double layer2out = 0.;
-	for (int i = 0; i < 50; i++) {
-		double tmp = layer1out[0][i];
-		layer2out += tmp * zetalayers1weights[i][0];
-	}
-	layer2out += zetalayers1bias; // here we have -log10(zeta)
-	double zeta = pow(10, -layer2out);
-	return zeta;
-	*/
 }
 
 double CoeffSolver2Comp1Temp::shareViscositySimple(macroParam currentPoint)
