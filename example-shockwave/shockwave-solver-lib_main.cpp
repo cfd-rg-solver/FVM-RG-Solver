@@ -167,7 +167,7 @@ int main()
 	GodunovSolver solver(CH4, solParam, SystemOfEquationType::shockwave2, RiemannSolverType::HLLESolver);
 
 	solver.setOutputDirectory(outputData);
-
+	// double M_PI = 3.141592;
 	// double MFP = viscocity_argon / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / argon.molarMass); // mean free path length for argon
 	double MFP = viscocity_methane / pressure_left * sqrt(M_PI * UniversalGasConstant * T_left / methane.molarMass); // mean free path length for methane
 	std::cout << "mean free path: " << MFP << std::endl;
