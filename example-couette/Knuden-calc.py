@@ -3,17 +3,17 @@ import math
 # Constants for Ar
 gamma = 1.67
 kb = 1.38064852e-23
-T = 273
+T = 296.65
 L = 1
 R_ar = 8.314 / 0.039948
-rho = 0.000115 # 0.00000478
-v = 302
+rho = 0.00000187 #0.000115 # 0.00000478
+v = 1377.77
 
 # Pressure calculation
 P = rho * R_ar * T
 
 # Reynolds number calculation
-mu = 2.0988e-05
+mu = 1.5755e-05 # 2.0988e-05
 nu = mu / rho
 Re = v * L / nu
 

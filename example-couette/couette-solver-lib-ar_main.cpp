@@ -24,13 +24,14 @@ int main()
     //////////////////////////////////////////////////////////////
     ///////////////////// Border Condition for Couette ///////////
     //////////////////////////////////////////////////////////////
-    int caseType = 0;
+    int caseType = 6;
     double T_up_wall;
     double T_down_wall;
     double velocity_up;
     double velocity_down;
 
     double argonSpeedOfSound = 307.73; // m/s	
+    double aronSpeedOfSound2 = 295.10; // m/s at 251 K
 
     if(caseType == 0)
     {
@@ -79,6 +80,14 @@ int main()
         velocity_down = 0;
     }
 
+    else if(caseType == 6)
+    {
+        T_up_wall = 251.05;
+        T_down_wall = 251.05;
+        velocity_up = 1556.16;
+        velocity_down = 0;
+    }
+
 
     BorderConditionCouette borderConditionCouette;
     borderConditionCouette.setWallParameters(velocity_up, velocity_down, T_up_wall, T_down_wall);
@@ -116,11 +125,11 @@ int main()
     startParamCouetteAr.setMixture(Ar); // TODO temp
     startParamCouetteArSlip.setMixture(Ar); // TODO temp
     macroParam startParamAr(Ar);
-    bool newSolving = true;
+    int newSolving = 2;
 
     double pressure;
 
-    if(newSolving)
+    if(newSolving == 1)
     {
         startParamAr.density = 0.000115; // 0.0000115; //  correct case
         startParamAr.fractionArray[0] = 1;
@@ -140,7 +149,7 @@ int main()
 
         std::cout << "pressure: " << pressure << std::endl;
     }
-    else
+    else if (newSolving == 0)
     {
         DataWriter writer(outputData); 
         DataReader reader(outputData + "/prev-data");
@@ -159,11 +168,31 @@ int main()
 
         std::cout << "pressure: " << pressure << std::endl;
     }
+    else if (newSolving == 2)
+    {
+        startParamAr.density = 0.003852;
+        startParamAr.fractionArray[0] = 1;
+        startParamAr.densityArray[0] =  startParamAr.fractionArray[0] * startParamAr.density;
+
+        startParamAr.temp = 251; 
+        startParamAr.velocity_tau = 0;
+        startParamAr.velocity_normal = 0;
+
+        pressure = startParamAr.density * T_up_wall * UniversalGasConstant / argon.molarMass;
+
+        startParamCouetteAr.setBorderCondition(&borderConditionCouette);
+        startParamCouetteAr.setDistributionParameter(startParamAr);
+
+        startParamCouetteArSlip.setBorderCondition(&borderConditionCouetteSlip);
+        startParamCouetteArSlip.setDistributionParameter(startParamAr);
+
+        std::cout << "pressure: " << pressure << std::endl;
+    }
 
     //////////////////////////////////////////////////////////////
 
     solverParams solParam;
-    solParam.NumCell     = 502;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
+    solParam.NumCell     = 202;    // Число расчтеных ячеек с учетом двух фиктивных ячеек
     solParam.Gamma    = 1.67;   // Ar
     solParam.CFL      = 0.95;    // Число Куранта 0.9
     solParam.MaxIter     = 8000000; // максимальное кол-во итареций
@@ -184,12 +213,13 @@ int main()
 
 
     double viscocity_argon = 2.0988e-05;
+    double viscocity_argon2 = 1.9532e-05;
 
     GodunovSolver solver(Ar, solParam, SystemOfEquationType::couette1, RiemannSolverType::HLLESolver);
     
-    double MFP = viscocity_argon / pressure * sqrt(M_PI * UniversalGasConstant * T_up_wall / 2. / argon.molarMass); // Mean free path length for Argon
+    double MFP = viscocity_argon2 / pressure * sqrt(M_PI * UniversalGasConstant * T_up_wall / 2. / argon.molarMass); // Mean free path length for Argon
 
-    double h = 1; // General length between the walls
+    double h = 0.1; // General length between the walls
     // h = h - 4 * MFP; // Effective length between the walls (length without Knudsen layers)
 
     writer.setDelta_h(h / (solParam.NumCell - 2));
