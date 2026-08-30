@@ -22,3 +22,4 @@ example-shockwave/data/*
 !example-shockwave/data/
 example-couette/data/*
 !example-couette/data/
+.DS_Store
