@@ -1,6 +1,6 @@
 # FVM-RG-Solver (Methane Shockwave Branch)
 
-This repository contains a numerical solver and the associated models for
+This branch contains a numerical solver and the associated models for
 the paper:
 **"Simulation of Shock Waves in Methane: A Self-Consistent Continuum
 Approach Enhanced Using Machine Learning"**
@@ -28,7 +28,7 @@ mission-relevant work.
 
 The paper was presented at open-science event YSM 2024 (All-Russian Conference of Young Scientists).
 
-## Scope of This Repository
+## Scope of This Branch-Repository
 
 To be precise about what is and is not modeled here:
 
@@ -50,7 +50,7 @@ To be precise about what is and is not modeled here:
   direct summation, to reduce computational cost without changing the
   underlying physical model.
 
-## Repository Structure
+## Branch-Repository Structure
 - `src`: Core finite-volume solver (C++), implementing the governing
   equations, transport coefficients, and Riemann solver.
 - `hdr`: Header files, including the neural-network-based approximations
